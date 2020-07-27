@@ -6,4 +6,4 @@ Naresh here. I hope you are having a great day! It was nice to e-meet you.
  
 📫 Reach me on [Linkedin]!
 
-[Linkedin]: "https://www.linkedin.com/in/naresh-omega/""
+[Linkedin]: "https://www.linkedin.com/in/naresh-omega/"
