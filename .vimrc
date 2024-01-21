@@ -80,6 +80,9 @@ set ttyfast
 " Autocomplete in command line
 set wildmenu
 
+" File format for line when creating / editing files
+set fileformat=unix
+
 " Remove newbie crutches in Command Mode
 cnoremap <Down> <Nop>
 cnoremap <Left> <Nop>
