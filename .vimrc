@@ -37,7 +37,7 @@ syntax on
 filetype plugin indent on
 
 " Set numbering and relative numbering
-set relativenumber
+set number relativenumber
 
 " Whitespace
 set wrap
@@ -80,8 +80,11 @@ set ttyfast
 " Autocomplete in command line
 set wildmenu
 
-" File format for line when creating / editing files
-set fileformat=unix
+" Split right and down first
+set splitright splitbelow
+
+" Search count
+set shortmess-=S
 
 " Remove newbie crutches in Command Mode
 cnoremap <Down> <Nop>
