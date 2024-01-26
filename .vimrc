@@ -3,6 +3,7 @@ call plug#begin()
 Plug 'preservim/nerdtree'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
+Plug 'jpalardy/vim-slime'
 call plug#end()
 
 " Set the color scheme
@@ -147,3 +148,6 @@ nnoremap <silent><leader>l :Buffers<CR>
 
 " Set fzf to include hidden files
 let $FZF_DEFAULT_COMMAND = 'rg --hidden --ignore .git -l -g ""'
+
+" Configs for vim slime
+let g:slime_target = "tmux"
