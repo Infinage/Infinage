@@ -1,10 +1,16 @@
 " Plugins
 call plug#begin()
+Plug 'preservim/nerdtree'
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
 call plug#end()
 
 " Set the color scheme
 colorscheme desert
 set background=dark
+
+" Matching parathensis are diff to distinguish
+let g:loaded_matchparen=1
 
 " Don't try to be vi compatible
 set nocompatible
@@ -86,6 +92,13 @@ set splitright splitbelow
 " Search count
 set shortmess-=S
 
+" Set PWD to the file that vim is editing
+set autochdir
+
+" Set leader as space
+nnoremap <SPACE> <Nop>
+let mapleader=" "
+
 " Remove newbie crutches in Command Mode
 cnoremap <Down> <Nop>
 cnoremap <Left> <Nop>
@@ -119,3 +132,18 @@ cnoremap <C-h> <Left>
 cnoremap <C-j> <Down>
 cnoremap <C-k> <Up>
 cnoremap <C-l> <Right>
+
+" Resize splits with ctrl - hjkl
+nnoremap <C-h> :vertical resize +1<CR>
+nnoremap <C-l> :vertical resize -1<CR>
+nnoremap <C-j> :resize +1<CR>
+nnoremap <C-k> :resize -1<CR>
+
+" Plugin shortcuts
+nnoremap <C-p> :Files<Cr>
+nnoremap <silent><leader>f :Rg<CR>
+nnoremap <C-n> :NERDTreeToggle<CR>
+nnoremap <silent><leader>l :Buffers<CR>
+
+" Set fzf to include hidden files
+let $FZF_DEFAULT_COMMAND = 'rg --hidden --ignore .git -l -g ""'
