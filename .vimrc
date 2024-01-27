@@ -4,10 +4,12 @@ Plug 'preservim/nerdtree'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 Plug 'jpalardy/vim-slime'
+Plug 'goerz/jupytext.vim'
+Plug 'davidhalter/jedi-vim'
 call plug#end()
 
 " Set the color scheme
-colorscheme desert
+colorscheme slate
 set background=dark
 
 " Matching parathensis are diff to distinguish
@@ -47,7 +49,7 @@ filetype plugin indent on
 set number relativenumber
 
 " Whitespace
-set wrap
+set nowrap
 set textwidth=79
 set formatoptions=tcqrn1
 set tabstop=4
@@ -71,11 +73,12 @@ set smartcase
 " Show partial command you type in the last line of the screen.
 set showcmd
 
-" Show the mode you are on the last line.
-set showmode
+" Don't show the mode you are on the last line
+" required for jedi-vim for show non intrusive show signatures
+set noshowmode
 
 " Enable folding
-set foldmethod=indent
+set foldmethod=manual
 set foldlevel=99
 
 " Use System Clipboard
@@ -96,29 +99,50 @@ set shortmess-=S
 " Set PWD to the file that vim is editing
 set autochdir
 
+" Set color scheme when using vimdiff
+if &diff
+    colorscheme elflord
+endif
+
+" Paste toggle keybind for pasting into vim
+" https://vim.fandom.com/wiki/Toggle_auto-indenting_for_code_paste
+set pastetoggle=<F2>
+
+" WSL specific changes
+let uname = substitute(system('uname'),'\n','','')
+if uname == 'Linux'
+    let lines = readfile("/proc/version")
+    if lines[0] =~ "Microsoft"
+
+        " WSL yank support
+        let s:clip = '/mnt/c/Windows/System32/clip.exe'  
+        if executable(s:clip)
+            augroup WSLYank
+                    autocmd!
+                    autocmd TextYankPost * if v:event.operator ==# 'y' | call system(s:clip, @0) | endif 
+            augroup END
+        endif
+
+    endif
+endif
+
 " Set leader as space
 nnoremap <SPACE> <Nop>
 let mapleader=" "
 
-" Remove newbie crutches in Command Mode
+" Remove newbie crutches in Command, Insert, Normal & Visual Mode
 cnoremap <Down> <Nop>
 cnoremap <Left> <Nop>
 cnoremap <Right> <Nop>
 cnoremap <Up> <Nop>
-
-" Remove newbie crutches in Insert Mode
 inoremap <Down> <Nop>
 inoremap <Left> <Nop>
 inoremap <Right> <Nop>
 inoremap <Up> <Nop>
-
-" Remove newbie crutches in Normal Mode
 nnoremap <Down> <Nop>
 nnoremap <Left> <Nop>
 nnoremap <Right> <Nop>
 nnoremap <Up> <Nop>
-
-" Remove newbie crutches in Visual Mode
 vnoremap <Down> <Nop>
 vnoremap <Left> <Nop>
 vnoremap <Right> <Nop>
@@ -135,10 +159,10 @@ cnoremap <C-k> <Up>
 cnoremap <C-l> <Right>
 
 " Resize splits with ctrl - hjkl
-nnoremap <C-h> :vertical resize +1<CR>
-nnoremap <C-l> :vertical resize -1<CR>
-nnoremap <C-j> :resize +1<CR>
+nnoremap <C-h> :vertical resize -1<CR>
+nnoremap <C-l> :vertical resize +1<CR>
 nnoremap <C-k> :resize -1<CR>
+nnoremap <C-j> :resize +1<CR>
 
 " Plugin shortcuts
 nnoremap <C-p> :Files<Cr>
@@ -151,3 +175,10 @@ let $FZF_DEFAULT_COMMAND = 'rg --hidden --ignore .git -l -g ""'
 
 " Configs for vim slime
 let g:slime_target = "tmux"
+let g:slime_python_ipython = 1
+
+" Configs for Jedi
+let g:jedi#popup_on_dot = 0
+let g:jedi#completions_command = "<S-Tab>"
+let g:jedi#use_tabs_not_buffers = 1
+let g:jedi#show_call_signatures = 2
