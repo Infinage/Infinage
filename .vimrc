@@ -6,14 +6,12 @@ Plug 'junegunn/fzf.vim'
 Plug 'jpalardy/vim-slime'
 Plug 'goerz/jupytext.vim'
 Plug 'davidhalter/jedi-vim'
+Plug 'vim-python/python-syntax'
 call plug#end()
 
 " Set the color scheme
 colorscheme slate
 set background=dark
-
-" Matching parathensis are diff to distinguish
-let g:loaded_matchparen=1
 
 " Don't try to be vi compatible
 set nocompatible
@@ -41,6 +39,7 @@ set incsearch
 
 " Turn on syntax highlighting
 syntax on
+let python_highlight_all = 1
 
 " For plugins to load correctly
 filetype plugin indent on
@@ -49,8 +48,7 @@ filetype plugin indent on
 set number relativenumber
 
 " Whitespace
-set nowrap
-set textwidth=79
+set wrap
 set formatoptions=tcqrn1
 set tabstop=4
 set shiftwidth=4
@@ -103,6 +101,9 @@ set autochdir
 if &diff
     colorscheme elflord
 endif
+
+" Matching parathensis are diff to distinguish
+hi MatchParen cterm=none ctermbg=black ctermfg=blue
 
 " Paste toggle keybind for pasting into vim
 " https://vim.fandom.com/wiki/Toggle_auto-indenting_for_code_paste
