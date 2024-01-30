@@ -3,12 +3,7 @@
     "workbench.startupEditor": "none",
     "terminal.integrated.defaultProfile.windows": "Git Bash",
     "security.workspace.trust.untrustedFiles": "newWindow",
-    "git.ignoreMissingGitWarning": true,
     "editor.accessibilitySupport": "off",
-    "markdown-preview-enhanced.mermaidTheme": "dark",
-    "markdown-preview-enhanced.revealjsTheme": "night.css",
-    "markdown-preview-enhanced.codeBlockTheme": "atom-dark.css",
-    "markdown-preview-enhanced.previewTheme": "atom-dark.css",
     "explorer.autoReveal": false,
     "[python]": {
         "editor.formatOnType": true
@@ -18,16 +13,13 @@
     "jupyter.showVariableViewWhenDebugging": true,
     "python.languageServer": "Pylance",
     "notebook.lineNumbers": "on",
-    "security.allowedUNCHosts": [
-        "wsl.localhost"
-    ],
     "vim.leader": "<Space>",
     "vim.hlsearch": true,
     "editor.lineNumbers": "relative",
     "vim.foldfix": true,
     "vim.showMarksInGutter": true,
     "vim.vimrc.enable": true,
-    "vim.vimrc.path": "c:\\Users\\kael\\.vimrc",
+    "vim.vimrc.path": "~/.vimrc",
     "remote.autoForwardPortsSource": "hybrid",
     "editor.minimap.enabled": false,
     "breadcrumbs.enabled": false,
@@ -60,6 +52,6 @@
             "before": ["leader", "l"],
             "commands": ["workbench.action.focusRightGroup"]
         }
-    ]
-
+    ],
+    "vim.easymotion": true
 }

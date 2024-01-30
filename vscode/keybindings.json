@@ -1,5 +1,6 @@
 // Place your key bindings in this file to override the defaultsauto[]
 [
+    // Disable some defaults
     {
         "key": "ctrl+p",
         "command": "-extension.vim_ctrl+p",
@@ -26,6 +27,43 @@
         "when": "editorTextFocus && vim.active && vim.use<C-w> && !inDebugRepl"
     },
     {
+        "key": "ctrl+up",
+        "command": "-list.scrollUp",
+        "when": "listFocus && !inputFocus && listScrollAtBoundary != 'both' && listScrollAtBoundary != 'top'"
+    },
+    {
+        "key": "ctrl+o",
+        "command": "-workbench.action.files.openFile",
+        "when": "true"
+    },
+    {
+        "key": "ctrl+down",
+        "command": "-list.scrollDown",
+        "when": "listFocus && !inputFocus && listScrollAtBoundary != 'both' && listScrollAtBoundary != 'bottom'"
+    },
+    {
+        "key": "y",
+        "command": "-notebook.cell.changeToCode",
+        "when": "notebookEditorFocused && !inputFocus && !notebookOutputFocused && activeEditor == 'workbench.editor.notebook' && notebookCellType == 'markup'"
+    },
+    {
+        "key": "c",
+        "command": "-notebook.cell.copy",
+        "when": "notebookEditorFocused && !inputFocus && !notebookOutputInputFocused"
+    },
+    {
+        "key": "v",
+        "command": "-notebook.cell.paste",
+        "when": "notebookEditorFocused && !inputFocus && !notebookOutputInputFocused"
+    },
+    {
+        "key": "ctrl+shift+v",
+        "command": "-notebook.cell.pasteAbove",
+        "when": "notebookEditorFocused && !inputFocus"
+    },
+
+    // Vim mappings
+    {
         "key": "ctrl+j",
         "command": "selectNextSuggestion",
         "when": "suggestWidgetVisible"
@@ -51,9 +89,8 @@
         "when": "listFocus && !inputFocus && listScrollAtBoundary != 'both' && listScrollAtBoundary != 'top'"
     },
     {
-        "key": "ctrl+up",
-        "command": "-list.scrollUp",
-        "when": "listFocus && !inputFocus && listScrollAtBoundary != 'both' && listScrollAtBoundary != 'top'"
+        "key": "ctrl+o",
+        "command": "extension.vim_ctrl+o"
     },
     {
         "key": "ctrl+e",
@@ -61,23 +98,8 @@
         "when": "listFocus && !inputFocus && listScrollAtBoundary != 'both' && listScrollAtBoundary != 'bottom'"
     },
     {
-        "key": "ctrl+down",
-        "command": "-list.scrollDown",
-        "when": "listFocus && !inputFocus && listScrollAtBoundary != 'both' && listScrollAtBoundary != 'bottom'"
-    },
-    {
-        "key": "y",
-        "command": "-notebook.cell.changeToCode",
-        "when": "notebookEditorFocused && !inputFocus && !notebookOutputFocused && activeEditor == 'workbench.editor.notebook' && notebookCellType == 'markup'"
-    },
-    {
         "key": "y y",
         "command": "notebook.cell.copy",
-        "when": "notebookEditorFocused && !inputFocus && !notebookOutputInputFocused"
-    },
-    {
-        "key": "c",
-        "command": "-notebook.cell.copy",
         "when": "notebookEditorFocused && !inputFocus && !notebookOutputInputFocused"
     },
     {
@@ -86,28 +108,34 @@
         "when": "notebookEditorFocused && !inputFocus && !notebookOutputInputFocused"
     },
     {
-        "key": "v",
-        "command": "-notebook.cell.paste",
-        "when": "notebookEditorFocused && !inputFocus && !notebookOutputInputFocused"
-    },
-    {
         "key": "shift+p",
         "command": "notebook.cell.pasteAbove",
         "when": "notebookEditorFocused && !inputFocus"
     },
     {
-        "key": "ctrl+shift+v",
-        "command": "-notebook.cell.pasteAbove",
+        "key": "ctrl+.",
+        "command": "notebook.cell.toggleOutputs",
         "when": "notebookEditorFocused && !inputFocus"
     },
     {
-        "key": "ctrl+o",
-        "command": "-workbench.action.files.openFile",
-        "when": "true"
+        "key": "ctrl+;",
+        "command": "notebook.cell.toggleOutputScrolling",
+        "when": "notebookEditorFocused && !inputFocus"
     },
     {
-        "key": "ctrl+o",
-        "command": "extension.vim_ctrl+o"
+        "key": "ctrl+shift+=",
+        "command": "notebook.cell.joinSelected",
+        "when": "notebookEditorFocused && !inputFocus"
+    },
+    { 
+        "key": "shift+j",            
+        "command": "list.expandSelectionDown",
+        "when": "listFocus && listSupportsMultiselect && !inputFocus" 
+    },
+    { 
+        "key": "shift+k",              
+        "command": "list.expandSelectionUp",
+        "when": "listFocus && listSupportsMultiselect && !inputFocus" 
     },
     
     // Terminal shortcuts
