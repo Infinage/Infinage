@@ -130,11 +130,11 @@
     // FILE TREE
     {
         "command": "workbench.action.toggleSidebarVisibility",
-        "key": "ctrl+e"
+        "key": "ctrl+n"
     },
     {
         "command": "workbench.files.action.focusFilesExplorer",
-        "key": "ctrl+e",
+        "key": "ctrl+n",
         "when": "editorTextFocus"
     },
     {
