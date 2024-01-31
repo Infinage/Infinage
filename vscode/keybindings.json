@@ -61,6 +61,11 @@
         "command": "-notebook.cell.pasteAbove",
         "when": "notebookEditorFocused && !inputFocus"
     },
+    { 
+        "key": "ctrl+shift+oem_3",      
+        "command": "-workbench.action.terminal.new",
+        "when": "terminalProcessSupported || terminalWebExtensionContributedProfile" 
+    },
 
     // Vim mappings
     {
@@ -137,6 +142,15 @@
         "command": "list.expandSelectionUp",
         "when": "listFocus && listSupportsMultiselect && !inputFocus" 
     },
+    { 
+        "key": "ctrl+shift+r",              
+        "command": "jupyter.restartkernel",
+        "when": "notebookEditorFocused && !inputFocus" 
+    },
+    {
+        "key": "ctrl+shift+a",
+        "command": "jupyter.restartkernelandrunallcells"
+    },
     
     // Terminal shortcuts
     {
@@ -153,6 +167,36 @@
         "key": "ctrl+q",
         "command": "workbench.action.terminal.kill",
         "when": "terminalFocus"
+    },
+    {
+        "key": "alt+k",
+        "command": "workbench.action.terminal.resizePaneUp",
+        "when": "terminalFocus"
+    },
+    {
+        "key": "alt+j",
+        "command": "workbench.action.terminal.resizePaneDown",
+        "when": "terminalFocus"
+    },
+    {
+        "key": "alt+h",
+        "command": "workbench.action.terminal.resizePaneLeft",
+        "when": "terminalFocus"
+    },
+    {
+        "key": "alt+l",
+        "command": "workbench.action.terminal.resizePaneRight",
+        "when": "terminalFocus"
+    },
+    {
+        "key": "ctrl+shift+-",
+        "command": "workbench.action.terminal.split",
+        "when": "terminalFocus"
+    },
+    { 
+        "key": "ctrl+shift+t",      
+        "command": "workbench.action.terminal.new",
+        "when": "terminalProcessSupported || terminalWebExtensionContributedProfile" 
     },
 
     // FILE TREE
@@ -181,13 +225,8 @@
         "when": "explorerViewletFocus"
     },
     {
-        "key": "shift+n",
-        "command": "workbench.action.newWindow",
-        "when": "!explorerViewletFocus"
-    },
-    {
         "command": "deleteFile",
         "key": "d",
         "when": "filesExplorerFocus && !inputFocus"
-    },
+    }
 ]

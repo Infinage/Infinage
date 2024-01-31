@@ -51,6 +51,22 @@
         {
             "before": ["leader", "l"],
             "commands": ["workbench.action.focusRightGroup"]
+        },
+
+        // Open file
+        {
+            "before": ["leader", "o"],
+            "commands": ["workbench.action.files.openFile"]
+        },
+
+        // Clear marks and search highlights
+        {
+            "before": ["leader", "c", "c"],
+            "commands": [":nohl"]
+        },
+        {
+            "before": ["leader", "c", "c"],
+            "commands": [":delm a-zA-Z0-9"]
         }
     ],
     "vim.easymotion": true
