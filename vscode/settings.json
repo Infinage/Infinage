@@ -58,6 +58,10 @@
             "before": ["leader", "o"],
             "commands": ["workbench.action.files.openFile"]
         },
+        {
+            "before": ["leader", "o", "r"],
+            "commands": ["workbench.action.reopenClosedEditor"]
+        },
 
         // Clear marks and search highlights
         {
@@ -65,9 +69,9 @@
             "commands": [":nohl"]
         },
         {
-            "before": ["leader", "c", "c"],
+            "before": ["leader", "c", "m"],
             "commands": [":delm a-zA-Z0-9"]
-        }
+        },
     ],
     "vim.easymotion": true
 }

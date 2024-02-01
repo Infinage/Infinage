@@ -66,6 +66,16 @@
         "command": "-workbench.action.terminal.new",
         "when": "terminalProcessSupported || terminalWebExtensionContributedProfile" 
     },
+    {
+        "key": "alt+down",
+        "command": "-workbench.action.terminal.focusNextPane",
+        "when": "terminalFocus && terminalHasBeenCreated || terminalFocus && terminalProcessSupported"
+    },
+    {
+        "key": "alt+right",
+        "command": "-workbench.action.terminal.focusNextPane",
+        "when": "terminalFocus && terminalHasBeenCreated || terminalFocus && terminalProcessSupported"
+    },
 
     // Vim mappings
     {
@@ -151,6 +161,11 @@
         "key": "ctrl+shift+a",
         "command": "jupyter.restartkernelandrunallcells"
     },
+    {
+        "key": "ctrl+z ctrl+z",
+        "command": "notebook.centerActiveCell",
+        "when": "notebookEditorFocused && !inputFocus"
+    },
     
     // Terminal shortcuts
     {
@@ -162,6 +177,16 @@
         "key": "ctrl+k",
         "command": "workbench.action.terminal.focusPrevious",
         "when": "terminalFocus"
+    },
+    {
+        "key": "ctrl+h",
+        "command": "workbench.action.terminal.focusPreviousPane",
+        "when": "terminalFocus && terminalHasBeenCreated || terminalFocus && terminalProcessSupported"
+    },
+    {
+        "key": "ctrl+l",
+        "command": "workbench.action.terminal.focusNextPane",
+        "when": "terminalFocus && terminalHasBeenCreated || terminalFocus && terminalProcessSupported"
     },
     {
         "key": "ctrl+q",
@@ -228,5 +253,5 @@
         "command": "deleteFile",
         "key": "d",
         "when": "filesExplorerFocus && !inputFocus"
-    }
+    },
 ]
