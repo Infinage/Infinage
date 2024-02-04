@@ -4,11 +4,11 @@ Plug 'preservim/nerdtree'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 Plug 'jpalardy/vim-slime'
+Plug 'kshenoy/vim-signature'
 Plug 'goerz/jupytext.vim'
 Plug 'davidhalter/jedi-vim'
 Plug 'vim-python/python-syntax'
 call plug#end()
-
 " Set the color scheme
 colorscheme slate
 set background=dark
@@ -165,6 +165,10 @@ nnoremap <C-l> :vertical resize +1<CR>
 nnoremap <C-k> :resize -1<CR>
 nnoremap <C-j> :resize +1<CR>
 
+" Clear marks and search highlights
+nnoremap <leader>cm :delm a-zA-Z0-9<CR>
+nnoremap <leader>cc :nohl<CR>
+
 " Plugin shortcuts
 nnoremap <C-p> :Files<Cr>
 nnoremap <silent><leader>f :Rg<CR>
@@ -180,6 +184,12 @@ let g:slime_python_ipython = 1
 
 " Configs for Jedi
 let g:jedi#popup_on_dot = 0
-let g:jedi#completions_command = "<S-Tab>"
 let g:jedi#use_tabs_not_buffers = 1
 let g:jedi#show_call_signatures = 2
+let g:jedi#completions_command = "<S-Tab>"
+let g:jedi#goto_command = "<leader>d"
+let g:jedi#goto_assignments_command = "<leader>g"
+let g:jedi#goto_stubs_command = "<leader>s"
+let g:jedi#goto_definitions_command = ""
+let g:jedi#documentation_command = "K"
+let g:jedi#usages_command = "<leader>n"
