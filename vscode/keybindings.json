@@ -76,6 +76,22 @@
         "command": "-workbench.action.terminal.focusNextPane",
         "when": "terminalFocus && terminalHasBeenCreated || terminalFocus && terminalProcessSupported"
     },
+    {
+        "key": "ctrl+shift+=",
+        "command": "-workbench.action.zoomIn"
+    },
+    {
+        "key": "ctrl+shift+-",
+        "command": "-workbench.action.zoomOut"
+    },
+    {
+        "key": "ctrl+=",
+        "command": "-workbench.action.zoomIn"
+    },
+    {
+        "key": "ctrl+-",
+        "command": "-workbench.action.zoomOut"
+    },
 
     // Vim mappings
     {
@@ -254,4 +270,44 @@
         "key": "d",
         "when": "filesExplorerFocus && !inputFocus"
     },
+    {
+        "key": "alt+h",
+        "command": "workbench.action.navigateLeft",
+        "when": "!terminalFocus"
+    },
+    {
+        "key": "alt+l",
+        "command": "workbench.action.navigateRight",
+        "when": "!terminalFocus"
+    },
+    {
+        "key": "alt+k",
+        "command": "workbench.action.navigateUp",
+        "when": "!terminalFocus"
+    },
+    {
+        "key": "alt+j",
+        "command": "workbench.action.navigateDown",
+        "when": "!terminalFocus"
+    },
+    {
+        "key": "ctrl+-",
+        "command": "workbench.action.decreaseViewSize",
+        "when": "!terminalFocus"
+    },
+    {
+        "key": "ctrl+=",
+        "command": "workbench.action.increaseViewSize",
+        "when": "!terminalFocus"
+    },
+    {
+        "key": "ctrl+y",
+        "command": "workbench.action.terminal.scrollUp",
+        "when": "terminalFocus"
+    },
+    {
+        "key": "ctrl+e",
+        "command": "workbench.action.terminal.scrollDown",
+        "when": "terminalFocus"
+    }
 ]
