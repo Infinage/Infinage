@@ -144,8 +144,13 @@
         "when": "notebookEditorFocused && !inputFocus"
     },
     {
-        "key": "ctrl+.",
+        "key": "ctrl+'",
         "command": "notebook.cell.toggleOutputs",
+        "when": "notebookEditorFocused && !inputFocus"
+    },
+    {
+        "key": "ctrl+.",
+        "command": "notebook.cell.clearOutputs",
         "when": "notebookEditorFocused && !inputFocus"
     },
     {
@@ -208,9 +213,16 @@
         "when": "!terminalFocus"
     },
     {
-        "key": "ctrl+=",
-        "command": "workbench.action.increaseViewSize",
-        "when": "!terminalFocus"
+        "key": "ctrl+shift+7",
+        "command": "toggle",
+        "when": "notebookEditorFocused && !inputFocus",
+        "args": {
+            "id": "audioCues",
+            "value": [
+                { "audioCues.notebookCellCompleted": "off", "audioCues.notebookCellFailed": "off" },
+                { "audioCues.notebookCellCompleted": "on", "audioCues.notebookCellFailed": "on" }
+            ]
+        }
     },
     
     // Terminal shortcuts
@@ -299,6 +311,11 @@
         "command": "deleteFile",
         "key": "d",
         "when": "filesExplorerFocus && !inputFocus"
+    },
+    {
+        "key": "ctrl+=",
+        "command": "workbench.action.increaseViewSize",
+        "when": "!terminalFocus"
     },
     {
         "key": "ctrl+y",
