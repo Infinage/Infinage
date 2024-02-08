@@ -34,6 +34,14 @@
             "before": ["leader", "s"], 
             "commands": [":new"] 
         },
+        { 
+            "before": ["leader", "|"], 
+            "commands": [":vsplit"] 
+        },
+        { 
+            "before": ["leader", "_"], 
+            "commands": [":split"] 
+        },
 
         // panes
         {
@@ -72,6 +80,12 @@
             "before": ["leader", "c", "m"],
             "commands": [":delm a-zA-Z0-9"]
         },
+
+        // Show hover and focus
+        {
+            "before": [ "g", "h" ],
+            "commands": [ "editor.action.showDefinitionPreviewHover" ]
+        }
     ],
     "vim.easymotion": true
 }
