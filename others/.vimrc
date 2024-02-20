@@ -7,6 +7,7 @@ Plug 'jpalardy/vim-slime'
 Plug 'kshenoy/vim-signature'
 Plug 'goerz/jupytext.vim'
 Plug 'davidhalter/jedi-vim'
+Plug 'dense-analysis/ale'
 Plug 'vim-python/python-syntax'
 call plug#end()
 " Set the color scheme
@@ -88,6 +89,9 @@ set ttyfast
 " Autocomplete in command line
 set wildmenu
 
+" Modifies the auto-complete menu to behave more like an IDE
+set completeopt=noinsert,menuone,noselect,preview
+
 " Split right and down first
 set splitright splitbelow
 
@@ -96,6 +100,11 @@ set shortmess-=S
 
 " Set PWD to the file that vim is editing
 set autochdir
+
+" Support python inside markdown
+let g:markdown_fenced_languages = ['python']
+autocmd FileType markdown set conceallevel=0 | :runtime ftplugin/python/jedi.vim
+let g:jupytext_fmt='py'
 
 " Set color scheme when using vimdiff
 if &diff
@@ -169,6 +178,12 @@ nnoremap <C-j> :resize +1<CR>
 nnoremap <leader>cm :delm a-zA-Z0-9<CR>
 nnoremap <leader>cc :nohl<CR>
 
+" Quick tab navigation
+nnoremap <leader>t g<Tab>
+
+" Disable S-Tab in insert mode - we would be using it for autocomplete
+inoremap <S-Tab> <Nop>
+
 " Plugin shortcuts
 nnoremap <C-p> :Files<Cr>
 nnoremap <silent><leader>f :Rg<CR>
@@ -181,6 +196,7 @@ let $FZF_DEFAULT_COMMAND = 'rg --hidden --ignore .git -l -g ""'
 " Configs for vim slime
 let g:slime_target = "tmux"
 let g:slime_python_ipython = 1
+let g:slime_preserve_curpos = 0
 
 " Configs for Jedi
 let g:jedi#popup_on_dot = 0
@@ -193,3 +209,9 @@ let g:jedi#goto_stubs_command = "<leader>s"
 let g:jedi#goto_definitions_command = ""
 let g:jedi#documentation_command = "K"
 let g:jedi#usages_command = "<leader>n"
+
+" Configs for ALE
+let g:ale_python_pylint_auto_pipenv = 1
+let g:ale_linters = {'python': ['mypy']}
+let g:ale_sign_error = '>>'
+let g:ale_sign_warning = '--'
