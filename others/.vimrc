@@ -10,6 +10,11 @@ Plug 'davidhalter/jedi-vim'
 Plug 'dense-analysis/ale'
 Plug 'vim-python/python-syntax'
 call plug#end()
+
+" Set leader as space
+nnoremap <SPACE> <Nop>
+let mapleader=" "
+
 " Set the color scheme
 colorscheme slate
 set background=dark
@@ -56,6 +61,9 @@ set shiftwidth=4
 set softtabstop=4
 set autoindent
 set noshiftround
+set columns=80
+set textwidth=0
+set wrapmargin=0
 
 " Highlight cursor line underneath the cursor horizontally.
 set cursorline
@@ -106,6 +114,18 @@ let g:markdown_fenced_languages = ['python']
 autocmd FileType markdown set conceallevel=0 | :runtime ftplugin/python/jedi.vim
 let g:jupytext_fmt='py:percent'
 
+" Create .ipynb with skeleton
+if empty(glob("~/.vim/templates/skeleton.ipynb"))
+    call mkdir($HOME . "/.vim/templates", "p")
+    silent !curl --no-progress-meter -o ~/.vim/templates/skeleton.ipynb https://raw.githubusercontent.com/Infinage/Infinage/main/others/vim-templates/skeleton.ipynb
+endif
+function! CreateJupyterNotebook()
+    let nbpath = input("Enter new notebook path: ", "./untitled.ipynb")
+    silent execute "!cp ~/.vim/templates/skeleton.ipynb " . nbpath
+    redraw!
+endfunction
+nnoremap <leader>nb :call CreateJupyterNotebook()<CR>
+
 " Set color scheme when using vimdiff
 if &diff
     colorscheme elflord
@@ -135,10 +155,6 @@ if uname == 'Linux'
 
     endif
 endif
-
-" Set leader as space
-nnoremap <SPACE> <Nop>
-let mapleader=" "
 
 " Remove newbie crutches in Command, Insert, Normal & Visual Mode
 cnoremap <Down> <Nop>
@@ -178,9 +194,6 @@ nnoremap <C-j> :resize +1<CR>
 nnoremap <leader>cm :delm a-zA-Z0-9<CR>
 nnoremap <leader>cc :nohl<CR>
 
-" Quick tab navigation
-nnoremap <leader>t g<Tab>
-
 " Disable S-Tab in insert mode - we would be using it for autocomplete
 inoremap <S-Tab> <Nop>
 
@@ -191,12 +204,13 @@ nnoremap <C-n> :NERDTreeToggle<CR>
 nnoremap <silent><leader>l :Buffers<CR>
 
 " Set fzf to include hidden files
-let $FZF_DEFAULT_COMMAND = 'rg --hidden --ignore .git -l -g ""'
+let $FZF_DEFAULT_COMMAND = 'rg --hidden --files --smart-case --ignore-vcs'
 
 " Configs for vim slime
 let g:slime_target = "tmux"
 let g:slime_python_ipython = 1
 let g:slime_preserve_curpos = 0
+nnoremap <silent><leader>ll :SlimeSendCurrentLine<CR>
 
 " Configs for Jedi
 let g:jedi#popup_on_dot = 0
