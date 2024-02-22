@@ -90,7 +90,7 @@ set ttyfast
 set wildmenu
 
 " Modifies the auto-complete menu to behave more like an IDE
-set completeopt=noinsert,menuone,noselect,preview
+set completeopt=noinsert,menuone,noselect
 
 " Split right and down first
 set splitright splitbelow
@@ -104,7 +104,7 @@ set autochdir
 " Support python inside markdown
 let g:markdown_fenced_languages = ['python']
 autocmd FileType markdown set conceallevel=0 | :runtime ftplugin/python/jedi.vim
-let g:jupytext_fmt='py'
+let g:jupytext_fmt='py:percent'
 
 " Set color scheme when using vimdiff
 if &diff
