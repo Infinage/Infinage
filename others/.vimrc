@@ -9,6 +9,7 @@ Plug 'goerz/jupytext.vim'
 Plug 'davidhalter/jedi-vim'
 Plug 'dense-analysis/ale'
 Plug 'vim-python/python-syntax'
+Plug 'michaeljsmith/vim-indent-object'
 call plug#end()
 
 " Set leader as space
@@ -121,8 +122,10 @@ if empty(glob("~/.vim/templates/skeleton.ipynb"))
 endif
 function! CreateJupyterNotebook()
     let nbpath = input("Enter new notebook path: ", "./untitled.ipynb")
-    silent execute "!cp ~/.vim/templates/skeleton.ipynb " . nbpath
-    redraw!
+    if !empty(nbpath)
+        silent execute "!cp ~/.vim/templates/skeleton.ipynb " . nbpath
+        redraw!
+    endif
 endfunction
 nnoremap <leader>nb :call CreateJupyterNotebook()<CR>
 
@@ -206,11 +209,17 @@ nnoremap <silent><leader>l :Buffers<CR>
 " Set fzf to include hidden files
 let $FZF_DEFAULT_COMMAND = 'rg --hidden --files --smart-case --ignore-vcs'
 
+" Nerd tree configs
+let NERDTreeShowHidden = 1
+let g:NERDTreeShowLineNumbers = 1
+autocmd BufEnter NERD_* setlocal relativenumber
+
 " Configs for vim slime
 let g:slime_target = "tmux"
 let g:slime_python_ipython = 1
 let g:slime_preserve_curpos = 0
-nnoremap <silent><leader>ll :SlimeSendCurrentLine<CR>
+nnoremap <silent><expr><leader>ll ":\<C-u>call slime#send_lines(" . v:count . ")\<cr>"
+vnoremap <silent><leader>ll :SlimeSend<CR>
 
 " Configs for Jedi
 let g:jedi#popup_on_dot = 0
