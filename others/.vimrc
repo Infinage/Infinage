@@ -90,7 +90,7 @@ set foldmethod=manual
 set foldlevel=99
 
 " Use System Clipboard
-set clipboard=unnamedplus
+set clipboard=unnamed
 
 " Speed up scrolling in Vim
 set ttyfast 
@@ -212,6 +212,8 @@ let $FZF_DEFAULT_COMMAND = 'rg --hidden --files --smart-case --ignore-vcs'
 " Nerd tree configs
 let NERDTreeShowHidden = 1
 let g:NERDTreeShowLineNumbers = 1
+let g:NERDTreeMapOpenSplit = 's'
+let g:NERDTreeMapOpenVSplit = 'i'
 autocmd BufEnter NERD_* setlocal relativenumber
 
 " Configs for vim slime
@@ -219,7 +221,7 @@ let g:slime_target = "tmux"
 let g:slime_python_ipython = 1
 let g:slime_preserve_curpos = 0
 nnoremap <silent><expr><leader>ll ":\<C-u>call slime#send_lines(" . v:count . ")\<cr>"
-vnoremap <silent><leader>ll :SlimeSend<CR>
+vnoremap <silent><leader>ll <Plug>SlimeRegionSend
 
 " Configs for Jedi
 let g:jedi#popup_on_dot = 0
