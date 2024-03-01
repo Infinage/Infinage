@@ -10,6 +10,7 @@ Plug 'davidhalter/jedi-vim'
 Plug 'dense-analysis/ale'
 Plug 'vim-python/python-syntax'
 Plug 'michaeljsmith/vim-indent-object'
+Plug 'morhetz/gruvbox'
 call plug#end()
 
 " Set leader as space
@@ -17,7 +18,7 @@ nnoremap <SPACE> <Nop>
 let mapleader=" "
 
 " Set the color scheme
-colorscheme slate
+colorscheme gruvbox
 set background=dark
 
 " Don't try to be vi compatible
@@ -90,7 +91,7 @@ set foldmethod=manual
 set foldlevel=99
 
 " Use System Clipboard
-set clipboard=unnamed
+set clipboard=unnamedplus
 
 " Speed up scrolling in Vim
 set ttyfast 
@@ -131,7 +132,7 @@ nnoremap <leader>nb :call CreateJupyterNotebook()<CR>
 
 " Set color scheme when using vimdiff
 if &diff
-    colorscheme elflord
+    colorscheme slate
 endif
 
 " Matching parathensis are diff to distinguish
@@ -221,7 +222,7 @@ let g:slime_target = "tmux"
 let g:slime_python_ipython = 1
 let g:slime_preserve_curpos = 0
 nnoremap <silent><expr><leader>ll ":\<C-u>call slime#send_lines(" . v:count . ")\<cr>"
-vnoremap <silent><leader>ll <Plug>SlimeRegionSend
+vnoremap <silent><leader>ll :<c-u>call slime#send_op(visualmode(), 1)<cr>
 
 " Configs for Jedi
 let g:jedi#popup_on_dot = 0
