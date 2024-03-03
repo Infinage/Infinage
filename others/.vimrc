@@ -63,7 +63,7 @@ set shiftwidth=4
 set softtabstop=4
 set autoindent
 set noshiftround
-set columns=80
+set colorcolumn=80
 set textwidth=0
 set wrapmargin=0
 
@@ -145,9 +145,9 @@ set pastetoggle=<F2>
 " WSL specific changes
 let uname = substitute(system('uname'),'\n','','')
 if uname == 'Linux'
-    let lines = readfile("/proc/version")
-    if lines[0] =~ "Microsoft"
-
+    let versionfile = "/proc/version"
+    let lines = filereadable(versionfile) ? readfile(versionfile): []
+    if !empty(lines) && lines[0] =~ "Microsoft"
         " WSL yank support
         let s:clip = '/mnt/c/Windows/System32/clip.exe'  
         if executable(s:clip)
@@ -156,7 +156,6 @@ if uname == 'Linux'
                     autocmd TextYankPost * if v:event.operator ==# 'y' | call system(s:clip, @0) | endif 
             augroup END
         endif
-
     endif
 endif
 
