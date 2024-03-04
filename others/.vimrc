@@ -208,6 +208,7 @@ nnoremap <silent><leader>l :Buffers<CR>
 
 " Set fzf to include hidden files
 let $FZF_DEFAULT_COMMAND = 'rg --hidden --files --smart-case --ignore-vcs'
+autocmd! FileType fzf tnoremap <expr> <C-r> getreg(nr2char(getchar()))
 
 " Nerd tree configs
 let NERDTreeShowHidden = 1
