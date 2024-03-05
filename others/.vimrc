@@ -206,6 +206,9 @@ nnoremap <silent><leader>f :Rg<CR>
 nnoremap <C-n> :NERDTreeToggle<CR>
 nnoremap <silent><leader>l :Buffers<CR>
 
+" XML Auto Indent
+autocmd FileType xml setlocal equalprg=xmllint\ --format\ -
+
 " Set fzf to include hidden files
 let $FZF_DEFAULT_COMMAND = 'rg --hidden --files --smart-case --ignore-vcs'
 autocmd! FileType fzf tnoremap <expr> <C-r> getreg(nr2char(getchar()))
@@ -241,3 +244,4 @@ let g:ale_python_pylint_auto_pipenv = 1
 let g:ale_linters = {'python': ['mypy']}
 let g:ale_sign_error = '>>'
 let g:ale_sign_warning = '--'
+highlight ALEError cterm=italic
