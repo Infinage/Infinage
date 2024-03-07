@@ -1,16 +1,12 @@
 " Plugins
 call plug#begin()
 Plug 'preservim/nerdtree'
-Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
-Plug 'junegunn/fzf.vim'
 Plug 'jpalardy/vim-slime'
 Plug 'kshenoy/vim-signature'
 Plug 'goerz/jupytext.vim'
-Plug 'davidhalter/jedi-vim'
-Plug 'dense-analysis/ale'
 Plug 'vim-python/python-syntax'
-Plug 'michaeljsmith/vim-indent-object'
 Plug 'morhetz/gruvbox'
+Plug 'dense-analysis/ale'
 call plug#end()
 
 " Set leader as space
@@ -98,9 +94,6 @@ set ttyfast
 
 " Autocomplete in command line
 set wildmenu
-
-" Modifies the auto-complete menu to behave more like an IDE
-set completeopt=noinsert,menuone,noselect
 
 " Split right and down first
 set splitright splitbelow
@@ -197,21 +190,20 @@ nnoremap <C-j> :resize +1<CR>
 nnoremap <leader>cm :delm a-zA-Z0-9<CR>
 nnoremap <leader>cc :nohl<CR>
 
+" Open terminal in a new tab
+nnoremap <leader>tt :tab term bash<CR>
+
+" 'Zoom' a split window into a tab
+nnoremap <leader>zz :tab sb<CR>
+
 " Disable S-Tab in insert mode - we would be using it for autocomplete
 inoremap <S-Tab> <Nop>
 
 " Plugin shortcuts
-nnoremap <C-p> :Files<Cr>
-nnoremap <silent><leader>f :Rg<CR>
 nnoremap <C-n> :NERDTreeToggle<CR>
-nnoremap <silent><leader>l :Buffers<CR>
 
 " XML Auto Indent
 autocmd FileType xml setlocal equalprg=xmllint\ --format\ -
-
-" Set fzf to include hidden files
-let $FZF_DEFAULT_COMMAND = 'rg --hidden --files --smart-case --ignore-vcs'
-autocmd! FileType fzf tnoremap <expr> <C-r> getreg(nr2char(getchar()))
 
 " Nerd tree configs
 let NERDTreeShowHidden = 1
@@ -227,21 +219,16 @@ let g:slime_preserve_curpos = 0
 nnoremap <silent><expr><leader>ll ":\<C-u>call slime#send_lines(" . v:count . ")\<cr>"
 vnoremap <silent><leader>ll :<c-u>call slime#send_op(visualmode(), 1)<cr>
 
-" Configs for Jedi
-let g:jedi#popup_on_dot = 0
-let g:jedi#use_tabs_not_buffers = 1
-let g:jedi#show_call_signatures = 2
-let g:jedi#completions_command = "<S-Tab>"
-let g:jedi#goto_command = "<leader>d"
-let g:jedi#goto_assignments_command = "<leader>g"
-let g:jedi#goto_stubs_command = "<leader>s"
-let g:jedi#goto_definitions_command = ""
-let g:jedi#documentation_command = "K"
-let g:jedi#usages_command = "<leader>n"
-
 " Configs for ALE
 let g:ale_python_pylint_auto_pipenv = 1
-let g:ale_linters = {'python': ['mypy']}
+let g:ale_linters = {'python': ['mypy', 'jedils']}
+let g:ale_fixers = {'python': ['black']}
 let g:ale_sign_error = '>>'
 let g:ale_sign_warning = '--'
+set omnifunc=ale#completion#OmniFunc
+set completeopt=noinsert,menuone,noselect
 highlight ALEError cterm=italic
+imap <S-Tab> <Plug>(ale_complete)
+nnoremap K :ALEHover<CR>
+nnoremap <leader>d :ALEGoToDefinition -split<CR>
+nnoremap <leader>n :ALEFindReferences<CR>
