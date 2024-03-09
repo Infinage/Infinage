@@ -54,20 +54,24 @@ set number relativenumber
 " Whitespace
 set wrap
 set formatoptions=tcqrn1
-set tabstop=4
-set shiftwidth=4
-set softtabstop=4
 set autoindent
 set noshiftround
 set colorcolumn=80
 set textwidth=0
 set wrapmargin=0
+set expandtab
+set tabstop=4
+set shiftwidth=4
+set softtabstop=4
+
+" Custom Whitespace Javascript, Typescript, HTML, JSON
+augroup custom_indentation
+    autocmd!
+    autocmd Filetype javascript,typescript,html,json setlocal tabstop=2 shiftwidth=2 softtabstop=2
+augroup END
 
 " Highlight cursor line underneath the cursor horizontally.
 set cursorline
-
-" Use space characters instead of tabs.
-set expandtab
 
 " Ignore case while searching
 set ignorecase
@@ -78,8 +82,7 @@ set smartcase
 " Show partial command you type in the last line of the screen.
 set showcmd
 
-" Don't show the mode you are on the last line
-" required for jedi-vim for show non intrusive show signatures
+" Don't show the mode you are, on the last line
 set noshowmode
 
 " Enable folding
@@ -105,8 +108,8 @@ set shortmess-=S
 set autochdir
 
 " Support python inside markdown
-let g:markdown_fenced_languages = ['python']
-autocmd FileType markdown set conceallevel=0 | :runtime ftplugin/python/jedi.vim
+let g:markdown_fenced_languages = ['python', 'javascript', 'js=javascript', 'typescript', 'ts=typescript']
+autocmd FileType markdown set conceallevel=0
 let g:jupytext_fmt='py:percent'
 
 " Create .ipynb with skeleton
@@ -221,8 +224,8 @@ vnoremap <silent><leader>ll :<c-u>call slime#send_op(visualmode(), 1)<cr>
 
 " Configs for ALE
 let g:ale_python_pylint_auto_pipenv = 1
-let g:ale_linters = {'python': ['mypy', 'jedils']}
-let g:ale_fixers = {'python': ['black']}
+let g:ale_linters = {'python': ['mypy', 'jedils'], 'javascript': ['eslint'], 'typescript': ['eslint', 'tsserver']}
+let g:ale_fixers = {'python': ['black'], 'javascript': ['eslint'], 'typescript': ['eslint']}
 let g:ale_sign_error = '>>'
 let g:ale_sign_warning = '--'
 set omnifunc=ale#completion#OmniFunc
