@@ -92,6 +92,10 @@ set foldlevel=99
 " Use System Clipboard
 set clipboard=unnamedplus
 
+" Compat Disable screen flashing, backspace work as expected
+set belloff=all
+set backspace=eol,indent,start
+
 " Speed up scrolling in Vim
 set ttyfast 
 
