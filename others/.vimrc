@@ -229,7 +229,7 @@ vnoremap <silent><leader>ll :<c-u>call slime#send_op(visualmode(), 1)<cr>
 
 " Configs for ALE
 let g:ale_python_pylint_auto_pipenv = 1
-let g:ale_linters = {'python': ['mypy', 'jedils'], 'javascript': ['eslint'], 'typescript': ['eslint', 'tsserver']}
+let g:ale_linters = {'python': ['mypy', 'jedils'], 'javascript': ['eslint'], 'typescript': ['eslint', 'tsserver'], 'sh': ['shellcheck']}
 let g:ale_fixers = {'python': ['black'], 'javascript': ['eslint'], 'typescript': ['eslint']}
 let g:ale_sign_error = '>>'
 let g:ale_sign_warning = '--'
