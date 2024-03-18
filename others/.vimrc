@@ -122,7 +122,8 @@ if empty(glob("~/.vim/templates/skeleton.ipynb"))
     silent !curl --no-progress-meter -o ~/.vim/templates/skeleton.ipynb https://raw.githubusercontent.com/Infinage/Infinage/main/others/vim-templates/skeleton.ipynb
 endif
 function! CreateJupyterNotebook()
-    let nbpath = input("Enter new notebook path: ", "./untitled.ipynb")
+    let currpath = fnamemodify(expand('%:p:h'), ':p') .. 'untitled.ipynb'
+    let nbpath = input("Enter new notebook path: ", currpath)
     if !empty(nbpath)
         silent execute "!cp ~/.vim/templates/skeleton.ipynb " . nbpath
         redraw!
