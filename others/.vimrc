@@ -111,6 +111,18 @@ set shortmess-=S
 " Set PWD to the file that vim is editing
 set autochdir
 
+" Auto close brackets (quotes, paranthesis, etc)
+inoremap " ""<left>
+inoremap ' ''<left>
+inoremap ( ()<left>
+inoremap [ []<left>
+inoremap { {}<left>
+inoremap {<CR> {<CR>}<ESC>O
+inoremap {;<CR> {<CR>};<ESC>O
+inoremap <expr> ) strpart(getline('.'), col('.')-1, 1) == ")" ? "\<Right>" : ")"
+inoremap <expr> } strpart(getline('.'), col('.')-1, 1) == "}" ? "\<Right>" : "}"
+inoremap <expr> ] strpart(getline('.'), col('.')-1, 1) == "]" ? "\<Right>" : "]"
+
 " Support python inside markdown
 let g:markdown_fenced_languages = ['python', 'javascript', 'js=javascript', 'typescript', 'ts=typescript']
 autocmd FileType markdown set conceallevel=0
@@ -229,8 +241,8 @@ vnoremap <silent><leader>ll :<c-u>call slime#send_op(visualmode(), 1)<cr>
 
 " Configs for ALE
 let g:ale_python_pylint_auto_pipenv = 1
-let g:ale_linters = {'python': ['mypy', 'jedils'], 'javascript': ['eslint'], 'typescript': ['eslint', 'tsserver'], 'sh': ['shellcheck']}
-let g:ale_fixers = {'python': ['black'], 'javascript': ['eslint'], 'typescript': ['eslint']}
+let g:ale_linters = {'c': ['clangd', 'gcc'], 'cpp': ['clangd', 'gcc'], 'python': ['mypy', 'jedils'], 'javascript': ['eslint'], 'typescript': ['eslint', 'tsserver'], 'sh': ['shellcheck']}
+let g:ale_fixers = {'c': ['clangd', 'gcc'], 'cpp': ['clangd', 'gcc'], 'python': ['black'], 'javascript': ['eslint'], 'typescript': ['eslint']}
 let g:ale_sign_error = '>>'
 let g:ale_sign_warning = '--'
 set omnifunc=ale#completion#OmniFunc
