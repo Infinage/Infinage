@@ -240,11 +240,15 @@ nnoremap <silent><expr><leader>ll ":\<C-u>call slime#send_lines(" . v:count . ")
 vnoremap <silent><leader>ll :<c-u>call slime#send_op(visualmode(), 1)<cr>
 
 " Configs for ALE
+" Create .clangd file into '~/.config/clangd/config.yaml' - MANUAL
 let g:ale_python_pylint_auto_pipenv = 1
 let g:ale_linters = {'c': ['clangd', 'gcc'], 'cpp': ['clangd', 'gcc'], 'python': ['mypy', 'jedils'], 'javascript': ['eslint'], 'typescript': ['eslint', 'tsserver'], 'sh': ['shellcheck']}
 let g:ale_fixers = {'c': ['clangd', 'gcc'], 'cpp': ['clangd', 'gcc'], 'python': ['black'], 'javascript': ['eslint'], 'typescript': ['eslint']}
 let g:ale_sign_error = '>>'
 let g:ale_sign_warning = '--'
+let cpp_opts = '-std=c++20 -Wall -Wextra'
+let g:ale_cpp_cc_options = cpp_opts
+let g:ale_cpp_gcc_options = cpp_opts
 set omnifunc=ale#completion#OmniFunc
 set completeopt=noinsert,menuone,noselect
 highlight ALEError cterm=italic

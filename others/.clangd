@@ -1,0 +1,3 @@
+# Into ~/.config/clangd/config.yaml
+CompileFlags:
+    Add: [-std=c++20]
