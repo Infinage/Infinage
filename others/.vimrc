@@ -246,7 +246,7 @@ let g:ale_linters = {'c': ['clangd', 'gcc'], 'cpp': ['clangd', 'gcc'], 'python':
 let g:ale_fixers = {'c': ['clangd', 'gcc'], 'cpp': ['clangd', 'gcc'], 'python': ['black'], 'javascript': ['eslint'], 'typescript': ['eslint']}
 let g:ale_sign_error = '>>'
 let g:ale_sign_warning = '--'
-let cpp_opts = '-std=c++20 -Wall -Wextra'
+let cpp_opts = '-std=c++23 -Wall -Weffc++ -Wextra -Wconversion -Wsign-conversion'
 let g:ale_cpp_cc_options = cpp_opts
 let g:ale_cpp_gcc_options = cpp_opts
 set omnifunc=ale#completion#OmniFunc
