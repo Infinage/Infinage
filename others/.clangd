@@ -1,3 +1,24 @@
 # Into ~/.config/clangd/config.yaml
+
+# We are using 'clangd' for auto completion whose configs cannot be set via vimrc
+# especially the std=c++23 opt. By moving to the specified path, clangd picks it up
+# For project specific stuffs we can always create a `.clangd` file into root.
+
+# Installing libraries -
+# We create a ~/cpplib folder to contain all our installs
+# Git clone repository
+# `cmake -DCMAKE_INSTALL_PREFIX=/home/kael/cpplib .`
+
+# Uninstalling libraries - 
+# `cat install_manifest.txt | sudo xargs rm`
+
 CompileFlags:
-    Add: [-std=c++23, -Wall, -Weffc++, -Wextra, -Wconversion, -Wsign-conversion]
+    Add:
+      - -std=c++23
+      - -Wall
+      - -Weffc++
+      - -Wextra
+      - -Wconversion
+      - -Wsign-conversion
+      - -I/home/kael/cpplib/include
+      - -L/home/kael/cpplib/lib
