@@ -32,6 +32,9 @@ set statusline+=%=
 " Status line right side.
 set statusline+=\ row:\ %l\ col:\ %c\ percent:\ %p%%
 
+" Dont resize existing windows when a new ones are created or closed
+set noea
+
 " Show the status on the second to last line.
 set laststatus=2
 
