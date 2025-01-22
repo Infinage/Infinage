@@ -250,8 +250,11 @@ let g:ale_fixers = {'c': ['clangd', 'cc'], 'cpp': ['clangd', 'cc'], 'python': ['
 let g:ale_sign_error = '>>'
 let g:ale_sign_warning = '--'
 let cpp_opts = '-std=c++23 -Wall -Weffc++ -Wextra -wconversion -wsign-conversion -L/home/kael/cpplib/lib -I/home/kael/cpplib/include'
+let c_opts = '-std=c11 -Wall -Wextra -Wconversion -Wsign-conversion'
 let g:ale_cpp_cc_options = cpp_opts
 let g:ale_cpp_gcc_options = cpp_opts
+let g:ale_c_cc_options = c_opts
+let g:ale_c_gcc_options = c_opts
 set omnifunc=ale#completion#OmniFunc
 set completeopt=noinsert,menuone,noselect
 highlight ALEError cterm=italic

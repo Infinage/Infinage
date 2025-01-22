@@ -14,11 +14,26 @@
 
 CompileFlags:
     Add:
-      - -std=c++23
       - -Wall
       - -Weffc++
       - -Wextra
       - -Wconversion
       - -Wsign-conversion
-      - -I/home/kael/cpplib/include
-      - -L/home/kael/cpplib/lib
+
+---
+
+If:
+  PathMatch: [.*\.cpp, .*\.hpp]
+CompileFlags:
+  Add: 
+    - -std=c++23
+    - -I/home/kael/cpplib/include
+    - -L/home/kael/cpplib/lib
+
+---
+
+If:
+  PathMatch: [.*\.c, .*\.h]
+CompileFlags:
+  Add: 
+    - -std=c11
