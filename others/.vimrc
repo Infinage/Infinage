@@ -1,3 +1,10 @@
+" Auto-install vim-plug if not present
+if empty(glob('~/.vim/autoload/plug.vim'))
+    silent !mkdir -p ~/.vim/autoload
+    silent !curl -fLo ~/.vim/autoload/plug.vim https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+    autocmd VimEnter * PlugInstall | source $MYVIMRC
+endif
+
 " Plugins
 call plug#begin()
 Plug 'preservim/nerdtree'
@@ -93,7 +100,7 @@ set foldmethod=manual
 set foldlevel=99
 
 " Use System Clipboard
-set clipboard=unnamedplus
+set clipboard^=unnamed,unnamedplus
 
 " Compat Disable screen flashing, backspace work as expected
 set belloff=all
