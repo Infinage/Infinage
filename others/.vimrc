@@ -1,7 +1,7 @@
 " Auto-install vim-plug if not present
-if empty(glob('~/.vim/autoload/plug.vim'))
-    silent !mkdir -p ~/.vim/autoload
-    silent !curl -fLo ~/.vim/autoload/plug.vim https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+if empty(glob('~/.local/share/nvim/site/autoload/plug.vim'))
+    silent !mkdir -p ~/.local/share/nvim/site/autoload
+    silent !curl -fLo ~/.local/share/nvim/site/autoload/plug.vim https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
     autocmd VimEnter * PlugInstall | source $MYVIMRC
 endif
 
@@ -10,11 +10,19 @@ call plug#begin()
 Plug 'preservim/nerdtree'
 Plug 'jpalardy/vim-slime'
 Plug 'kshenoy/vim-signature'
-Plug 'goerz/jupytext.vim'
 Plug 'vim-python/python-syntax'
 Plug 'morhetz/gruvbox'
 Plug 'dense-analysis/ale'
+Plug 'petertriho/nvim-scrollbar'
 call plug#end()
+
+" Setup nvim scoll bar
+lua << EOF
+require("scrollbar").setup({ 
+    throttle_ms = 100,
+    handle = { blend = 0 } 
+})
+EOF
 
 " Set leader as space
 nnoremap <SPACE> <Nop>
@@ -22,7 +30,10 @@ let mapleader=" "
 
 " Set the color scheme
 colorscheme gruvbox
+let g:gruvbox_contrast_dark = 'soft'
+let g:gruvbox_transparent_bg = 1
 set background=dark
+autocmd VimEnter * hi Normal ctermbg=NONE guibg=NONE
 
 " Don't try to be vi compatible
 set nocompatible
@@ -138,21 +149,6 @@ let g:markdown_fenced_languages = ['python', 'javascript', 'js=javascript', 'typ
 autocmd FileType markdown set conceallevel=0
 let g:jupytext_fmt='py:percent'
 
-" Create .ipynb with skeleton
-if empty(glob("~/.vim/templates/skeleton.ipynb"))
-    call mkdir($HOME . "/.vim/templates", "p")
-    silent !curl --no-progress-meter -o ~/.vim/templates/skeleton.ipynb https://raw.githubusercontent.com/Infinage/Infinage/main/others/vim-templates/skeleton.ipynb
-endif
-function! CreateJupyterNotebook()
-    let currpath = fnamemodify(expand('%:p:h'), ':p') .. 'untitled.ipynb'
-    let nbpath = input("Enter new notebook path: ", currpath)
-    if !empty(nbpath)
-        silent execute "!cp ~/.vim/templates/skeleton.ipynb " . nbpath
-        redraw!
-    endif
-endfunction
-nnoremap <leader>nb :call CreateJupyterNotebook()<CR>
-
 " Set color scheme when using vimdiff
 if &diff
     colorscheme slate
@@ -162,25 +158,19 @@ endif
 hi MatchParen cterm=none ctermbg=black ctermfg=blue
 
 " Paste toggle keybind for pasting into vim
-" https://vim.fandom.com/wiki/Toggle_auto-indenting_for_code_paste
-set pastetoggle=<F2>
+nnoremap <F2> :set paste!<CR>:set paste?<CR>
 
-" WSL specific changes
-let uname = substitute(system('uname'),'\n','','')
-if uname == 'Linux'
-    let versionfile = "/proc/version"
-    let lines = filereadable(versionfile) ? readfile(versionfile): []
-    if !empty(lines) && lines[0] =~ "Microsoft"
-        " WSL yank support
-        let s:clip = '/mnt/c/Windows/System32/clip.exe'  
-        if executable(s:clip)
-            augroup WSLYank
-                    autocmd!
-                    autocmd TextYankPost * if v:event.operator ==# 'y' | call system(s:clip, @0) | endif 
-            augroup END
+" Create function to scroll vim popups
+function! ScrollPopup(nlines)
+    for winid in nvim_list_wins()
+        let config = nvim_win_get_config(winid)
+        if get(config, 'relative', '') != ''
+          let cmd = a:nlines > 0 ? 'normal! ' . a:nlines . "\<C-e>" : 'normal! ' . abs(a:nlines) . "\<C-y>"
+          call win_execute(winid, cmd)
+          return
         endif
-    endif
-endif
+    endfor
+endfunction
 
 " Remove newbie crutches in Command, Insert, Normal & Visual Mode
 cnoremap <Down> <Nop>
@@ -235,6 +225,10 @@ nnoremap <C-n> :NERDTreeToggle<CR>
 " XML Auto Indent
 autocmd FileType xml setlocal equalprg=xmllint\ --format\ -
 
+" Scroll floating popups via Alt - J / K
+nnoremap <silent> <A-j> :call ScrollPopup( 1)<CR>
+nnoremap <silent> <A-k> :call ScrollPopup(-1)<CR>
+
 " Nerd tree configs
 let NERDTreeShowHidden = 1
 let g:NERDTreeShowLineNumbers = 1
@@ -256,12 +250,13 @@ let g:ale_linters = {'c': ['clangd', 'cc'], 'cpp': ['clangd', 'cc'], 'python': [
 let g:ale_fixers = {'c': ['clangd', 'cc'], 'cpp': ['clangd', 'cc'], 'python': ['black'], 'javascript': ['eslint'], 'typescript': ['eslint']}
 let g:ale_sign_error = '>>'
 let g:ale_sign_warning = '--'
-let cpp_opts = '-std=c++23 -Wall -Weffc++ -Wextra -wconversion -wsign-conversion -L/home/kael/cpplib/lib -I/home/kael/cpplib/include'
+let cpp_opts = '-std=c++23 -Wall -Weffc++ -Wextra -wconversion -wsign-conversion -Wpedantic -pedantic-errors -L/home/kael/cpplib/lib -I/home/kael/cpplib/include'
 let c_opts = '-std=c11 -Wall -Wextra -Wconversion -Wsign-conversion'
 let g:ale_cpp_cc_options = cpp_opts
 let g:ale_cpp_gcc_options = cpp_opts
 let g:ale_c_cc_options = c_opts
 let g:ale_c_gcc_options = c_opts
+let g:ale_floating_preview = 1
 set omnifunc=ale#completion#OmniFunc
 set completeopt=noinsert,menuone,noselect
 highlight ALEError cterm=italic
@@ -269,3 +264,5 @@ imap <S-Tab> <Plug>(ale_complete)
 nnoremap K :ALEHover<CR>
 nnoremap <leader>d :ALEGoToDefinition -split<CR>
 nnoremap <leader>n :ALEFindReferences<CR>
+nnoremap <leader>aj :ALENextWrap<cr>
+nnoremap <leader>ak :ALEPreviousWrap<cr>

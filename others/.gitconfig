@@ -1,0 +1,9 @@
+[user]
+	email = 37257700+Infinage@users.noreply.github.com
+	name = infinage
+[core]
+	editor = nvim
+[credential]
+	helper = store
+[diff]
+	tool = nvimdiff
