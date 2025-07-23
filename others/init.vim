@@ -10,18 +10,19 @@ call plug#begin()
 Plug 'preservim/nerdtree'
 Plug 'jpalardy/vim-slime'
 Plug 'kshenoy/vim-signature'
-Plug 'vim-python/python-syntax'
 Plug 'morhetz/gruvbox'
 Plug 'dense-analysis/ale'
 Plug 'petertriho/nvim-scrollbar'
+Plug 'nvim-lua/plenary.nvim'
+Plug 'nvim-telescope/telescope.nvim'
+Plug 'airblade/vim-rooter'
+Plug 'airblade/vim-gitgutter'
+Plug 'nvim-telescope/telescope-live-grep-args.nvim'
 call plug#end()
 
 " Setup nvim scoll bar
 lua << EOF
-require("scrollbar").setup({ 
-    throttle_ms = 100,
-    handle = { blend = 0 } 
-})
+require("scrollbar").setup({ handle = { blend = 10 } })
 EOF
 
 " Set leader as space
@@ -129,9 +130,6 @@ set splitright splitbelow
 " Search count
 set shortmess-=S
 
-" Set PWD to the file that vim is editing
-set autochdir
-
 " Auto close brackets (quotes, paranthesis, etc)
 inoremap " ""<left>
 inoremap ' ''<left>
@@ -147,7 +145,6 @@ inoremap <expr> ] strpart(getline('.'), col('.')-1, 1) == "]" ? "\<Right>" : "]"
 " Support python inside markdown
 let g:markdown_fenced_languages = ['python', 'javascript', 'js=javascript', 'typescript', 'ts=typescript']
 autocmd FileType markdown set conceallevel=0
-let g:jupytext_fmt='py:percent'
 
 " Set color scheme when using vimdiff
 if &diff
@@ -225,6 +222,25 @@ nnoremap <C-n> :NERDTreeToggle<CR>
 " XML Auto Indent
 autocmd FileType xml setlocal equalprg=xmllint\ --format\ -
 
+" Vim Signature - set dyn marking based on git
+let g:SignatureMarkTextHLDynamic = 1
+
+" Git gutter settings
+let g:gitgutter_map_keys = 0
+nnoremap gp :GitGutterPreviewHunk<CR>
+nnoremap gs :GitGutterStageHunk<CR>
+nnoremap gu :GitGutterUndoHunk<CR>
+nnoremap ]g :GitGutterNextHunk<CR>
+nnoremap [g :GitGutterPrevHunk<CR>
+let g:gitgutter_floating_window_options = {
+    \ 'relative': 'cursor', 'row': 1, 'col': 0,
+    \ 'width': 42, 'height': &previewheight,
+    \ 'style': 'minimal', 'border': 'rounded' 
+\ }
+
+" Determining a root directory with the presence of these
+let g:rooter_patterns = ['.git', '.svn', 'package.json', '!node_modules']
+
 " Scroll floating popups via Alt - J / K
 nnoremap <silent> <A-j> :call ScrollPopup( 1)<CR>
 nnoremap <silent> <A-k> :call ScrollPopup(-1)<CR>
@@ -235,6 +251,31 @@ let g:NERDTreeShowLineNumbers = 1
 let g:NERDTreeMapOpenSplit = 's'
 let g:NERDTreeMapOpenVSplit = 'i'
 autocmd BufEnter NERD_* setlocal relativenumber
+
+" Telescope for find and grep
+nnoremap <leader>ff :lua require('telescope.builtin').find_files({ hidden = true })<CR>
+nnoremap <leader>fs :lua require('telescope.builtin').current_buffer_fuzzy_find()<CR>
+nnoremap <leader>fS :lua require("telescope").extensions.live_grep_args.live_grep_args()<CR>
+nnoremap <leader>fb :lua require('telescope.builtin').buffers()<CR>
+nnoremap <leader>fm :lua require('telescope.builtin').marks()<CR>
+nnoremap <leader>fg :lua require('telescope.builtin').git_status()<CR>
+
+" Shortcuts in Telescope preview
+lua << EOF
+local actions = require("telescope.actions")
+local map = {
+  ["<A-h>"] = actions.preview_scrolling_left,
+  ["<A-l>"] = actions.preview_scrolling_right,
+  ["<A-j>"] = actions.preview_scrolling_down,
+  ["<A-k>"] = actions.preview_scrolling_up,
+  ["<C-h>"] = actions.results_scrolling_left,
+  ["<C-l>"] = actions.results_scrolling_right,
+}
+
+require("telescope").setup {
+  defaults = { mappings = { i = map, n = map, } }
+}
+EOF
 
 " Configs for vim slime
 let g:slime_target = "tmux"
@@ -262,7 +303,9 @@ set completeopt=noinsert,menuone,noselect
 highlight ALEError cterm=italic
 imap <S-Tab> <Plug>(ale_complete)
 nnoremap K :ALEHover<CR>
+nnoremap ]a :ALENext<cr>
+nnoremap [a :ALEPrevious<cr>
+nnoremap ]e :ALENext -error<CR>
+nnoremap [e :ALEPrevious -error<CR>
 nnoremap <leader>d :ALEGoToDefinition -split<CR>
 nnoremap <leader>n :ALEFindReferences<CR>
-nnoremap <leader>aj :ALENextWrap<cr>
-nnoremap <leader>ak :ALEPreviousWrap<cr>
