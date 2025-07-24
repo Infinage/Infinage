@@ -291,7 +291,7 @@ let g:ale_linters = {'c': ['clangd', 'cc'], 'cpp': ['clangd', 'cc'], 'python': [
 let g:ale_fixers = {'c': ['clangd', 'cc'], 'cpp': ['clangd', 'cc'], 'python': ['black'], 'javascript': ['eslint'], 'typescript': ['eslint']}
 let g:ale_sign_error = '>>'
 let g:ale_sign_warning = '--'
-let cpp_opts = '-std=c++23 -Wall -Weffc++ -Wextra -wconversion -wsign-conversion -Wpedantic -pedantic-errors -L/home/kael/cpplib/lib -I/home/kael/cpplib/include'
+let cpp_opts = '-std=c++23 -Wall -Weffc++ -Wextra -Wconversion -Wsign-conversion -Wpedantic -pedantic-errors -L/home/kael/cpplib/lib -I/home/kael/cpplib/include'
 let c_opts = '-std=c11 -Wall -Wextra -Wconversion -Wsign-conversion'
 let g:ale_cpp_cc_options = cpp_opts
 let g:ale_cpp_gcc_options = cpp_opts
