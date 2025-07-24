@@ -1,9 +1,6 @@
-" Auto-install vim-plug if not present
-if empty(glob('~/.local/share/nvim/site/autoload/plug.vim'))
-    silent !mkdir -p ~/.local/share/nvim/site/autoload
-    silent !curl -fLo ~/.local/share/nvim/site/autoload/plug.vim https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-    autocmd VimEnter * PlugInstall | source $MYVIMRC
-endif
+" Install vim-plug if not present
+" https://raw.githubusercontent.com/junegunn/vim-plug/refs/heads/master/plug.vim
+" nv --headless -es +silent! +'PlugInstall --sync' +qa
 
 " Plugins
 call plug#begin()
@@ -212,6 +209,9 @@ nnoremap <leader>tt :tab term bash<CR>
 
 " 'Zoom' a split window into a tab
 nnoremap <leader>zz :tab sb<CR>
+
+" Set current buffer as root directory
+nnoremap <leader>cd :cd %:p:h<CR>:NERDTreeCWD<CR>:NERDTreeClose<CR>
 
 " Disable S-Tab in insert mode - we would be using it for autocomplete
 inoremap <S-Tab> <Nop>

@@ -19,11 +19,13 @@ CompileFlags:
       - -Wextra
       - -Wconversion
       - -Wsign-conversion
+      - -Wpedantic 
+      - -pedantic-errors
 
 ---
 
 If:
-  PathMatch: [.*\.cpp, .*\.hpp]
+  PathMatch: [.*\.cpp, .*\.hpp, .*\.h]
 CompileFlags:
   Add: 
     - -std=c++23
@@ -33,7 +35,7 @@ CompileFlags:
 ---
 
 If:
-  PathMatch: [.*\.c, .*\.h]
+  PathMatch: [.*\.c]
 CompileFlags:
   Add: 
     - -std=c11
