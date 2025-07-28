@@ -8,18 +8,58 @@ Plug 'preservim/nerdtree'
 Plug 'jpalardy/vim-slime'
 Plug 'kshenoy/vim-signature'
 Plug 'morhetz/gruvbox'
-Plug 'dense-analysis/ale'
 Plug 'petertriho/nvim-scrollbar'
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
 Plug 'airblade/vim-rooter'
 Plug 'airblade/vim-gitgutter'
 Plug 'nvim-telescope/telescope-live-grep-args.nvim'
+Plug 'neovim/nvim-lspconfig'
+Plug 'hrsh7th/nvim-cmp'
+Plug 'hrsh7th/cmp-nvim-lsp'
 call plug#end()
 
 " Setup nvim scoll bar
+lua require("scrollbar").setup({ handle = { blend = 10 } })
+
+" Setup LSP
 lua << EOF
-require("scrollbar").setup({ handle = { blend = 10 } })
+-- Setup LSP servers
+local lspconfig = require('lspconfig')
+local capabilities = require('cmp_nvim_lsp').default_capabilities()
+local cmp = require('cmp')
+
+-- C/C++ LSP
+lspconfig.clangd.setup {
+  capabilities = capabilities,
+  cmd = { "clangd", "--background-index", "--clang-tidy" },
+}
+
+-- Python
+lspconfig.jedils.setup { capabilities = capabilities, }
+
+-- Setup autocompletion
+cmp.setup {
+  mapping = cmp.mapping.preset.insert({
+    ['<C-j>'] = cmp.mapping.select_next_item(),
+    ['<C-k>'] = cmp.mapping.select_prev_item(),
+    ['<CR>'] = cmp.mapping.confirm({ select = true }),
+    ['<A-j>'] = cmp.mapping.scroll_docs(4),
+    ['<A-k>'] = cmp.mapping.scroll_docs(-4),
+    ['<C-Space>'] = cmp.mapping.complete(),
+  }),
+  sources = {
+    { name = 'nvim_lsp' }
+  },
+}
+
+-- Show diagnostics as virtual text
+vim.diagnostic.config({
+  virtual_text = true,
+  signs = { priority = 15 },
+  update_in_insert = false,
+  float = { border = "rounded" }
+})
 EOF
 
 " Set leader as space
@@ -32,9 +72,6 @@ let g:gruvbox_contrast_dark = 'soft'
 let g:gruvbox_transparent_bg = 1
 set background=dark
 autocmd VimEnter * hi Normal ctermbg=NONE guibg=NONE
-
-" Don't try to be vi compatible
-set nocompatible
 
 " Clear status line when vimrc is reloaded.
 set statusline=
@@ -140,7 +177,7 @@ inoremap <expr> } strpart(getline('.'), col('.')-1, 1) == "}" ? "\<Right>" : "}"
 inoremap <expr> ] strpart(getline('.'), col('.')-1, 1) == "]" ? "\<Right>" : "]"
 
 " Support python inside markdown
-let g:markdown_fenced_languages = ['python', 'javascript', 'js=javascript', 'typescript', 'ts=typescript']
+let g:markdown_fenced_languages = ['cpp', 'python', 'javascript', 'js=javascript', 'typescript', 'ts=typescript']
 autocmd FileType markdown set conceallevel=0
 
 " Set color scheme when using vimdiff
@@ -227,6 +264,7 @@ let g:SignatureMarkTextHLDynamic = 1
 
 " Git gutter settings
 let g:gitgutter_map_keys = 0
+let g:gitgutter_sign_allow_clobber = 0
 nnoremap gp :GitGutterPreviewHunk<CR>
 nnoremap gs :GitGutterStageHunk<CR>
 nnoremap gu :GitGutterUndoHunk<CR>
@@ -284,28 +322,9 @@ let g:slime_preserve_curpos = 0
 nnoremap <silent><expr><leader>ll ":\<C-u>call slime#send_lines(" . v:count . ")\<cr>"
 vnoremap <silent><leader>ll :<c-u>call slime#send_op(visualmode(), 1)<cr>
 
-" Configs for ALE
-" Create .clangd file into '~/.config/clangd/config.yaml' - MANUAL
-let g:ale_python_pylint_auto_pipenv = 1
-let g:ale_linters = {'c': ['clangd', 'cc'], 'cpp': ['clangd', 'cc'], 'python': ['mypy', 'jedils'], 'javascript': ['eslint'], 'typescript': ['eslint', 'tsserver'], 'sh': ['shellcheck']}
-let g:ale_fixers = {'c': ['clangd', 'cc'], 'cpp': ['clangd', 'cc'], 'python': ['black'], 'javascript': ['eslint'], 'typescript': ['eslint']}
-let g:ale_sign_error = '>>'
-let g:ale_sign_warning = '--'
-let cpp_opts = '-std=c++23 -Wall -Weffc++ -Wextra -Wconversion -Wsign-conversion -Wpedantic -pedantic-errors -L/home/kael/cpplib/lib -I/home/kael/cpplib/include'
-let c_opts = '-std=c11 -Wall -Wextra -Wconversion -Wsign-conversion'
-let g:ale_cpp_cc_options = cpp_opts
-let g:ale_cpp_gcc_options = cpp_opts
-let g:ale_c_cc_options = c_opts
-let g:ale_c_gcc_options = c_opts
-let g:ale_floating_preview = 1
-set omnifunc=ale#completion#OmniFunc
-set completeopt=noinsert,menuone,noselect
-highlight ALEError cterm=italic
-imap <S-Tab> <Plug>(ale_complete)
-nnoremap K :ALEHover<CR>
-nnoremap ]a :ALENext<cr>
-nnoremap [a :ALEPrevious<cr>
-nnoremap ]e :ALENext -error<CR>
-nnoremap [e :ALEPrevious -error<CR>
-nnoremap <leader>d :ALEGoToDefinition -split<CR>
-nnoremap <leader>n :ALEFindReferences<CR>
+" Custom mappings for LSP
+nnoremap <silent> [e        :lua vim.diagnostic.goto_prev()<CR>
+nnoremap <silent> ]e        :lua vim.diagnostic.goto_next()<CR>
+nnoremap <silent> [E        :lua vim.diagnostic.goto_prev({ severity = vim.diagnostic.severity.ERROR })<CR>
+nnoremap <silent> ]E        :lua vim.diagnostic.goto_next({ severity = vim.diagnostic.severity.ERROR })<CR>
+nnoremap <silent> <leader>e :lua vim.diagnostic.open_float()<CR>
