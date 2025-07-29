@@ -16,6 +16,7 @@ Plug 'nvim-telescope/telescope-live-grep-args.nvim'
 Plug 'neovim/nvim-lspconfig'
 Plug 'hrsh7th/nvim-cmp'
 Plug 'hrsh7th/cmp-nvim-lsp'
+Plug 'hrsh7th/cmp-buffer'
 Plug 'Vigemus/iron.nvim'
 Plug 'goerz/jupytext.nvim'
 call plug#end()
@@ -54,8 +55,18 @@ cmp.setup {
   }),
   sources = {
     { name = 'nvim_lsp' },
-    { name = 'buffer' },
-    { name = 'path' },
+    { 
+        name = 'buffer',
+        option = {
+            get_bufnrs = function()
+                local bufs = {}
+                for _, win in ipairs(vim.api.nvim_list_wins()) do
+                    bufs[vim.api.nvim_win_get_buf(win)] = true
+                end
+                return vim.tbl_keys(bufs)
+            end
+        },
+    },
   },
 }
 
@@ -315,6 +326,8 @@ local map = {
   ["<A-k>"] = actions.preview_scrolling_up,
   ["<C-h>"] = actions.results_scrolling_left,
   ["<C-l>"] = actions.results_scrolling_right,
+  ["<C-j>"] = actions.move_selection_next,
+  ["<C-k>"] = actions.move_selection_previous,
 }
 
 require("telescope").setup {
@@ -324,6 +337,7 @@ EOF
 
 " Iron nvim setup
 lua << EOF
+local common = require("iron.fts.common")
 require("iron.core").setup({
     ignore_blank_lines = true,
     highlight = { italic = true },
@@ -333,10 +347,13 @@ require("iron.core").setup({
         scratch_repl = false,
         repl_open_cmd = "split",
         repl_definition = {
-            sh = { command = "bash" },
+            sh = {
+                command = "bash",
+                format = common.bracketed_paste,
+            },
             python = {
                 command = { "python" },
-                format = require("iron.fts.common").bracketed_paste_python,
+                format = common.bracketed_paste,
                 block_dividers = { "# %%", "#%%" },
             },
         },
