@@ -5,7 +5,6 @@
 " Plugins
 call plug#begin()
 Plug 'preservim/nerdtree'
-Plug 'jpalardy/vim-slime'
 Plug 'kshenoy/vim-signature'
 Plug 'morhetz/gruvbox'
 Plug 'petertriho/nvim-scrollbar'
@@ -17,10 +16,15 @@ Plug 'nvim-telescope/telescope-live-grep-args.nvim'
 Plug 'neovim/nvim-lspconfig'
 Plug 'hrsh7th/nvim-cmp'
 Plug 'hrsh7th/cmp-nvim-lsp'
+Plug 'Vigemus/iron.nvim'
+Plug 'goerz/jupytext.nvim'
 call plug#end()
 
 " Setup nvim scoll bar
 lua require("scrollbar").setup({ handle = { blend = 10 } })
+
+" Setup jupytext
+lua require("jupytext").setup({ format = "py:percent" })
 
 " Setup LSP
 lua << EOF
@@ -36,7 +40,7 @@ lspconfig.clangd.setup {
 }
 
 -- Python
-lspconfig.jedils.setup { capabilities = capabilities, }
+lspconfig.jedi_language_server.setup { capabilities = capabilities, }
 
 -- Setup autocompletion
 cmp.setup {
@@ -46,10 +50,12 @@ cmp.setup {
     ['<CR>'] = cmp.mapping.confirm({ select = true }),
     ['<A-j>'] = cmp.mapping.scroll_docs(4),
     ['<A-k>'] = cmp.mapping.scroll_docs(-4),
-    ['<C-Space>'] = cmp.mapping.complete(),
+    ['<S-Tab>'] = cmp.mapping.complete(),
   }),
   sources = {
-    { name = 'nvim_lsp' }
+    { name = 'nvim_lsp' },
+    { name = 'buffer' },
+    { name = 'path' },
   },
 }
 
@@ -241,8 +247,9 @@ nnoremap <C-j> :resize +1<CR>
 nnoremap <leader>cm :delm a-zA-Z0-9<CR>
 nnoremap <leader>cc :nohl<CR>
 
-" Open terminal in a new tab
-nnoremap <leader>tt :tab term bash<CR>
+" Open new vim terminal
+nnoremap <leader>T :tab term bash<CR>
+nnoremap <leader>tt :split<CR> :term bash<CR>
 
 " 'Zoom' a split window into a tab
 nnoremap <leader>zz :tab sb<CR>
@@ -315,12 +322,33 @@ require("telescope").setup {
 }
 EOF
 
-" Configs for vim slime
-let g:slime_target = "tmux"
-let g:slime_python_ipython = 1
-let g:slime_preserve_curpos = 0
-nnoremap <silent><expr><leader>ll ":\<C-u>call slime#send_lines(" . v:count . ")\<cr>"
-vnoremap <silent><leader>ll :<c-u>call slime#send_op(visualmode(), 1)<cr>
+" Iron nvim setup
+lua << EOF
+require("iron.core").setup({
+    ignore_blank_lines = true,
+    highlight = { italic = true },
+    close_window_on_exit = true,
+    buflisted = true,
+    config = {
+        scratch_repl = false,
+        repl_open_cmd = "split",
+        repl_definition = {
+            sh = { command = "bash" },
+            python = {
+                command = { "python" },
+                format = require("iron.fts.common").bracketed_paste_python,
+                block_dividers = { "# %%", "#%%" },
+            },
+        },
+    },
+    keymaps = {
+        send_line = "<leader>ll",
+        visual_send = "<leader>ll",
+    },
+})
+EOF
+nnoremap <leader>if :IronFocus<CR>
+nnoremap <leader>ih :IronHide<CR>
 
 " Custom mappings for LSP
 nnoremap <silent> [e        :lua vim.diagnostic.goto_prev()<CR>
@@ -328,3 +356,7 @@ nnoremap <silent> ]e        :lua vim.diagnostic.goto_next()<CR>
 nnoremap <silent> [E        :lua vim.diagnostic.goto_prev({ severity = vim.diagnostic.severity.ERROR })<CR>
 nnoremap <silent> ]E        :lua vim.diagnostic.goto_next({ severity = vim.diagnostic.severity.ERROR })<CR>
 nnoremap <silent> <leader>e :lua vim.diagnostic.open_float()<CR>
+
+" Vim terminal mappings
+tnoremap <expr> <C-w>" '<C-\><C-N>"'.nr2char(getchar()).'pi'
+tnoremap <C-w> <C-\><C-N><C-w>
