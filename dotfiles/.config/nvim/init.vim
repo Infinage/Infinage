@@ -17,7 +17,7 @@ Plug 'neovim/nvim-lspconfig'
 Plug 'hrsh7th/nvim-cmp'
 Plug 'hrsh7th/cmp-nvim-lsp'
 Plug 'hrsh7th/cmp-buffer'
-Plug 'Vigemus/iron.nvim'
+Plug 'jpalardy/vim-slime'
 Plug 'goerz/jupytext.nvim'
 call plug#end()
 
@@ -238,6 +238,9 @@ vnoremap <Left> <Nop>
 vnoremap <Right> <Nop>
 vnoremap <Up> <Nop>
 
+" Disable mouse
+set mouse=
+
 " In insert or command mode, move normally by using Ctrl
 inoremap <C-h> <Left>
 inoremap <C-j> <Down>
@@ -260,7 +263,7 @@ nnoremap <leader>cc :nohl<CR>
 
 " Open new vim terminal
 nnoremap <leader>T :tab term bash<CR>
-nnoremap <leader>tt :split<CR> :term bash<CR>
+nnoremap <silent> <leader>tt :split <bar> terminal bash<CR>
 
 " 'Zoom' a split window into a tab
 nnoremap <leader>zz :tab sb<CR>
@@ -328,6 +331,7 @@ local map = {
   ["<C-l>"] = actions.results_scrolling_right,
   ["<C-j>"] = actions.move_selection_next,
   ["<C-k>"] = actions.move_selection_previous,
+  ["<C-d>"] = actions.delete_buffer,
 }
 
 require("telescope").setup {
@@ -335,44 +339,20 @@ require("telescope").setup {
 }
 EOF
 
-" Iron nvim setup
-lua << EOF
-local common = require("iron.fts.common")
-require("iron.core").setup({
-    ignore_blank_lines = true,
-    highlight = { italic = true },
-    close_window_on_exit = true,
-    buflisted = true,
-    config = {
-        scratch_repl = false,
-        repl_open_cmd = "split",
-        repl_definition = {
-            sh = {
-                command = "bash",
-                format = common.bracketed_paste,
-            },
-            python = {
-                command = { "python" },
-                format = common.bracketed_paste,
-                block_dividers = { "# %%", "#%%" },
-            },
-        },
-    },
-    keymaps = {
-        send_line = "<leader>ll",
-        visual_send = "<leader>ll",
-    },
-})
-EOF
-nnoremap <leader>if :IronFocus<CR>
-nnoremap <leader>ih :IronHide<CR>
-
 " Custom mappings for LSP
 nnoremap <silent> [e        :lua vim.diagnostic.goto_prev()<CR>
 nnoremap <silent> ]e        :lua vim.diagnostic.goto_next()<CR>
 nnoremap <silent> [E        :lua vim.diagnostic.goto_prev({ severity = vim.diagnostic.severity.ERROR })<CR>
 nnoremap <silent> ]E        :lua vim.diagnostic.goto_next({ severity = vim.diagnostic.severity.ERROR })<CR>
 nnoremap <silent> <leader>e :lua vim.diagnostic.open_float()<CR>
+
+" Configs for vim slime
+let g:slime_target = "neovim"
+let g:slime_python_ipython = 1
+let g:slime_preserve_curpos = 0
+let g:slime_menu_config = 4
+nnoremap <silent><expr><leader>ll ":\<C-u>call slime#send_lines(" . v:count . ")\<cr>"
+vnoremap <silent><leader>ll :<c-u>call slime#send_op(visualmode(), 1)<cr>
 
 " Vim terminal mappings
 tnoremap <expr> <C-w>" '<C-\><C-N>"'.nr2char(getchar()).'pi'
