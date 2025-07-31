@@ -241,6 +241,9 @@ vnoremap <Up> <Nop>
 " Disable mouse
 set mouse=
 
+" Unload buffer on close
+set nohidden
+
 " In insert or command mode, move normally by using Ctrl
 inoremap <C-h> <Left>
 inoremap <C-j> <Down>
@@ -268,9 +271,6 @@ nnoremap <silent> <leader>tt :split <bar> terminal bash<CR>
 " 'Zoom' a split window into a tab
 nnoremap <leader>zz :tab sb<CR>
 
-" Set current buffer as root directory
-nnoremap <leader>cd :cd %:p:h<CR>:NERDTreeCWD<CR>:NERDTreeClose<CR>
-
 " Disable S-Tab in insert mode - we would be using it for autocomplete
 inoremap <S-Tab> <Nop>
 
@@ -297,8 +297,12 @@ let g:gitgutter_floating_window_options = {
     \ 'style': 'minimal', 'border': 'rounded' 
 \ }
 
-" Determining a root directory with the presence of these
+" Vim rooter configs
+let g:rooter_manual_only = 1
+let g:rooter_cd_cmd = 'lcd'
 let g:rooter_patterns = ['.git', '.svn', 'package.json', '!node_modules']
+nnoremap cd :cd %:p:h<CR>:NERDTreeCWD<CR>:NERDTreeClose<CR>
+nnoremap cD :Rooter<CR>:NERDTreeCWD<CR>:NERDTreeClose<CR>
 
 " Scroll floating popups via Alt - J / K
 nnoremap <silent> <A-j> :call ScrollPopup( 1)<CR>
