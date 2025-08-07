@@ -19,6 +19,7 @@ Plug 'hrsh7th/cmp-nvim-lsp'
 Plug 'hrsh7th/cmp-buffer'
 Plug 'jpalardy/vim-slime'
 Plug 'goerz/jupytext.nvim'
+Plug 'dense-analysis/ale'
 call plug#end()
 
 " Setup nvim scoll bar
@@ -361,3 +362,10 @@ vnoremap <silent><leader>ll :<c-u>call slime#send_op(visualmode(), 1)<cr>
 " Vim terminal mappings
 tnoremap <expr> <C-w>" '<C-\><C-N>"'.nr2char(getchar()).'pi'
 tnoremap <C-w> <C-\><C-N><C-w>
+
+" Add linter for extra 
+let g:ale_linters = { 'cpp': ['cc'] }
+let cpp_opts = '-std=c++23 -Wall -Weffc++ -Wextra -Wpedantic -pedantic-errors -L/home/kael/cpplib/lib -I/home/kael/cpplib/include'
+let g:ale_cpp_cc_options = cpp_opts
+let g:ale_floating_preview = 1
+nnoremap <leader>ad :ALEDetail<CR>
