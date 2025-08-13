@@ -89,7 +89,7 @@ colorscheme gruvbox
 let g:gruvbox_contrast_dark = 'soft'
 let g:gruvbox_transparent_bg = 1
 set background=dark
-autocmd VimEnter * hi Normal ctermbg=NONE guibg=NONE
+autocmd ColorScheme * highlight Normal ctermbg=NONE guibg=NONE
 
 " Clear status line when vimrc is reloaded.
 set statusline=
@@ -165,6 +165,7 @@ set foldlevel=99
 
 " Use System Clipboard
 set clipboard^=unnamed,unnamedplus
+"let g:clipboard = "termux"
 
 " Compat Disable screen flashing, backspace work as expected
 set belloff=all
