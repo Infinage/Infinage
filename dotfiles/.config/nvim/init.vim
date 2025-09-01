@@ -9,10 +9,9 @@ Plug 'kshenoy/vim-signature'
 Plug 'morhetz/gruvbox'
 Plug 'petertriho/nvim-scrollbar'
 Plug 'nvim-lua/plenary.nvim'
-Plug 'nvim-telescope/telescope.nvim'
 Plug 'airblade/vim-rooter'
 Plug 'airblade/vim-gitgutter'
-Plug 'nvim-telescope/telescope-live-grep-args.nvim'
+Plug 'ibhagwan/fzf-lua'
 Plug 'neovim/nvim-lspconfig'
 Plug 'hrsh7th/nvim-cmp'
 Plug 'hrsh7th/cmp-nvim-lsp'
@@ -317,32 +316,42 @@ let g:NERDTreeMapOpenSplit = 's'
 let g:NERDTreeMapOpenVSplit = 'i'
 autocmd BufEnter NERD_* setlocal relativenumber
 
-" Telescope for find and grep
-nnoremap <leader>ff :lua require('telescope.builtin').find_files({ hidden = true })<CR>
-nnoremap <leader>fs :lua require('telescope.builtin').current_buffer_fuzzy_find()<CR>
-nnoremap <leader>fS :lua require("telescope").extensions.live_grep_args.live_grep_args()<CR>
-nnoremap <leader>fb :lua require('telescope.builtin').buffers()<CR>
-nnoremap <leader>fm :lua require('telescope.builtin').marks()<CR>
-nnoremap <leader>fg :lua require('telescope.builtin').git_status()<CR>
+" FZF for find and grep
+nnoremap <leader>ff :lua require('fzf-lua').files()<CR>
+nnoremap <leader>fs :lua require('fzf-lua').blines()<CR>
+nnoremap <leader>fS :lua require('fzf-lua').live_grep()<CR>
+nnoremap <leader>fb :lua require('fzf-lua').buffers()<CR>
+nnoremap <leader>fm :lua require('fzf-lua').marks()<CR>
+nnoremap <leader>fg :lua require('fzf-lua').git_status()<CR>
 
 " Shortcuts in Telescope preview
 lua << EOF
-local actions = require("telescope.actions")
-local map = {
-  ["<A-h>"] = actions.preview_scrolling_left,
-  ["<A-l>"] = actions.preview_scrolling_right,
-  ["<A-j>"] = actions.preview_scrolling_down,
-  ["<A-k>"] = actions.preview_scrolling_up,
-  ["<C-h>"] = actions.results_scrolling_left,
-  ["<C-l>"] = actions.results_scrolling_right,
-  ["<C-j>"] = actions.move_selection_next,
-  ["<C-k>"] = actions.move_selection_previous,
-  ["<C-d>"] = actions.delete_buffer,
-}
-
-require("telescope").setup {
-  defaults = { mappings = { i = map, n = map, } }
-}
+require("fzf-lua").setup({
+  winopts = {
+    preview = {
+      layout = "vertical",
+      vertical = "down:60%",
+      horizontal = "right:60%",
+      wrap = true,
+      scrollbar = "float",
+      default = "bat",
+    },
+  },
+  files = {
+    cmd = "rg --files --hidden --glob '!.git/*'",
+  },
+  grep = {
+    cmd = "rg --hidden --glob '!.git/*'",
+    rg_opts = { "--color=always", "--line-number", "--no-heading" },
+    silent = true,
+  },
+  keymap = {
+      fzf = {
+        ["Alt-j"] = "preview-page-down",
+        ["Alt-k"] = "preview-page-up",
+      }
+  }
+})
 EOF
 
 " Custom mappings for LSP
