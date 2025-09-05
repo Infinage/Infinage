@@ -88,7 +88,7 @@ colorscheme gruvbox
 let g:gruvbox_contrast_dark = 'soft'
 let g:gruvbox_transparent_bg = 1
 set background=dark
-autocmd ColorScheme * highlight Normal ctermbg=NONE guibg=NONE
+autocmd VimEnter * hi Normal ctermbg=NONE guibg=NONE
 
 " Clear status line when vimrc is reloaded.
 set statusline=
@@ -265,8 +265,8 @@ nnoremap <C-j> :resize +1<CR>
 nnoremap <leader>cm :delm a-zA-Z0-9<CR>
 nnoremap <leader>cc :nohl<CR>
 
-" Open new vim terminal
-nnoremap <leader>T :tab term bash<CR>
+" Open new vim terminal in a new split / tab
+nnoremap <leader>T :tabnew <bar> terminal bash<CR>
 nnoremap <silent> <leader>tt :split <bar> terminal bash<CR>
 
 " 'Zoom' a split window into a tab
@@ -275,8 +275,60 @@ nnoremap <leader>zz :tab sb<CR>
 " Disable S-Tab in insert mode - we would be using it for autocomplete
 inoremap <S-Tab> <Nop>
 
-" Plugin shortcuts
+" Function to toggle sorting alphabetically, via size & via timestamp
+function! NERDTreeToggleSort()
+  " Initialize the sort state if it doesn't exist
+  if !exists("g:NERDTreeSortState")
+    let g:NERDTreeSortState = 0
+  endif
+
+  " Cycle through sorting states
+  if g:NERDTreeSortState == 0
+    " Sort by size (smallest first)
+    let g:NERDTreeSortOrder = ['[[size]]']
+    let g:NERDTreeSortState = 1
+    echo "NERDTree: Sort by Size"
+  elseif g:NERDTreeSortState == 1
+    " Sort by timestamp (newest first)
+    let g:NERDTreeSortOrder = ['\/$', '*', '[[timestamp]]']
+    let g:NERDTreeSortState = 2
+    echo "NERDTree: Sort by Timestamp"
+  else
+    " Sort by alphabetical
+    let g:NERDTreeSortOrder = ['\/$', '*', '\.swp$',  '\.bak$', '\~$']
+    let g:NERDTreeSortState = 0
+    echo "NERDTree: Sort Alphabetically"
+  endif
+
+  " Refresh NERDTree to apply changes
+  if exists("t:NERDTreeBufName")
+    execute 'NERDTreeRefreshRoot'
+  endif
+endfunction
+
+" Yank relative or absolute path from NERDTree
+function! NERDTreeYankPath(mode)
+  let node = g:NERDTreeFileNode.GetSelected()
+  if node != {}
+    let path = node.path.str()
+    if a:mode ==# 'relative'
+      let path = fnamemodify(path, ':.')   " relative to cwd
+    endif
+    let @+ = path
+    echo "Yanked: " . path
+  else
+    echo "No node selected"
+  endif
+endfunction
+
+" NERDTree shortcuts
 nnoremap <C-n> :NERDTreeToggle<CR>
+nnoremap <leader>nf :NERDTreeFind<CR>
+nnoremap <leader>ns :call NERDTreeToggleSort()<CR>
+
+" Keymaps inside NERDTree
+autocmd FileType nerdtree nnoremap <buffer> dd :call NERDTreeYankPath('relative')<CR>
+autocmd FileType nerdtree nnoremap <buffer> D  :call NERDTreeYankPath('absolute')<CR>
 
 " XML Auto Indent
 autocmd FileType xml setlocal equalprg=xmllint\ --format\ -
@@ -319,7 +371,8 @@ autocmd BufEnter NERD_* setlocal relativenumber
 " FZF for find and grep
 nnoremap <leader>ff :lua require('fzf-lua').files()<CR>
 nnoremap <leader>fs :lua require('fzf-lua').blines()<CR>
-nnoremap <leader>fS :lua require('fzf-lua').live_grep()<CR>
+nnoremap <leader>fS :lua require('fzf-lua').live_grep_native()<CR>
+nnoremap <leader>fG :lua require('fzf-lua').live_grep()<CR>
 nnoremap <leader>fb :lua require('fzf-lua').buffers()<CR>
 nnoremap <leader>fm :lua require('fzf-lua').marks()<CR>
 nnoremap <leader>fg :lua require('fzf-lua').git_status()<CR>
@@ -335,15 +388,8 @@ require("fzf-lua").setup({
       wrap = true,
       scrollbar = "float",
       default = "bat",
+      hidden = true,
     },
-  },
-  files = {
-    cmd = "rg --files --hidden --glob '!.git/*'",
-  },
-  grep = {
-    cmd = "rg --hidden --glob '!.git/*'",
-    rg_opts = { "--color=always", "--line-number", "--no-heading" },
-    silent = true,
   },
   keymap = {
       fzf = {
