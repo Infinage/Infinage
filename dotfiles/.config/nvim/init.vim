@@ -272,6 +272,10 @@ nnoremap <silent> <leader>tt :split <bar> terminal bash<CR>
 " 'Zoom' a split window into a tab
 nnoremap <leader>zz :tab sb<CR>
 
+" Newer and colder quickfix list mapping
+nnoremap ]f :cnewer<CR>
+nnoremap [f :colder<CR>
+
 " Disable S-Tab in insert mode - we would be using it for autocomplete
 inoremap <S-Tab> <Nop>
 
@@ -330,8 +334,10 @@ nnoremap <leader>ns :call NERDTreeToggleSort()<CR>
 autocmd FileType nerdtree nnoremap <buffer> dd :call NERDTreeYankPath('relative')<CR>
 autocmd FileType nerdtree nnoremap <buffer> D  :call NERDTreeYankPath('absolute')<CR>
 
-" XML Auto Indent
+" Formatters for XML, JSON, SQL
 autocmd FileType xml setlocal equalprg=xmllint\ --format\ -
+autocmd FileType json setlocal equalprg=jq\ .
+autocmd FileType sql setlocal equalprg=sqlformat\ --reindent\ --indent_width\ 4\ --keywords\ upper\ --identifiers\ lower\ -
 
 " Vim Signature - set dyn marking based on git
 let g:SignatureMarkTextHLDynamic = 1
@@ -395,6 +401,7 @@ require("fzf-lua").setup({
       fzf = {
         ["Alt-j"] = "preview-page-down",
         ["Alt-k"] = "preview-page-up",
+        ["ctrl-q"] = "select-all+accept",
       }
   }
 })
