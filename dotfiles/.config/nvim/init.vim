@@ -124,6 +124,9 @@ filetype plugin indent on
 " Set numbering and relative numbering
 set number relativenumber
 
+" Always use unix line endings on save
+set fileformat=unix
+
 " Whitespace
 set wrap
 set formatoptions=tcqrn1
@@ -337,7 +340,7 @@ autocmd FileType nerdtree nnoremap <buffer> D  :call NERDTreeYankPath('absolute'
 " Formatters for XML, JSON, SQL
 autocmd FileType xml setlocal equalprg=xmllint\ --format\ -
 autocmd FileType json setlocal equalprg=jq\ .
-autocmd FileType sql setlocal equalprg=sqlformat\ --reindent\ --indent_width\ 4\ --keywords\ upper\ --identifiers\ lower\ -
+autocmd FileType sql setlocal equalprg=sqlformat\ --reindent\ --keywords\ upper\ --identifiers\ lower\ -
 
 " Vim Signature - set dyn marking based on git
 let g:SignatureMarkTextHLDynamic = 1
@@ -377,15 +380,27 @@ autocmd BufEnter NERD_* setlocal relativenumber
 " FZF for find and grep
 nnoremap <leader>ff :lua require('fzf-lua').files()<CR>
 nnoremap <leader>fs :lua require('fzf-lua').blines()<CR>
-nnoremap <leader>fS :lua require('fzf-lua').live_grep_native()<CR>
-nnoremap <leader>fG :lua require('fzf-lua').live_grep()<CR>
+nnoremap <leader>fS :lua require('fzf-lua').live_grep()<CR>
 nnoremap <leader>fb :lua require('fzf-lua').buffers()<CR>
 nnoremap <leader>fm :lua require('fzf-lua').marks()<CR>
-nnoremap <leader>fg :lua require('fzf-lua').git_status()<CR>
+nnoremap <leader>fG :lua require('fzf-lua').git_commits()<CR>
+nnoremap <leader>fg :lua require('fzf-lua').git_bcommits()<CR>
+vnoremap <leader>fg <cmd>FzfLua git_bcommits<CR>
+nnoremap <leader>fz :lua require('fzf-lua').builtin()<CR>
 
 " Shortcuts in Telescope preview
 lua << EOF
 require("fzf-lua").setup({
+  git = {
+    bcommits = {
+        actions = {
+          ["ctrl-d"] = function(...)
+            require("fzf-lua").actions.git_buf_vsplit(...)
+            vim.cmd("windo diffthis | wincmd h")
+          end,
+        },
+    },
+  },
   winopts = {
     preview = {
       layout = "vertical",
