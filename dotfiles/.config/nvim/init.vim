@@ -19,6 +19,7 @@ Plug 'hrsh7th/cmp-buffer'
 Plug 'jpalardy/vim-slime'
 Plug 'goerz/jupytext.nvim'
 Plug 'dense-analysis/ale'
+Plug 'tpope/vim-fugitive'
 call plug#end()
 
 " Setup nvim scoll bar
@@ -102,9 +103,6 @@ set statusline+=%=
 " Status line right side.
 set statusline+=\ row:\ %l\ col:\ %c\ percent:\ %p%%
 
-" Dont resize existing windows when a new ones are created or closed
-set noea
-
 " Show the status on the second to last line.
 set laststatus=2
 
@@ -113,13 +111,6 @@ set hlsearch
 
 " While searching though a file incrementally highlight matching characters as you type.
 set incsearch
-
-" Turn on syntax highlighting
-syntax on
-let python_highlight_all = 1
-
-" For plugins to load correctly
-filetype plugin indent on
 
 " Set numbering and relative numbering
 set number relativenumber
@@ -172,9 +163,6 @@ set clipboard^=unnamed,unnamedplus
 " Compat Disable screen flashing, backspace work as expected
 set belloff=all
 set backspace=eol,indent,start
-
-" Speed up scrolling in Vim
-set ttyfast 
 
 " Autocomplete in command line
 set wildmenu
@@ -359,6 +347,11 @@ let g:gitgutter_floating_window_options = {
     \ 'style': 'minimal', 'border': 'rounded' 
 \ }
 
+" Fugitive keybinds
+nnoremap <leader>gd :Gvdiffsplit!<CR>
+nnoremap <leader>gD :G! difftool<CR>
+nnoremap <leader>gl :0Gllog<CR>
+
 " Vim rooter configs
 let g:rooter_manual_only = 1
 let g:rooter_cd_cmd = 'lcd'
@@ -380,7 +373,7 @@ autocmd BufEnter NERD_* setlocal relativenumber
 " FZF for find and grep
 nnoremap <leader>ff :lua require('fzf-lua').files()<CR>
 nnoremap <leader>fs :lua require('fzf-lua').blines()<CR>
-nnoremap <leader>fS :lua require('fzf-lua').live_grep()<CR>
+nnoremap <leader>fS :lua require('fzf-lua').live_grep_native()<CR>
 nnoremap <leader>fb :lua require('fzf-lua').buffers()<CR>
 nnoremap <leader>fm :lua require('fzf-lua').marks()<CR>
 nnoremap <leader>fG :lua require('fzf-lua').git_commits()<CR>
@@ -388,14 +381,47 @@ nnoremap <leader>fg :lua require('fzf-lua').git_bcommits()<CR>
 vnoremap <leader>fg <cmd>FzfLua git_bcommits<CR>
 nnoremap <leader>fz :lua require('fzf-lua').builtin()<CR>
 
-" Shortcuts in Telescope preview
+" Shortcuts for FZF-Lua
 lua << EOF
-require("fzf-lua").setup({
+local fzf = require("fzf-lua")
+fzf.setup({
   git = {
+    commits = {
+      preview = "git show --color --stat --format= {1}",
+      winopts = {
+        preview = {
+          layout = "vertical",
+          horizontal = "right:40%",
+          vertical = "down:40%",
+          hidden = false
+        },
+      },
+    },
     bcommits = {
+        fzf_args="--multi",
         actions = {
+          ["ctrl-q"] = function(selected)
+            if not selected or #selected == 0 then return end
+            local current_file = vim.api.nvim_buf_get_name(0)
+            if current_file == "" then
+              vim.notify("Not in a file buffer to see its commits", vim.log.levels.WARN)
+              return
+            end
+
+            local commits = {}
+            for _, entry in ipairs(selected) do
+              local hash = entry:match("^%x+")
+              if hash then table.insert(commits, hash) end
+            end
+
+            if #commits > 0 then
+              local cmd = string.format("silent! Gclog %s -- %s", table.concat(commits, " "), current_file)
+              vim.cmd(cmd) vim.cmd("copen")
+            end
+          end,
+
           ["ctrl-d"] = function(...)
-            require("fzf-lua").actions.git_buf_vsplit(...)
+            fzf.actions.git_buf_vsplit(...)
             vim.cmd("windo diffthis | wincmd h")
           end,
         },
@@ -416,9 +442,14 @@ require("fzf-lua").setup({
       fzf = {
         ["Alt-j"] = "preview-page-down",
         ["Alt-k"] = "preview-page-up",
+        ["ctrl-f"] = "half-page-down",
+        ["ctrl-b"] = "half-page-up",
         ["ctrl-q"] = "select-all+accept",
-      }
-  }
+        ["f3"]     = "toggle-preview-wrap",
+        ["ctrl-l"] = "forward-char",
+        ["ctrl-h"] = "backward-char",
+      },
+  },
 })
 EOF
 
@@ -442,6 +473,7 @@ tnoremap <expr> <C-w>" '<C-\><C-N>"'.nr2char(getchar()).'pi'
 tnoremap <C-w> <C-\><C-N><C-w>
 
 " Add linter for extra 
+let g:ale_set_loclist = 0
 let g:ale_linters = { 'cpp': ['cc'] }
 let cpp_opts = '-std=c++23 -Wall -Weffc++ -Wextra -Wpedantic -pedantic-errors -L/home/kael/cpplib/lib -I/home/kael/cpplib/include'
 let g:ale_cpp_cc_options = cpp_opts
