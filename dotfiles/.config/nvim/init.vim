@@ -5,7 +5,7 @@
 " Plugins
 call plug#begin()
 Plug 'preservim/nerdtree'
-Plug 'kshenoy/vim-signature'
+Plug 'chentoast/marks.nvim'
 Plug 'morhetz/gruvbox'
 Plug 'nvim-lua/plenary.nvim'
 Plug 'airblade/vim-rooter'
@@ -23,6 +23,29 @@ call plug#end()
 
 " Setup jupytext
 lua require("jupytext").setup({ format = "py:percent" })
+
+" Setup marks.nvim
+lua << EOF
+local marks = require("marks")
+
+-- Delete all numbered bookmarks (0–9)
+function _G.delete_all_numbered_bookmarks()
+    for i = 0, 9 do
+        pcall(function() marks["delete_bookmark" .. tostring(i)]() end)
+    end
+end
+
+marks.setup {
+  default_mappings = true,
+  signs = true,
+  mappings = {
+    toggle = "m`",
+    next_bookmark = "]~",
+    prev_bookmark = "[~",
+    annotate = "<leader>ba"
+  }
+}
+EOF
 
 " Setup LSP
 lua << EOF
@@ -91,17 +114,8 @@ let g:gruvbox_transparent_bg = 1
 set background=dark
 autocmd VimEnter * hi Normal ctermbg=NONE guibg=NONE
 
-" Clear status line when vimrc is reloaded.
-set statusline=
-
-" Status line left side.
-set statusline+=\ %F\ %M\ %Y\ %R
-
-" Use a divider to separate the left side from the right side.
-set statusline+=%=
-
-" Status line right side.
-set statusline+=\ row:\ %l\ col:\ %c\ percent:\ %p%%
+" Status line with Git Status, rel filename, File type, Row, Col, Percent
+set statusline=\ %{FugitiveHead()!=''?'['.FugitiveHead().']\ ':''}%f\ %M\ %Y\ %R%=\ Row:\ %l\ Col:\ %c\ Percent:\ %p%%\ 
 
 " Show the status on the second to last line.
 set laststatus=2
@@ -134,7 +148,7 @@ set softtabstop=4
 " Custom Whitespace Javascript, Typescript, HTML, JSON
 augroup custom_indentation
     autocmd!
-    autocmd Filetype javascript,typescript,html,json setlocal tabstop=2 shiftwidth=2 softtabstop=2
+    autocmd Filetype javascript,typescript,html,json,vim setlocal tabstop=2 shiftwidth=2 softtabstop=2
 augroup END
 
 " Highlight cursor line underneath the cursor horizontally.
@@ -233,9 +247,6 @@ vnoremap <Up> <Nop>
 " Disable mouse
 set mouse=
 
-" Unload buffer on close
-set nohidden
-
 " In insert or command mode, move normally by using Ctrl
 inoremap <C-h> <Left>
 inoremap <C-j> <Down>
@@ -252,9 +263,11 @@ nnoremap <C-l> :vertical resize +1<CR>
 nnoremap <C-k> :resize -1<CR>
 nnoremap <C-j> :resize +1<CR>
 
-" Clear marks and search highlights
-nnoremap <leader>cm :delm a-zA-Z0-9<CR>
+" Clear marks, bookmarks and search highlights
 nnoremap <leader>cc :nohl<CR>
+nnoremap <leader>cm :delm a-zA-Z0-9<CR>
+nnoremap <leader>cM :lua delete_all_numbered_bookmarks()<CR>
+nnoremap <leader>fB :lua FZFBookmarksList()<CR>
 
 " Open new vim terminal in a new split / tab
 nnoremap <leader>T :tabnew <bar> terminal bash<CR>
@@ -330,9 +343,6 @@ autocmd FileType xml setlocal equalprg=xmllint\ --format\ -
 autocmd FileType json setlocal equalprg=jq\ .
 autocmd FileType sql setlocal equalprg=sqlformat\ --reindent\ --keywords\ upper\ --identifiers\ lower\ -
 
-" Vim Signature - set dyn marking based on git
-let g:SignatureMarkTextHLDynamic = 1
-
 " Git gutter settings
 let g:gitgutter_map_keys = 0
 let g:gitgutter_sign_allow_clobber = 0
@@ -370,20 +380,10 @@ let g:NERDTreeMapOpenSplit = 's'
 let g:NERDTreeMapOpenVSplit = 'i'
 autocmd BufEnter NERD_* setlocal relativenumber
 
-" FZF for find and grep
-nnoremap <leader>ff :lua require('fzf-lua').files()<CR>
-nnoremap <leader>fs :lua require('fzf-lua').blines()<CR>
-nnoremap <leader>fS :lua require('fzf-lua').live_grep_native()<CR>
-nnoremap <leader>fb :lua require('fzf-lua').buffers()<CR>
-nnoremap <leader>fm :lua require('fzf-lua').marks()<CR>
-nnoremap <leader>fG :lua require('fzf-lua').git_commits()<CR>
-nnoremap <leader>fg :lua require('fzf-lua').git_bcommits()<CR>
-vnoremap <leader>fg <cmd>FzfLua git_bcommits<CR>
-nnoremap <leader>fz :lua require('fzf-lua').builtin()<CR>
-
 " Shortcuts for FZF-Lua
 lua << EOF
 local fzf = require("fzf-lua")
+
 fzf.setup({
   git = {
     commits = {
@@ -451,7 +451,69 @@ fzf.setup({
       },
   },
 })
+
+-- Function to feed marks.nvim bookmarks list output to fzf
+function _G.FZFBookmarksList()
+  -- Run the Vim command to populate the location list
+  vim.cmd("BookmarksListAll")
+  local loclist = vim.fn.getloclist(0)
+  vim.cmd("lclose")
+
+  -- Grab the entries from the location list
+  if vim.tbl_isempty(loclist) then
+    vim.notify("No bookmarks found", vim.log.levels.WARN) return
+  end
+
+  -- Convert loclist items into strings for fzf
+  local entries = vim.tbl_map(function(item)
+    local fname = vim.fn.bufname(item.bufnr)
+    local text = vim.trim(item.text or "")
+    return string.format("%s:%d: %s", fname, item.lnum, text)
+  end, loclist)
+
+  -- Configure fzf-lua picker
+  local opts = require("fzf-lua.config").normalize_opts({
+    prompt = "Bookmarks> ",
+    actions = {
+      ["default"] = function(selected)
+        if #selected == 1 then
+          local fname, lnum = selected[1]:match("^(.-):(%d+):")
+          if fname and lnum then
+            vim.cmd("edit " .. fname)
+            vim.fn.cursor(tonumber(lnum), 1)
+          end
+        else
+          local newlist = {}
+          for _, entry in ipairs(selected) do
+            local fname, lnum, text = entry:match("^(.-):(%d+):%s*(.*)")
+            if fname and lnum then
+              table.insert(newlist, { filename = fname, lnum = tonumber(lnum), text = text, })
+            end
+          end
+
+          if not vim.tbl_isempty(newlist) then
+            vim.fn.setloclist(0, newlist, "r")
+            vim.cmd("lopen")
+          end
+        end
+      end,
+    },
+  }, "files")
+
+  fzf.fzf_exec(entries, opts)
+end
 EOF
+
+" FZF for find and grep
+nnoremap <leader>fb :lua require('fzf-lua').buffers()<CR>
+nnoremap <leader>ff :lua require('fzf-lua').files()<CR>
+nnoremap <leader>fs :lua require('fzf-lua').blines({resume=true})<CR>
+nnoremap <leader>fS :lua require('fzf-lua').live_grep_native()<CR>
+nnoremap <leader>fm :lua require('fzf-lua').marks()<CR>
+nnoremap <leader>fg :lua require('fzf-lua').git_bcommits()<CR>
+vnoremap <leader>fg <cmd>FzfLua git_bcommits<CR>
+nnoremap <leader>fG :lua require('fzf-lua').git_commits()<CR>
+nnoremap <leader>fz :lua require('fzf-lua').builtin()<CR>
 
 " Custom mappings for LSP
 nnoremap <silent> [e        :lua vim.diagnostic.goto_prev()<CR>
