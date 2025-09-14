@@ -7,7 +7,6 @@ call plug#begin()
 Plug 'preservim/nerdtree'
 Plug 'kshenoy/vim-signature'
 Plug 'morhetz/gruvbox'
-Plug 'petertriho/nvim-scrollbar'
 Plug 'nvim-lua/plenary.nvim'
 Plug 'airblade/vim-rooter'
 Plug 'airblade/vim-gitgutter'
@@ -22,9 +21,6 @@ Plug 'dense-analysis/ale'
 Plug 'tpope/vim-fugitive'
 call plug#end()
 
-" Setup nvim scoll bar
-lua require("scrollbar").setup({ handle = { blend = 10 } })
-
 " Setup jupytext
 lua require("jupytext").setup({ format = "py:percent" })
 
@@ -38,7 +34,11 @@ local cmp = require('cmp')
 -- C/C++ LSP
 lspconfig.clangd.setup {
   capabilities = capabilities,
-  cmd = { "clangd", "--background-index", "--clang-tidy" },
+  cmd = { 
+    "clangd", "--background-index", "--clang-tidy", "-j=8", 
+    "--pch-storage=memory", "--malloc-trim", "--limit-references=100",
+    "--limit-results=20",
+  },
 }
 
 -- Python

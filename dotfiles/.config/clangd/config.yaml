@@ -21,6 +21,7 @@ CompileFlags:
       - -Wsign-conversion
       - -Wpedantic 
       - -pedantic-errors
+      - -fmodules
 
 ---
 
