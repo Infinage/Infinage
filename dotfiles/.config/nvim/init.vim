@@ -297,10 +297,13 @@ nnoremap <leader>cM :lua DeleteAllBookmarks()<CR>
 nnoremap <leader>cc :nohl<CR>
 nnoremap <leader>fB :lua FZFBookmarksList()<CR>
 
-" Open new vim terminal in a new split / tab
-nnoremap <leader>T :tabnew <bar> terminal bash<CR>
+" Vim terminal related keybinds
+nnoremap <silent><leader>T :tabnew <bar> terminal bash<CR>
 nnoremap <silent> <leader>tt :split <bar> terminal bash<CR>
 nnoremap <silent> <leader>tv :vsplit <bar> terminal bash<CR>
+tnoremap <ESC> <C-\><C-n>
+tnoremap <expr> <C-w>" '<C-\><C-N>"'.nr2char(getchar()).'pi'
+tnoremap <C-w> <C-\><C-N><C-w>
 
 " 'Zoom' a split window into a tab
 nnoremap <leader>zz :tab sb<CR>
@@ -499,10 +502,6 @@ let g:slime_preserve_curpos = 0
 let g:slime_menu_config = 4
 nnoremap <silent><expr><leader>ll ":\<C-u>call slime#send_lines(" . v:count . ")\<cr>"
 vnoremap <silent><leader>ll :<c-u>call slime#send_op(visualmode(), 1)<cr>
-
-" Vim terminal mappings
-tnoremap <expr> <C-w>" '<C-\><C-N>"'.nr2char(getchar()).'pi'
-tnoremap <C-w> <C-\><C-N><C-w>
 
 " Add linter for extra 
 let g:ale_set_loclist = 0
