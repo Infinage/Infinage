@@ -477,6 +477,32 @@ function _G.FZFBookmarksList()
 end
 EOF
 
+" Create a helper for safely renaming unnamed + terminal buffers
+lua << EOF
+vim.api.nvim_create_user_command("RenameBuf", function(opts)
+  local buf = vim.api.nvim_get_current_buf()
+  local buftype = vim.bo[buf].buftype
+  local name = opts.args
+
+  -- Some edge cases
+  if name == "" then 
+    vim.notify("A new name is required.", vim.log.levels.ERROR) 
+    return 
+  end
+
+  -- Skip renaming if it's a real file buffer
+  if vim.fn.filereadable(vim.api.nvim_buf_get_name(buf)) == 1 then
+    print("Skipping Rename: buffer is tied to a real file.")
+    return
+  end
+
+  vim.api.nvim_buf_set_name(buf, name)
+end, { nargs = 1, desc = "Safely renames unnamed or terminal buffers.", })
+
+-- Setup an alias
+vim.cmd("command! -nargs=+ Rb RenameBuf <args>")
+EOF
+
 " FZF for find and grep
 nnoremap <leader>fb :lua require('fzf-lua').buffers()<CR>
 nnoremap <leader>ff :lua require('fzf-lua').files()<CR>
