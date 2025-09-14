@@ -4,7 +4,7 @@
 
 " Plugins
 call plug#begin()
-Plug 'preservim/nerdtree'
+Plug 'stevearc/oil.nvim'
 Plug 'chentoast/marks.nvim'
 Plug 'morhetz/gruvbox'
 Plug 'nvim-lua/plenary.nvim'
@@ -21,6 +21,34 @@ Plug 'dense-analysis/ale'
 Plug 'tpope/vim-fugitive'
 call plug#end()
 
+" Setup oil nvim
+lua << EOF
+local oil = require("oil")
+oil.setup({
+  columns = { "icon", "permissions", "size", "mtime" },
+  view_options = {
+    show_hidden = true,
+  },
+  keymaps = {
+    ["!"] = "actions.open_terminal",
+    ["<C-Y>"] = "actions.yank_entry",
+    ["<C-y>"] = { 
+        callback = function()
+            local entry = oil.get_cursor_entry()
+            local dir = oil.get_current_dir()
+            if not entry or not dir then return end
+            vim.fn.setreg("+", vim.fn.fnamemodify(dir, ":.") .. entry.name)
+        end,
+        desc = "Copy relative file path of current entry",
+    },
+  }
+})
+
+-- Keymap to open Oil
+vim.keymap.set("n", "-", "<CMD>Oil<CR>", { desc = "Open parent directory of current buffer in Oil" })
+vim.keymap.set("n", "~", "<CMD>Oil .<CR>", { desc = "Open CWD in Oil" })
+EOF
+
 " Setup jupytext
 lua require("jupytext").setup({ format = "py:percent" })
 
@@ -29,7 +57,7 @@ lua << EOF
 local marks = require("marks")
 
 -- Delete all numbered bookmarks (0–9)
-function _G.delete_all_numbered_bookmarks()
+function _G.DeleteAllBookmarks()
     for i = 0, 9 do
         pcall(function() marks["delete_bookmark" .. tostring(i)]() end)
     end
@@ -205,7 +233,7 @@ autocmd FileType markdown set conceallevel=0
 
 " Set color scheme when using vimdiff
 if &diff
-    colorscheme slate
+  colorscheme slate 
 endif
 
 " Matching parathensis are diff to distinguish
@@ -264,14 +292,15 @@ nnoremap <C-k> :resize -1<CR>
 nnoremap <C-j> :resize +1<CR>
 
 " Clear marks, bookmarks and search highlights
-nnoremap <leader>cc :nohl<CR>
 nnoremap <leader>cm :delm a-zA-Z0-9<CR>
-nnoremap <leader>cM :lua delete_all_numbered_bookmarks()<CR>
+nnoremap <leader>cM :lua DeleteAllBookmarks()<CR>
+nnoremap <leader>cc :nohl<CR>
 nnoremap <leader>fB :lua FZFBookmarksList()<CR>
 
 " Open new vim terminal in a new split / tab
 nnoremap <leader>T :tabnew <bar> terminal bash<CR>
 nnoremap <silent> <leader>tt :split <bar> terminal bash<CR>
+nnoremap <silent> <leader>tv :vsplit <bar> terminal bash<CR>
 
 " 'Zoom' a split window into a tab
 nnoremap <leader>zz :tab sb<CR>
@@ -283,65 +312,13 @@ nnoremap [f :colder<CR>
 " Disable S-Tab in insert mode - we would be using it for autocomplete
 inoremap <S-Tab> <Nop>
 
-" Function to toggle sorting alphabetically, via size & via timestamp
-function! NERDTreeToggleSort()
-  " Initialize the sort state if it doesn't exist
-  if !exists("g:NERDTreeSortState")
-    let g:NERDTreeSortState = 0
-  endif
-
-  " Cycle through sorting states
-  if g:NERDTreeSortState == 0
-    " Sort by size (smallest first)
-    let g:NERDTreeSortOrder = ['[[size]]']
-    let g:NERDTreeSortState = 1
-    echo "NERDTree: Sort by Size"
-  elseif g:NERDTreeSortState == 1
-    " Sort by timestamp (newest first)
-    let g:NERDTreeSortOrder = ['\/$', '*', '[[timestamp]]']
-    let g:NERDTreeSortState = 2
-    echo "NERDTree: Sort by Timestamp"
-  else
-    " Sort by alphabetical
-    let g:NERDTreeSortOrder = ['\/$', '*', '\.swp$',  '\.bak$', '\~$']
-    let g:NERDTreeSortState = 0
-    echo "NERDTree: Sort Alphabetically"
-  endif
-
-  " Refresh NERDTree to apply changes
-  if exists("t:NERDTreeBufName")
-    execute 'NERDTreeRefreshRoot'
-  endif
-endfunction
-
-" Yank relative or absolute path from NERDTree
-function! NERDTreeYankPath(mode)
-  let node = g:NERDTreeFileNode.GetSelected()
-  if node != {}
-    let path = node.path.str()
-    if a:mode ==# 'relative'
-      let path = fnamemodify(path, ':.')   " relative to cwd
-    endif
-    let @+ = path
-    echo "Yanked: " . path
-  else
-    echo "No node selected"
-  endif
-endfunction
-
-" NERDTree shortcuts
-nnoremap <C-n> :NERDTreeToggle<CR>
-nnoremap <leader>nf :NERDTreeFind<CR>
-nnoremap <leader>ns :call NERDTreeToggleSort()<CR>
-
-" Keymaps inside NERDTree
-autocmd FileType nerdtree nnoremap <buffer> dd :call NERDTreeYankPath('relative')<CR>
-autocmd FileType nerdtree nnoremap <buffer> D  :call NERDTreeYankPath('absolute')<CR>
-
 " Formatters for XML, JSON, SQL
-autocmd FileType xml setlocal equalprg=xmllint\ --format\ -
-autocmd FileType json setlocal equalprg=jq\ .
-autocmd FileType sql setlocal equalprg=sqlformat\ --reindent\ --keywords\ upper\ --identifiers\ lower\ -
+augroup formatters
+  autocmd!
+  autocmd FileType xml setlocal equalprg=xmllint\ --format\ -
+  autocmd FileType json setlocal equalprg=jq\ .
+  autocmd FileType sql setlocal equalprg=sqlformat\ --reindent\ --keywords\ upper\ --identifiers\ lower\ -
+augroup END
 
 " Git gutter settings
 let g:gitgutter_map_keys = 0
@@ -366,19 +343,12 @@ nnoremap <leader>gl :0Gllog<CR>
 let g:rooter_manual_only = 1
 let g:rooter_cd_cmd = 'lcd'
 let g:rooter_patterns = ['.git', '.svn', 'package.json', '!node_modules']
-nnoremap cd :cd %:p:h<CR>:NERDTreeCWD<CR>:NERDTreeClose<CR>
-nnoremap cD :Rooter<CR>:NERDTreeCWD<CR>:NERDTreeClose<CR>
+nnoremap cd :cd %:p:h<CR>
+nnoremap cD :Rooter<CR>
 
 " Scroll floating popups via Alt - J / K
 nnoremap <silent> <A-j> :call ScrollPopup( 1)<CR>
 nnoremap <silent> <A-k> :call ScrollPopup(-1)<CR>
-
-" Nerd tree configs
-let NERDTreeShowHidden = 1
-let g:NERDTreeShowLineNumbers = 1
-let g:NERDTreeMapOpenSplit = 's'
-let g:NERDTreeMapOpenVSplit = 'i'
-autocmd BufEnter NERD_* setlocal relativenumber
 
 " Shortcuts for FZF-Lua
 lua << EOF
@@ -507,7 +477,7 @@ EOF
 " FZF for find and grep
 nnoremap <leader>fb :lua require('fzf-lua').buffers()<CR>
 nnoremap <leader>ff :lua require('fzf-lua').files()<CR>
-nnoremap <leader>fs :lua require('fzf-lua').blines({resume=true})<CR>
+nnoremap <leader>fs :lua require('fzf-lua').blines()<CR>
 nnoremap <leader>fS :lua require('fzf-lua').live_grep_native()<CR>
 nnoremap <leader>fm :lua require('fzf-lua').marks()<CR>
 nnoremap <leader>fg :lua require('fzf-lua').git_bcommits()<CR>
