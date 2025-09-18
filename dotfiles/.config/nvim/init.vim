@@ -338,7 +338,7 @@ let g:gitgutter_floating_window_options = {
 \ }
 
 " Fugitive keybinds
-nnoremap <leader>gd :Gvdiffsplit!<CR>
+nnoremap <leader>gd :Ghdiffsplit!<CR>
 nnoremap <leader>gD :G! difftool<CR>
 nnoremap <leader>gl :0Gllog<CR>
 
@@ -394,7 +394,7 @@ fzf.setup({
           end,
 
           ["ctrl-d"] = function(...)
-            fzf.actions.git_buf_vsplit(...)
+            fzf.actions.git_buf_split(...)
             vim.cmd("windo diffthis | wincmd h")
           end,
         },
@@ -477,8 +477,8 @@ function _G.FZFBookmarksList()
 end
 EOF
 
-" Create a helper for safely renaming unnamed + terminal buffers
 lua << EOF
+-- Create a helper for safely renaming unnamed + terminal buffers
 vim.api.nvim_create_user_command("RenameBuf", function(opts)
   local buf = vim.api.nvim_get_current_buf()
   local buftype = vim.bo[buf].buftype
@@ -499,7 +499,7 @@ vim.api.nvim_create_user_command("RenameBuf", function(opts)
   vim.api.nvim_buf_set_name(buf, name)
 end, { nargs = 1, desc = "Safely renames unnamed or terminal buffers.", })
 
--- Setup an alias
+-- Setup an alias for above function
 vim.cmd("command! -nargs=+ Rb RenameBuf <args>")
 EOF
 
