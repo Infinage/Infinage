@@ -5,14 +5,13 @@
 " Plugins
 call plug#begin()
 Plug 'stevearc/oil.nvim'
-Plug 'chentoast/marks.nvim'
 Plug 'morhetz/gruvbox'
 Plug 'nvim-lua/plenary.nvim'
 Plug 'airblade/vim-rooter'
 Plug 'airblade/vim-gitgutter'
 Plug 'ibhagwan/fzf-lua'
-Plug 'neovim/nvim-lspconfig'
 Plug 'hrsh7th/nvim-cmp'
+Plug 'neovim/nvim-lspconfig'
 Plug 'hrsh7th/cmp-nvim-lsp'
 Plug 'hrsh7th/cmp-buffer'
 Plug 'jpalardy/vim-slime'
@@ -30,6 +29,7 @@ oil.setup({
     show_hidden = true,
   },
   keymaps = {
+    ["`"] = false,
     ["!"] = "actions.open_terminal",
     ["<C-Y>"] = "actions.yank_entry",
     ["<C-y>"] = { 
@@ -52,48 +52,27 @@ EOF
 " Setup jupytext
 lua require("jupytext").setup({ format = "py:percent" })
 
-" Setup marks.nvim
-lua << EOF
-local marks = require("marks")
-
--- Delete all numbered bookmarks (0–9)
-function _G.DeleteAllBookmarks()
-    for i = 0, 9 do
-        pcall(function() marks["delete_bookmark" .. tostring(i)]() end)
-    end
-end
-
-marks.setup {
-  default_mappings = true,
-  signs = true,
-  mappings = {
-    toggle = "m`",
-    next_bookmark = "]~",
-    prev_bookmark = "[~",
-    annotate = "<leader>ba"
-  }
-}
-EOF
-
 " Setup LSP
 lua << EOF
 -- Setup LSP servers
-local lspconfig = require('lspconfig')
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
 local cmp = require('cmp')
 
 -- C/C++ LSP
-lspconfig.clangd.setup {
+vim.lsp.config('clangd', {
   capabilities = capabilities,
   cmd = { 
     "clangd", "--background-index", "--clang-tidy", "-j=8", 
     "--pch-storage=memory", "--malloc-trim", "--limit-references=100",
     "--limit-results=20",
   },
-}
+})
 
 -- Python
-lspconfig.jedi_language_server.setup { capabilities = capabilities, }
+vim.lsp.config('jedi_language_server', { capabilities = capabilities, })
+
+-- Enable both LSP configs
+vim.lsp.enable('clangd', 'jedi_language_server')
 
 -- Setup autocompletion
 cmp.setup {
@@ -291,11 +270,10 @@ nnoremap <C-l> :vertical resize +1<CR>
 nnoremap <C-k> :resize -1<CR>
 nnoremap <C-j> :resize +1<CR>
 
-" Clear marks, bookmarks and search highlights
-nnoremap <leader>cm :delm a-zA-Z0-9<CR>
-nnoremap <leader>cM :lua DeleteAllBookmarks()<CR>
+" Clear marks for current buffer and search highlights
+nnoremap <leader>cm :delm a-z<CR>
+nnoremap <leader>cM :delm a-zA-Z<CR>
 nnoremap <leader>cc :nohl<CR>
-nnoremap <leader>fB :lua FZFBookmarksList()<CR>
 
 " Vim terminal related keybinds
 nnoremap <silent><leader>T :tabnew <bar> terminal bash<CR>
@@ -308,10 +286,6 @@ tnoremap <C-w> <C-\><C-N><C-w>
 " 'Zoom' a split window into a tab
 nnoremap <leader>zz :tab sb<CR>
 
-" Newer and colder quickfix list mapping
-nnoremap ]f :cnewer<CR>
-nnoremap [f :colder<CR>
-
 " Disable S-Tab in insert mode - we would be using it for autocomplete
 inoremap <S-Tab> <Nop>
 
@@ -321,6 +295,12 @@ augroup formatters
   autocmd FileType xml setlocal equalprg=xmllint\ --format\ -
   autocmd FileType json setlocal equalprg=jq\ .
   autocmd FileType sql setlocal equalprg=sqlformat\ --reindent\ --keywords\ upper\ --identifiers\ lower\ -
+augroup END
+
+" Assocating file type to extensions
+augroup ftdetect
+  autocmd!
+  autocmd BufRead,BufNewFile *.log* set filetype=log
 augroup END
 
 " Git gutter settings
@@ -358,6 +338,18 @@ lua << EOF
 local fzf = require("fzf-lua")
 
 fzf.setup({
+  grep = {
+    actions = {
+      ["alt-n"] = {
+        fn = function(_, opts)
+          require("fzf-lua").actions.toggle_flag(_, vim.tbl_extend("force", opts, {
+            toggle_flag = "--multiline --multiline-dotall"
+          }))
+        end,
+        desc = "Toggle multiline search",
+      },
+    },
+  },
   git = {
     commits = {
       preview = "git show --color --stat --format= {1}",
@@ -424,58 +416,25 @@ fzf.setup({
       },
   },
 })
-
--- Function to feed marks.nvim bookmarks list output to fzf
-function _G.FZFBookmarksList()
-  -- Run the Vim command to populate the location list
-  vim.cmd("BookmarksListAll")
-  local loclist = vim.fn.getloclist(0)
-  vim.cmd("lclose")
-
-  -- Grab the entries from the location list
-  if vim.tbl_isempty(loclist) then
-    vim.notify("No bookmarks found", vim.log.levels.WARN) return
-  end
-
-  -- Convert loclist items into strings for fzf
-  local entries = vim.tbl_map(function(item)
-    local fname = vim.fn.bufname(item.bufnr)
-    local text = vim.trim(item.text or "")
-    return string.format("%s:%d: %s", fname, item.lnum, text)
-  end, loclist)
-
-  -- Configure fzf-lua picker
-  local opts = require("fzf-lua.config").normalize_opts({
-    prompt = "Bookmarks> ",
-    actions = {
-      ["default"] = function(selected)
-        if #selected == 1 then
-          local fname, lnum = selected[1]:match("^(.-):(%d+):")
-          if fname and lnum then
-            vim.cmd("edit " .. fname)
-            vim.fn.cursor(tonumber(lnum), 1)
-          end
-        else
-          local newlist = {}
-          for _, entry in ipairs(selected) do
-            local fname, lnum, text = entry:match("^(.-):(%d+):%s*(.*)")
-            if fname and lnum then
-              table.insert(newlist, { filename = fname, lnum = tonumber(lnum), text = text, })
-            end
-          end
-
-          if not vim.tbl_isempty(newlist) then
-            vim.fn.setloclist(0, newlist, "r")
-            vim.cmd("lopen")
-          end
-        end
-      end,
-    },
-  }, "files")
-
-  fzf.fzf_exec(entries, opts)
-end
 EOF
+
+" FZF for find and grep
+nnoremap <leader>fb :lua require('fzf-lua').buffers()<CR>
+nnoremap <leader>ff :lua require('fzf-lua').files()<CR>
+nnoremap <leader>fs :lua require('fzf-lua').blines()<CR>
+vnoremap <leader>fs <cmd>FzfLua blines<CR>
+nnoremap <leader>fS :lua require('fzf-lua').live_grep_native()<CR>
+nnoremap <leader>fg :lua require('fzf-lua').git_bcommits()<CR>
+vnoremap <leader>fg <cmd>FzfLua git_bcommits<CR>
+nnoremap <leader>fG :lua require('fzf-lua').git_commits()<CR>
+nnoremap <leader>fz :lua require('fzf-lua').builtin()<CR>
+
+" Custom mappings for LSP
+nnoremap <silent> [e        :lua vim.diagnostic.goto_prev()<CR>
+nnoremap <silent> ]e        :lua vim.diagnostic.goto_next()<CR>
+nnoremap <silent> [E        :lua vim.diagnostic.goto_prev({ severity = vim.diagnostic.severity.ERROR })<CR>
+nnoremap <silent> ]E        :lua vim.diagnostic.goto_next({ severity = vim.diagnostic.severity.ERROR })<CR>
+nnoremap <silent> <leader>e :lua vim.diagnostic.open_float()<CR>
 
 lua << EOF
 -- Create a helper for safely renaming unnamed + terminal buffers
@@ -501,25 +460,118 @@ end, { nargs = 1, desc = "Safely renames unnamed or terminal buffers.", })
 
 -- Setup an alias for above function
 vim.cmd("command! -nargs=+ Rb RenameBuf <args>")
+
+-- Copy current file + line to clipboard
+local function copy_file_and_line_to_clipboard()
+  local filepath = vim.fn.expand("%:p")
+  local linenum = vim.fn.line(".")
+  local text = filepath .. ":" .. linenum
+  vim.fn.setreg("+", text)
+  vim.api.nvim_echo({ { "Copied: " .. text, "None" } }, false, {})
+end
+
+-- Setup alias for above function
+vim.api.nvim_create_user_command("Where", function()
+  copy_file_and_line_to_clipboard()
+end, {})
 EOF
 
-" FZF for find and grep
-nnoremap <leader>fb :lua require('fzf-lua').buffers()<CR>
-nnoremap <leader>ff :lua require('fzf-lua').files()<CR>
-nnoremap <leader>fs :lua require('fzf-lua').blines()<CR>
-nnoremap <leader>fS :lua require('fzf-lua').live_grep_native()<CR>
-nnoremap <leader>fm :lua require('fzf-lua').marks()<CR>
-nnoremap <leader>fg :lua require('fzf-lua').git_bcommits()<CR>
-vnoremap <leader>fg <cmd>FzfLua git_bcommits<CR>
-nnoremap <leader>fG :lua require('fzf-lua').git_commits()<CR>
-nnoremap <leader>fz :lua require('fzf-lua').builtin()<CR>
+" Navigate across files using jump list
+function! JumpToNextBufferInJumplist(dir) " 1=forward, -1=backward
+    let jl = getjumplist()
+    let jumplist = jl[0]
+    let curjump = jl[1]
 
-" Custom mappings for LSP
-nnoremap <silent> [e        :lua vim.diagnostic.goto_prev()<CR>
-nnoremap <silent> ]e        :lua vim.diagnostic.goto_next()<CR>
-nnoremap <silent> [E        :lua vim.diagnostic.goto_prev({ severity = vim.diagnostic.severity.ERROR })<CR>
-nnoremap <silent> ]E        :lua vim.diagnostic.goto_next({ severity = vim.diagnostic.severity.ERROR })<CR>
-nnoremap <silent> <leader>e :lua vim.diagnostic.open_float()<CR>
+    let jumpcmdstr = a:dir > 0 ? '<C-i>' : '<C-o>'
+    let jumpcmdchr = a:dir > 0 ? "\<C-i>" : "\<C-o>"
+    let searchrange = a:dir > 0? range(curjump+1, len(jumplist)): range(curjump-1, 0, -1)
+
+    let found = 0
+    for i in searchrange
+        if i < len(jumplist) && jumplist[i]["bufnr"] != bufnr('%')
+            let n = (i - curjump) * a:dir
+            execute "silent normal! " . n . jumpcmdchr
+            let found = 1
+            break
+        endif
+    endfor
+
+  if !found 
+    echohl WarningMsg | echom "No other jump locations available" | echohl None
+  endif
+endfunction
+
+" Jump multiple files from jump list
+nnoremap <silent>]f :call JumpToNextBufferInJumplist( 1)<CR>
+nnoremap <silent>[f :call JumpToNextBufferInJumplist(-1)<CR>
+
+" Toggle bookmark on the current line
+function! ToggleBookmark()
+  let l:marks = getmarklist()
+  let l:taken = []
+
+  " Collect all uppercase marks
+  for m in l:marks
+    let mchar = m['mark'][1]
+    let mark_file_abs = m['file'] !=# ''? fnamemodify(m['file'], ':p'): ''
+
+    " Only consider uppercase marks A-Z
+    if !(char2nr(mchar) >= char2nr('A') && char2nr(mchar) <= char2nr('Z'))
+        continue
+    endif
+
+    " If current line already has an uppercase mark toggle it off
+    call add(l:taken, mchar)
+    if m['pos'][1] == line('.') && mark_file_abs ==# expand('%:p')
+      execute 'delmarks ' . mchar
+      echohl None | echom "Bookmark removed"
+      return
+    endif
+  endfor
+
+  " Compute available uppercase marks and place first one
+  let l:available = filter(map(range(char2nr('A'), char2nr('Z')), 'nr2char(v:val)'), 'index(l:taken, v:val) == -1')
+  if !empty(l:available)
+      execute 'mark ' . l:available[0]
+      echohl None | echom "Line bookmarked"
+  else
+      echohl WarningMsg | echom "No marks available" | echohl NONE
+  endif
+endfunction
+
+" Populate all global bookmarks to a quickfix list
+function! GlobalMarksToQuickfix()
+  let l:qf = []
+
+  for m in getmarklist()
+    let mark = m['mark'][1]
+    let file = get(m, 'file', '')
+    let pos  = get(m, 'pos', [])
+
+    " Only uppercase global marks
+    if matchstr(mark, '^[A-Z]$') != ''
+      call add(l:qf, {
+            \ 'filename': file == ''? file: fnamemodify(file, ':p'),
+            \ 'lnum': get(pos, 1, 0),
+            \ 'col': get(pos, 2, 0),
+            \ 'text': 'Mark ' . mark,
+            \ })
+    endif
+  endfor
+
+  if empty(l:qf)
+    echohl WarningMsg | echom "No global marks found" | echohl None
+    return
+  endif
+
+  " Populate quickfix list and open
+  call setqflist([], ' ', {'title': 'Global Marks', 'items': l:qf})
+  copen
+endfunction
+
+" Map to toggle bookmarking a line and to display all in a qf list
+nnoremap <silent> m` :call ToggleBookmark()<CR>
+nnoremap <silent> <leader>fm :call GlobalMarksToQuickfix()<CR>
 
 " Configs for vim slime
 let g:slime_target = "neovim"
