@@ -7,17 +7,16 @@ call plug#begin()
 Plug 'stevearc/oil.nvim'
 Plug 'morhetz/gruvbox'
 Plug 'nvim-lua/plenary.nvim'
-Plug 'airblade/vim-rooter'
 Plug 'airblade/vim-gitgutter'
 Plug 'ibhagwan/fzf-lua'
 Plug 'hrsh7th/nvim-cmp'
 Plug 'neovim/nvim-lspconfig'
 Plug 'hrsh7th/cmp-nvim-lsp'
 Plug 'hrsh7th/cmp-buffer'
-Plug 'jpalardy/vim-slime'
 Plug 'goerz/jupytext.nvim'
 Plug 'dense-analysis/ale'
 Plug 'tpope/vim-fugitive'
+Plug 'nvim-treesitter/nvim-treesitter'
 call plug#end()
 
 " Setup oil nvim
@@ -110,14 +109,37 @@ vim.diagnostic.config({
 })
 EOF
 
+" Setup nvim-treesitter
+lua << EOF
+-- vim.opt.runtimepath:prepend("/some/path/to/store/parsers")
+require('nvim-treesitter.configs').setup({
+  -- parser_install_dir = "/some/path/to/store/parsers",
+  ensure_installed = { "cpp", "python", "lua", "json", "xml", "vim" },
+  highlight = {
+    enable = true,
+    additional_vim_regex_highlighting = false,
+  },
+  indent = {
+    enable = true,
+  },
+  incremental_selection = {
+    enable = true,
+    keymaps = {
+      init_selection = "gnn",
+      node_incremental = "grn",
+      node_decremental = "grm",
+      scope_incremental = "grc",
+    },
+  },
+})
+EOF
+
 " Set leader as space
 nnoremap <SPACE> <Nop>
 let mapleader=" "
 
 " Set the color scheme
 colorscheme gruvbox
-let g:gruvbox_contrast_dark = 'soft'
-let g:gruvbox_transparent_bg = 1
 set background=dark
 autocmd VimEnter * hi Normal ctermbg=NONE guibg=NONE
 
@@ -321,13 +343,6 @@ let g:gitgutter_floating_window_options = {
 nnoremap <leader>gd :Ghdiffsplit!<CR>
 nnoremap <leader>gD :G! difftool<CR>
 nnoremap <leader>gl :0Gllog<CR>
-
-" Vim rooter configs
-let g:rooter_manual_only = 1
-let g:rooter_cd_cmd = 'lcd'
-let g:rooter_patterns = ['.git', '.svn', 'package.json', '!node_modules']
-nnoremap cd :cd %:p:h<CR>
-nnoremap cD :Rooter<CR>
 
 " Scroll floating popups via Alt - J / K
 nnoremap <silent> <A-j> :call ScrollPopup( 1)<CR>
@@ -573,13 +588,57 @@ endfunction
 nnoremap <silent> m` :call ToggleBookmark()<CR>
 nnoremap <silent> <leader>fm :call GlobalMarksToQuickfix()<CR>
 
-" Configs for vim slime
-let g:slime_target = "neovim"
-let g:slime_python_ipython = 1
-let g:slime_preserve_curpos = 0
-let g:slime_menu_config = 4
-nnoremap <silent><expr><leader>ll ":\<C-u>call slime#send_lines(" . v:count . ")\<cr>"
-vnoremap <silent><leader>ll :<c-u>call slime#send_op(visualmode(), 1)<cr>
+" Change to project root based on .git (or other patterns)
+function! Rooter()
+  " Patterns to consider as project root
+  let l:roots = ['.git']
+
+  let l:dir = expand('%:p:h')
+  if l:dir == ''
+    let l:dir = getcwd()
+  endif
+
+  while l:dir !=# '/'
+    " Check if any of the root patterns exist in this directory
+    for root in l:roots
+      if isdirectory(l:dir . '/' . root)
+        execute 'cd ' . fnameescape(l:dir)
+        echo "Changed directory to project root: " . l:dir
+        return
+      endif
+    endfor
+    let l:dir = fnamemodify(l:dir, ':h')
+  endwhile
+
+  echohl WarningMsg | echom "No project root found" | echohl None
+endfunction
+
+" Map above function to keybinds
+nnoremap cd :cd %:p:h<CR>
+nnoremap cD :call Rooter()<CR>
+
+" Run a command, copy output, and color message based on return code
+lua << EOF
+vim.api.nvim_create_user_command("RunCommand", function()
+  local cmd = vim.fn.input("Command: ")
+  if cmd == "" then return end
+
+  -- Run async using shell
+  vim.system({ "sh", "-c", cmd }, { text = true }, function(result)
+    vim.schedule(function()
+      vim.fn.setreg("+", result.stdout)
+      if result.code == 0 then
+        vim.cmd('echohl Question | echom "Command succeeded: ' .. cmd .. '" | echohl None')
+      else
+        vim.cmd('echohl ErrorMsg | echom "Command failed (exit ' .. result.code .. '): ' .. cmd .. '" | echohl None')
+      end
+    end)
+  end)
+end, {})
+EOF
+
+" Map <leader>cc to run a command and copy its output
+nnoremap ! :RunCommand<CR>
 
 " Add linter for extra 
 let g:ale_set_loclist = 0
