@@ -149,12 +149,6 @@ set statusline=\ %{FugitiveHead()!=''?'['.FugitiveHead().']\ ':''}%f\ %M\ %Y\ %R
 " Show the status on the second to last line.
 set laststatus=2
 
-" Highlight the searches
-set hlsearch
-
-" While searching though a file incrementally highlight matching characters as you type.
-set incsearch
-
 " Set numbering and relative numbering
 set number relativenumber
 
@@ -183,11 +177,14 @@ augroup END
 " Highlight cursor line underneath the cursor horizontally.
 set cursorline
 
-" Ignore case while searching
+" Searching related stuff
 set ignorecase
-
-" Override the ignorecase option if searching for capital letters.
 set smartcase
+set hlsearch
+set incsearch
+
+" Set border as rounded for floating windows
+set winborder=rounded
 
 " Show partial command you type in the last line of the screen.
 set showcmd
@@ -639,6 +636,12 @@ EOF
 
 " Map <leader>cc to run a command and copy its output
 nnoremap ! :RunCommand<CR>
+
+" Feedback for what has been yanked
+augroup highlight_yank
+  autocmd!
+  autocmd TextYankPost * silent! lua vim.highlight.on_yank { higroup="IncSearch", timeout=250 }
+augroup END
 
 " Add linter for extra 
 let g:ale_set_loclist = 0
