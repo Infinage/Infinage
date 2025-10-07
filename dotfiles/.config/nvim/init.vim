@@ -16,7 +16,43 @@ Plug 'hrsh7th/cmp-buffer'
 Plug 'goerz/jupytext.nvim'
 Plug 'dense-analysis/ale'
 Plug 'tpope/vim-fugitive'
+Plug 'nvim-tree/nvim-web-devicons'
+Plug 'nvim-lualine/lualine.nvim'
 call plug#end()
+
+" Setup lualine
+lua << EOF
+local colors = { bg = "#282828", fg = "#ebdbb2" }
+require('lualine').setup({
+  options = {
+    section_separators = '', component_separators = '',
+    theme = { 
+      normal = { 
+        a = { fg = colors.bg, bg = colors.fg, gui = "bold" },
+        b = { fg = colors.fg, bg = colors.bg },
+        c = { fg = colors.fg, bg = colors.bg },
+        c = { fg = colors.fg, bg = colors.bg }
+      },
+      inactive = { 
+        a = { fg = colors.fg, bg = colors.bg }, -- Inactive sections are usually the background
+        b = { fg = colors.fg, bg = colors.bg },
+        c = { fg = colors.fg, bg = colors.bg }
+      }
+    }
+  },
+  sections = {
+    lualine_a = { 'mode' },
+    lualine_b = { 'branch', 'diff', 'diagnostics' },
+    lualine_c = { { 'filename', path = 1 } },
+    lualine_x = { 'filetype' },
+    lualine_y = { 'progress' },
+    lualine_z = { 'location', 'searchcount' },
+  },
+  tabline = {
+    lualine_a = { { 'buffers', show_filename_only = true, mode = 2 } },
+  }
+})
+EOF
 
 " Setup oil nvim
 lua << EOF
@@ -116,12 +152,9 @@ nnoremap <SPACE> <Nop>
 let mapleader=" "
 
 " Set the color scheme
+let g:gruvbox_contrast_dark='hard'
 colorscheme gruvbox
 set background=dark
-autocmd VimEnter * hi Normal ctermbg=NONE guibg=NONE
-
-" Status line with Git Status, rel filename, File type, Row, Col, Percent
-set statusline=\ %{FugitiveHead()!=''?'['.FugitiveHead().']\ ':''}%f\ %M\ %Y\ %R%=\ Row:\ %l\ Col:\ %c\ Percent:\ %p%%\ 
 
 " Show the status on the second to last line.
 set laststatus=2
@@ -187,8 +220,8 @@ set wildmenu
 " Split right and down first
 set splitright splitbelow
 
-" Search count
-set shortmess-=S
+" Disable search count (lualine displays it)
+set shortmess=S
 
 " Auto close brackets (quotes, paranthesis, etc)
 inoremap " ""<left>
@@ -317,6 +350,10 @@ let g:gitgutter_floating_window_options = {
 nnoremap <leader>gd :Ghdiffsplit!<CR>
 nnoremap <leader>gD :G! difftool<CR>
 nnoremap <leader>gl :0Gllog<CR>
+nnoremap gb :G blame<CR>
+
+" Fold everything in Fugitive windows
+autocmd FileType git setlocal foldmethod=syntax | silent! normal! ggVGzc
 
 " Scroll floating popups via Alt - J / K
 nnoremap <silent> <A-j> :call ScrollPopup( 1)<CR>
@@ -394,10 +431,10 @@ fzf.setup({
   },
   keymap = {
       fzf = {
-        ["Alt-j"] = "preview-page-down",
-        ["Alt-k"] = "preview-page-up",
-        ["ctrl-f"] = "half-page-down",
-        ["ctrl-b"] = "half-page-up",
+        ["Alt-j"] = "preview-down",
+        ["Alt-k"] = "preview-up",
+        ["ctrl-d"] = "preview-page-down",
+        ["ctrl-u"] = "preview-page-up",
         ["ctrl-q"] = "select-all+accept",
         ["f3"]     = "toggle-preview-wrap",
         ["ctrl-l"] = "forward-char",
@@ -481,6 +518,7 @@ function! JumpToNextBufferInJumplist(dir) " 1=forward, -1=backward
             let n = (i - curjump) * a:dir
             execute "silent normal! " . n . jumpcmdchr
             let found = 1
+            silent! normal! g`"
             break
         endif
     endfor
