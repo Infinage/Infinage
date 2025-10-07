@@ -16,7 +16,6 @@ Plug 'hrsh7th/cmp-buffer'
 Plug 'goerz/jupytext.nvim'
 Plug 'dense-analysis/ale'
 Plug 'tpope/vim-fugitive'
-Plug 'nvim-treesitter/nvim-treesitter'
 call plug#end()
 
 " Setup oil nvim
@@ -63,15 +62,18 @@ vim.lsp.config('clangd', {
   cmd = { 
     "clangd", "--background-index", "--clang-tidy", "-j=8", 
     "--pch-storage=memory", "--malloc-trim", "--limit-references=100",
-    "--limit-results=20",
+    "--limit-results=50",
   },
 })
 
 -- Python
 vim.lsp.config('jedi_language_server', { capabilities = capabilities, })
 
+-- Bash
+vim.lsp.config('bashls', { capabilities = capabilities, })
+
 -- Enable both LSP configs
-vim.lsp.enable('clangd', 'jedi_language_server')
+vim.lsp.enable('clangd', 'jedi_language_server', 'bashls')
 
 -- Setup autocompletion
 cmp.setup {
@@ -106,31 +108,6 @@ vim.diagnostic.config({
   signs = { priority = 15 },
   update_in_insert = false,
   float = { border = "rounded" }
-})
-EOF
-
-" Setup nvim-treesitter
-lua << EOF
--- vim.opt.runtimepath:prepend("/some/path/to/store/parsers")
-require('nvim-treesitter.configs').setup({
-  -- parser_install_dir = "/some/path/to/store/parsers",
-  ensure_installed = { "cpp", "python", "lua", "json", "xml", "vim" },
-  highlight = {
-    enable = true,
-    additional_vim_regex_highlighting = false,
-  },
-  indent = {
-    enable = true,
-  },
-  incremental_selection = {
-    enable = true,
-    keymaps = {
-      init_selection = "gnn",
-      node_incremental = "grn",
-      node_decremental = "grm",
-      scope_incremental = "grc",
-    },
-  },
 })
 EOF
 
@@ -536,7 +513,7 @@ function! ToggleBookmark()
     call add(l:taken, mchar)
     if m['pos'][1] == line('.') && mark_file_abs ==# expand('%:p')
       execute 'delmarks ' . mchar
-      echohl None | echom "Bookmark removed"
+      echohl None | echom "Bookmark removed: " . mchar
       return
     endif
   endfor
@@ -545,7 +522,7 @@ function! ToggleBookmark()
   let l:available = filter(map(range(char2nr('A'), char2nr('Z')), 'nr2char(v:val)'), 'index(l:taken, v:val) == -1')
   if !empty(l:available)
       execute 'mark ' . l:available[0]
-      echohl None | echom "Line bookmarked"
+      echohl None | echom "Bookmark added: " . l:available[0]
   else
       echohl WarningMsg | echom "No marks available" | echohl NONE
   endif
