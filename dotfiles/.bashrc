@@ -26,3 +26,9 @@ PS1='[\u@\h \W]\$ '
 #PS1="[$R\u$W@$B\h$W $G\W$W]\\$ "
 
 alias nv='nvim'
+
+# Setup fzf for bash
+eval "$(fzf --bash)"
+
+# Setup zoxide for bash
+eval "$(zoxide init bash)"

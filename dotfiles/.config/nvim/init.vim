@@ -22,34 +22,45 @@ call plug#end()
 
 " Setup lualine
 lua << EOF
-local colors = { bg = "#282828", fg = "#ebdbb2" }
+local theme = require('lualine.themes.gruvbox')
+
+local function mode_color()
+  local mode = vim.fn.mode()
+  local colors = {
+    n = theme.normal.a,
+    i = theme.insert.a,
+    v = theme.visual.a,
+    V = theme.visual.a,
+    c = theme.command.a,
+    R = theme.replace.a,
+    t = theme.normal.a,
+  }
+  return { fg = colors[mode].fg, bg = colors[mode].bg, gui = 'bold' }
+end
+
 require('lualine').setup({
   options = {
-    section_separators = '', component_separators = '',
+    component_separators = '',
     theme = { 
-      normal = { 
-        a = { fg = colors.bg, bg = colors.fg, gui = "bold" },
-        b = { fg = colors.fg, bg = colors.bg },
-        c = { fg = colors.fg, bg = colors.bg },
-        c = { fg = colors.fg, bg = colors.bg }
-      },
-      inactive = { 
-        a = { fg = colors.fg, bg = colors.bg }, -- Inactive sections are usually the background
-        b = { fg = colors.fg, bg = colors.bg },
-        c = { fg = colors.fg, bg = colors.bg }
-      }
+      normal = theme.normal,
+      insert = theme.normal,
+      visual = theme.normal,
+      replace = theme.normal,
+      command = theme.normal,
+      terminal = theme.normal,
+      inactive = theme.inactive,
     }
   },
   sections = {
-    lualine_a = { 'mode' },
+    lualine_a = { { 'mode', color = mode_color, separator = { right = '' } } },
     lualine_b = { 'branch', 'diff', 'diagnostics' },
     lualine_c = { { 'filename', path = 1 } },
-    lualine_x = { 'filetype' },
+    lualine_x = { 'searchcount', 'filetype' },
     lualine_y = { 'progress' },
     lualine_z = { 'location', 'searchcount' },
   },
   tabline = {
-    lualine_a = { { 'buffers', show_filename_only = true, mode = 2 } },
+    lualine_a = { { 'tabs', tab_max_length = 40, mode = 2, max_length = vim.o.columns } },
   }
 })
 EOF
@@ -152,9 +163,10 @@ nnoremap <SPACE> <Nop>
 let mapleader=" "
 
 " Set the color scheme
-let g:gruvbox_contrast_dark='hard'
-colorscheme gruvbox
+autocmd VimEnter * hi Normal ctermbg=NONE guibg=NONE
+let g:gruvbox_transparent_bg=1
 set background=dark
+colorscheme gruvbox
 
 " Show the status on the second to last line.
 set laststatus=2
@@ -335,16 +347,25 @@ augroup END
 " Git gutter settings
 let g:gitgutter_map_keys = 0
 let g:gitgutter_sign_allow_clobber = 0
-nnoremap gp :GitGutterPreviewHunk<CR>
-nnoremap gs :GitGutterStageHunk<CR>
-nnoremap gu :GitGutterUndoHunk<CR>
-nnoremap ]g :GitGutterNextHunk<CR>
-nnoremap [g :GitGutterPrevHunk<CR>
 let g:gitgutter_floating_window_options = {
     \ 'relative': 'cursor', 'row': 1, 'col': 0,
     \ 'width': 42, 'height': &previewheight,
     \ 'style': 'minimal', 'border': 'rounded' 
 \ }
+
+" Git gutter text object navigation
+omap ig <Plug>(GitGutterTextObjectInnerPending)
+omap ag <Plug>(GitGutterTextObjectOuterPending)
+xmap ig <Plug>(GitGutterTextObjectInnerVisual)
+xmap ag <Plug>(GitGutterTextObjectOuterVisual)
+
+" Git gutter keymaps
+nnoremap gp :GitGutterPreviewHunk<CR>
+nnoremap gs :GitGutterStageHunk<CR>
+vnoremap gs :GitGutterStageHunk<CR>
+nnoremap gu :GitGutterUndoHunk<CR>
+nmap ]g <Plug>(GitGutterNextHunk)
+nmap [g <Plug>(GitGutterPrevHunk)
 
 " Fugitive keybinds
 nnoremap <leader>gd :Ghdiffsplit!<CR>
@@ -433,8 +454,8 @@ fzf.setup({
       fzf = {
         ["Alt-j"] = "preview-down",
         ["Alt-k"] = "preview-up",
-        ["ctrl-d"] = "preview-page-down",
-        ["ctrl-u"] = "preview-page-up",
+        ["Alt-d"] = "preview-page-down",
+        ["Alt-u"] = "preview-page-up",
         ["ctrl-q"] = "select-all+accept",
         ["f3"]     = "toggle-preview-wrap",
         ["ctrl-l"] = "forward-char",
@@ -446,8 +467,8 @@ EOF
 
 " FZF for find and grep
 nnoremap <leader>fb :lua require('fzf-lua').buffers()<CR>
-nnoremap <leader>ff :lua require('fzf-lua').files()<CR>
-nnoremap <leader>fs :lua require('fzf-lua').blines()<CR>
+nnoremap <leader>ff :lua require('fzf-lua').files({resume=true})<CR>
+nnoremap <leader>fs :lua require('fzf-lua').blines({resume=true})<CR>
 vnoremap <leader>fs <cmd>FzfLua blines<CR>
 nnoremap <leader>fS :lua require('fzf-lua').live_grep_native()<CR>
 nnoremap <leader>fg :lua require('fzf-lua').git_bcommits()<CR>
