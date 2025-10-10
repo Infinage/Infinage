@@ -327,6 +327,10 @@ tnoremap <C-w> <C-\><C-N><C-w>
 " 'Zoom' a split window into a tab
 nnoremap <leader>zz :tab sb<CR>
 
+" Navigate prev and next tab
+nnoremap [t :tabprevious<CR>
+nnoremap ]t :tabnext<CR>
+
 " Disable S-Tab in insert mode - we would be using it for autocomplete
 inoremap <S-Tab> <Nop>
 
@@ -368,8 +372,8 @@ nmap ]g <Plug>(GitGutterNextHunk)
 nmap [g <Plug>(GitGutterPrevHunk)
 
 " Fugitive keybinds
-nnoremap <leader>gd :Ghdiffsplit!<CR>
-nnoremap <leader>gD :G! difftool<CR>
+nnoremap <leader>gd :Gdiffsplit!<CR>
+nnoremap <leader>gD :G! difftool -y<CR>
 nnoremap <leader>gl :0Gllog<CR>
 nnoremap gb :G blame<CR>
 
@@ -387,14 +391,23 @@ local fzf = require("fzf-lua")
 fzf.setup({
   grep = {
     actions = {
-      ["alt-n"] = {
-        fn = function(_, opts)
-          require("fzf-lua").actions.toggle_flag(_, vim.tbl_extend("force", opts, {
-            toggle_flag = "--multiline --multiline-dotall"
-          }))
-        end,
-        desc = "Toggle multiline search",
-      },
+        ["alt-n"] = {
+          fn = function(_, opts)
+            require("fzf-lua").actions.toggle_flag(_, vim.tbl_extend("force", opts, {
+              toggle_flag = "--multiline --multiline-dotall --files-with-matches",
+            }))
+          end,
+          desc = "toggle-multiline",
+          header = function(o)
+            local utils = require("fzf-lua.utils")
+            local flag = "--multiline"
+            if o.cmd and o.cmd:match(utils.lua_regex_escape(flag)) then
+              return "[x] Multiline"
+            else
+              return "[ ] Multiline"
+            end
+          end,
+        },
     },
   },
   git = {
@@ -452,12 +465,12 @@ fzf.setup({
   },
   keymap = {
       fzf = {
+        true,
         ["Alt-j"] = "preview-down",
         ["Alt-k"] = "preview-up",
         ["Alt-d"] = "preview-page-down",
         ["Alt-u"] = "preview-page-up",
         ["ctrl-q"] = "select-all+accept",
-        ["f3"]     = "toggle-preview-wrap",
         ["ctrl-l"] = "forward-char",
         ["ctrl-h"] = "backward-char",
       },
@@ -682,7 +695,7 @@ augroup END
 " Add linter for extra 
 let g:ale_set_loclist = 0
 let g:ale_linters = { 'cpp': ['cc'] }
-let cpp_opts = '-std=c++23 -Wall -Weffc++ -Wextra -Wpedantic -pedantic-errors -L/home/kael/cpplib/lib -I/home/kael/cpplib/include'
+let cpp_opts = '-std=c++23 -Wall -Weffc++ -Wextra -Wpedantic -L/home/kael/cpplib/lib -I/home/kael/cpplib/include'
 let g:ale_cpp_cc_options = cpp_opts
 let g:ale_floating_preview = 1
 nnoremap <leader>ad :ALEDetail<CR>
