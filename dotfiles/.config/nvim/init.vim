@@ -463,8 +463,8 @@ fzf.setup({
         true,
         ["Alt-j"] = "preview-down",
         ["Alt-k"] = "preview-up",
-        ["Alt-d"] = "preview-page-down",
-        ["Alt-u"] = "preview-page-up",
+        ["Alt-n"] = "preview-page-down",
+        ["Alt-m"] = "preview-page-up",
         ["ctrl-q"] = "select-all+accept",
         ["ctrl-l"] = "forward-char",
         ["ctrl-h"] = "backward-char",
@@ -473,9 +473,9 @@ fzf.setup({
         true,
         ["Alt-j"] = "preview-down",
         ["Alt-k"] = "preview-up",
-        ["Alt-d"] = "preview-page-down",
-        ["Alt-u"] = "preview-page-up",
-        ["Alt-p"] = "focus-preview",
+        ["Alt-n"] = "preview-page-down",
+        ["Alt-m"] = "preview-page-up",
+        ["Alt-f"] = "focus-preview",
         ["ctrl-l"] = "forward-char",
         ["ctrl-h"] = "backward-char",
       },
@@ -483,7 +483,7 @@ fzf.setup({
 })
 
 -- Function to fuzzy search and preview cppman pages inline
-function cppman_live()
+function CppmanLive()
   fzf.fzf_live(
   "cppman -f <query>",
   {
@@ -512,6 +512,74 @@ function cppman_live()
     },
   })
 end
+
+-- Function to fuzzy search and kill running processes
+function FzfKill()
+  local function ps_cmd()
+    return "ps -eo pid,%cpu,%mem,user,cmd --sort=-%cpu" .. 
+    " | cut -c1-100"
+  end
+
+  local function ps_preview(selected)
+    local pid = selected[1]:match("^%s*(.-)%s*$"):match("^(%d+)")
+    local ps_cmd = string.format("ps -p %s -o pid=,ppid=,user=,%%cpu=,%%mem=,etime=,cmd=", pid)
+    local handle = io.popen(ps_cmd)
+    local result = handle:read("*a")
+    handle:close()
+
+    -- Parse output (ps returns a single line)
+    local pid_out, ppid, user, cpu, mem, etime, cmd = result:match(
+      "(%d+)%s+(%d+)%s+(%S+)%s+(%S+)%s+(%S+)%s+(%S+)%s+(.+)"
+    )
+
+    if not pid_out then return "Process not found" end
+    return string.format([[
+PID:          %s
+PPID:         %s
+Program:      %s
+User:         %s
+Uptime:       %s
+Memory usage: %s%%
+CPU Usage:    %s%%
+Command:      %s
+    ]], pid_out, ppid, cmd:match("([^%s]+)"), user, etime, mem, cpu, cmd)
+  end
+
+  fzf.fzf_exec(ps_cmd(), {
+    prompt = "Processes> ",
+    preview = ps_preview,
+    actions = {
+      ["ctrl-x"] = function(selected)
+        local killed_count = 0
+        for _, line in ipairs(selected) do
+          local pid = line:match("^%s*(.-)%s*$"):match("^(%d+)")
+          if pid then
+            vim.fn.system({ "kill", "-9", pid })
+            killed_count = killed_count + 1
+          end
+        end
+        vim.defer_fn(function() -- reliably output log message
+          vim.notify("Killed " .. killed_count .. " process(es)")
+        end, 10)
+      end,
+    },
+    keymap = {
+      fzf = {
+        ["ctrl-r"] = "reload:" .. ps_cmd(),
+        ["enter"] = "ignore",
+      },
+    },
+    fzf_opts = { ["--multi"] = true },
+    winopts = {
+      width = 0.8,
+      preview = {
+        vertical = "down:45%",
+        wrap = true,
+      },
+    },
+    header = [[CTRL-R reload | ALT-A toggle all | CTRL-X kill]],
+  })
+end
 EOF
 
 " FZF keymaps for useful utils
@@ -524,7 +592,8 @@ nnoremap <leader>fg :lua require('fzf-lua').git_bcommits()<CR>
 vnoremap <leader>fg <cmd>FzfLua git_bcommits<CR>
 nnoremap <leader>fG :lua require('fzf-lua').git_commits()<CR>
 nnoremap <leader>fz :lua require('fzf-lua').builtin()<CR>
-nnoremap <leader>cp :lua cppman_live()<CR>
+nnoremap <leader>fC :lua CppmanLive()<CR>
+nnoremap <leader>fp :lua FzfKill()<CR>
 
 " Custom mappings for LSP
 nnoremap <silent> [e        :lua vim.diagnostic.goto_prev()<CR>
