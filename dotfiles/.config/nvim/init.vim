@@ -251,11 +251,6 @@ inoremap <expr> ] strpart(getline('.'), col('.')-1, 1) == "]" ? "\<Right>" : "]"
 let g:markdown_fenced_languages = ['cpp', 'python', 'javascript', 'js=javascript', 'typescript', 'ts=typescript']
 autocmd FileType markdown set conceallevel=0
 
-" Set color scheme when using vimdiff
-if &diff
-  colorscheme slate 
-endif
-
 " Matching parathensis are diff to distinguish
 hi MatchParen cterm=none ctermbg=black ctermfg=blue
 
@@ -474,11 +469,52 @@ fzf.setup({
         ["ctrl-l"] = "forward-char",
         ["ctrl-h"] = "backward-char",
       },
+      builtin = {
+        true,
+        ["Alt-j"] = "preview-down",
+        ["Alt-k"] = "preview-up",
+        ["Alt-d"] = "preview-page-down",
+        ["Alt-u"] = "preview-page-up",
+        ["Alt-p"] = "focus-preview",
+        ["ctrl-l"] = "forward-char",
+        ["ctrl-h"] = "backward-char",
+      },
   },
 })
+
+-- Function to fuzzy search and preview cppman pages inline
+function cppman_live()
+  fzf.fzf_live(
+  "cppman -f <query>",
+  {
+    prompt = "cppman> ",
+    exec_empty_query = false,
+    preview = {
+      type = "cmd", 
+      fn = function(selected) 
+        local token = selected[1]:match("^(%S+)") or selected[1] 
+        return "cppman " .. vim.fn.shellescape(token) 
+      end,
+    },
+    actions = {
+      ["default"] = function(selected)
+        local token = selected[1]:match("^(.-) %-") or selected[1]
+        vim.cmd("split | terminal cppman " .. token)
+      end,
+    },
+    winopts = {
+      fullscreen = true,
+      preview = {
+        hidden = false,
+        layout = "vertical",
+        vertical = "down:80%",
+      },
+    },
+  })
+end
 EOF
 
-" FZF for find and grep
+" FZF keymaps for useful utils
 nnoremap <leader>fb :lua require('fzf-lua').buffers()<CR>
 nnoremap <leader>ff :lua require('fzf-lua').files({resume=true})<CR>
 nnoremap <leader>fs :lua require('fzf-lua').blines({resume=true})<CR>
@@ -488,6 +524,7 @@ nnoremap <leader>fg :lua require('fzf-lua').git_bcommits()<CR>
 vnoremap <leader>fg <cmd>FzfLua git_bcommits<CR>
 nnoremap <leader>fG :lua require('fzf-lua').git_commits()<CR>
 nnoremap <leader>fz :lua require('fzf-lua').builtin()<CR>
+nnoremap <leader>cp :lua cppman_live()<CR>
 
 " Custom mappings for LSP
 nnoremap <silent> [e        :lua vim.diagnostic.goto_prev()<CR>
@@ -523,9 +560,7 @@ vim.cmd("command! -nargs=+ Rb RenameBuf <args>")
 
 -- Copy current file + line to clipboard
 local function copy_file_and_line_to_clipboard()
-  local filepath = vim.fn.expand("%:p")
-  local linenum = vim.fn.line(".")
-  local text = filepath .. ":" .. linenum
+  local text = vim.fn.expand("%:p") .. ":" .. vim.fn.line(".")
   vim.fn.setreg("+", text)
   vim.api.nvim_echo({ { "Copied: " .. text, "None" } }, false, {})
 end
@@ -662,29 +697,6 @@ endfunction
 " Map above function to keybinds
 nnoremap cd :cd %:p:h<CR>
 nnoremap cD :call Rooter()<CR>
-
-" Run a command, copy output, and color message based on return code
-lua << EOF
-vim.api.nvim_create_user_command("RunCommand", function()
-  local cmd = vim.fn.input("Command: ")
-  if cmd == "" then return end
-
-  -- Run async using shell
-  vim.system({ "sh", "-c", cmd }, { text = true }, function(result)
-    vim.schedule(function()
-      vim.fn.setreg("+", result.stdout)
-      if result.code == 0 then
-        vim.cmd('echohl Question | echom "Command succeeded: ' .. cmd .. '" | echohl None')
-      else
-        vim.cmd('echohl ErrorMsg | echom "Command failed (exit ' .. result.code .. '): ' .. cmd .. '" | echohl None')
-      end
-    end)
-  end)
-end, {})
-EOF
-
-" Map <leader>cc to run a command and copy its output
-nnoremap ! :RunCommand<CR>
 
 " Feedback for what has been yanked
 augroup highlight_yank
