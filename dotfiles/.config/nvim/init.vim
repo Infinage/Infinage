@@ -13,12 +13,16 @@ Plug 'hrsh7th/nvim-cmp'
 Plug 'neovim/nvim-lspconfig'
 Plug 'hrsh7th/cmp-nvim-lsp'
 Plug 'hrsh7th/cmp-buffer'
-Plug 'goerz/jupytext.nvim'
 Plug 'dense-analysis/ale'
 Plug 'tpope/vim-fugitive'
 Plug 'nvim-tree/nvim-web-devicons'
 Plug 'nvim-lualine/lualine.nvim'
+Plug 'hedyhli/outline.nvim'
 call plug#end()
+
+" Setup outline.nvim
+lua require("outline").setup({ outline_window = {show_relative_numbers = true} })
+nnoremap gO :Outline<CR>
 
 " Setup lualine
 lua << EOF
@@ -93,9 +97,6 @@ oil.setup({
 vim.keymap.set("n", "-", "<CMD>Oil<CR>", { desc = "Open parent directory of current buffer in Oil" })
 vim.keymap.set("n", "~", "<CMD>Oil .<CR>", { desc = "Open CWD in Oil" })
 EOF
-
-" Setup jupytext
-lua require("jupytext").setup({ format = "py:percent" })
 
 " Setup LSP
 lua << EOF
@@ -379,6 +380,10 @@ autocmd FileType git setlocal foldmethod=syntax | silent! normal! ggVGzc
 nnoremap <silent> <A-j> :call ScrollPopup( 1)<CR>
 nnoremap <silent> <A-k> :call ScrollPopup(-1)<CR>
 
+" Scroll right left with keybinds
+nnoremap <A-l> zL
+nnoremap <A-h> zH
+
 " Shortcuts for FZF-Lua
 lua << EOF
 local fzf = require("fzf-lua")
@@ -455,6 +460,7 @@ fzf.setup({
       wrap = true,
       scrollbar = "float",
       default = "bat",
+      delay = 20,
       hidden = true,
     },
   },
@@ -463,8 +469,8 @@ fzf.setup({
         true,
         ["Alt-j"] = "preview-down",
         ["Alt-k"] = "preview-up",
-        ["Alt-n"] = "preview-page-down",
-        ["Alt-m"] = "preview-page-up",
+        ["Alt-n"] = "preview-half-page-down",
+        ["Alt-m"] = "preview-half-page-up",
         ["ctrl-q"] = "select-all+accept",
         ["ctrl-l"] = "forward-char",
         ["ctrl-h"] = "backward-char",
@@ -473,8 +479,8 @@ fzf.setup({
         true,
         ["Alt-j"] = "preview-down",
         ["Alt-k"] = "preview-up",
-        ["Alt-n"] = "preview-page-down",
-        ["Alt-m"] = "preview-page-up",
+        ["Alt-n"] = "preview-half-page-down",
+        ["Alt-m"] = "preview-half-page-up",
         ["Alt-f"] = "focus-preview",
         ["ctrl-l"] = "forward-char",
         ["ctrl-h"] = "backward-char",
@@ -489,17 +495,18 @@ function CppmanLive()
   {
     prompt = "cppman> ",
     exec_empty_query = false,
-    preview = {
-      type = "cmd", 
-      fn = function(selected) 
-        local token = selected[1]:match("^(%S+)") or selected[1] 
-        return "cppman " .. vim.fn.shellescape(token) 
-      end,
-    },
+    preview = function(selected)
+        local token = selected[1]:match("^(.-)%s*%-") or selected[1] 
+        local cmd = "echo 1 | cppman " .. vim.fn.shellescape(token)
+        local result = vim.fn.system(cmd)
+        local start_index = result:find("\nNAME")
+        if start_index then return result:sub(start_index + 1)
+        else return "No match for: " .. token end
+    end,
     actions = {
       ["default"] = function(selected)
         local token = selected[1]:match("^(.-) %-") or selected[1]
-        vim.cmd("split | terminal cppman " .. token)
+        vim.cmd("split | terminal echo 1 | cppman '" .. token .. "'")
       end,
     },
     winopts = {
