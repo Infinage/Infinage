@@ -104,7 +104,7 @@ lua << EOF
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
 local cmp = require('cmp')
 
--- C/C++ LSP
+-- C/C++ LSP (custom modification from what is defined)
 vim.lsp.config('clangd', {
   capabilities = capabilities,
   cmd = { 
@@ -114,14 +114,8 @@ vim.lsp.config('clangd', {
   },
 })
 
--- Python
-vim.lsp.config('jedi_language_server', { capabilities = capabilities, })
-
--- Bash
-vim.lsp.config('bashls', { capabilities = capabilities, })
-
--- Enable both LSP configs
-vim.lsp.enable('clangd', 'jedi_language_server', 'bashls')
+-- Enable all required LSP configs
+vim.lsp.enable('clangd', 'jedi_language_server', 'bashls', 'luals')
 
 -- Setup autocompletion
 cmp.setup {
