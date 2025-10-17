@@ -13,16 +13,13 @@ Plug 'hrsh7th/nvim-cmp'
 Plug 'neovim/nvim-lspconfig'
 Plug 'hrsh7th/cmp-nvim-lsp'
 Plug 'hrsh7th/cmp-buffer'
-Plug 'dense-analysis/ale'
 Plug 'tpope/vim-fugitive'
 Plug 'nvim-tree/nvim-web-devicons'
 Plug 'nvim-lualine/lualine.nvim'
-Plug 'hedyhli/outline.nvim'
+Plug 'nvim-treesitter/nvim-treesitter'
+Plug 'nvim-treesitter/nvim-treesitter-textobjects'
+Plug 'ggandor/leap.nvim'
 call plug#end()
-
-" Setup outline.nvim
-lua require("outline").setup({ outline_window = {show_relative_numbers = true} })
-nnoremap gO :Outline<CR>
 
 " Setup lualine
 lua << EOF
@@ -153,6 +150,57 @@ vim.diagnostic.config({
 })
 EOF
 
+" Setup treesitter
+lua << EOF
+require("nvim-treesitter.install").prefer_git = true
+require('nvim-treesitter.configs').setup {
+  parser_install_dir = nil,
+  ensure_installed = { "cpp", "c", "lua", "python", "vim", "bash", "json", "markdown", "markdown_inline" },
+  highlight = { enable = true, additional_vim_regex_highlighting = false },
+  incremental_selection = {
+    enable = true,
+    keymaps = {
+      init_selection = "<CR>",
+      node_incremental = "<CR>",
+      node_decremental = "<BS>",
+    },
+  },
+  textobjects = {
+    select = {
+      enable = true,
+      lookahead = true,
+      keymaps = {
+        ["af"] = "@function.outer",
+        ["if"] = "@function.inner",
+        ["ac"] = "@class.outer",
+        ["ic"] = "@class.inner",
+        ["ai"] = "@conditional.outer",
+        ["ii"] = "@conditional.inner",
+        ["al"] = "@loop.outer",
+        ["il"] = "@loop.inner",
+        ["a/"] = "@comment.outer",
+      },
+    },
+    move = {
+      enable = true,
+      set_jumps = true,
+      goto_next_start = {
+        ["]1"] = "@class.outer",
+        ["]2"] = "@function.outer",
+      },
+      goto_previous_start = {
+        ["[1"] = "@class.outer",
+        ["[2"] = "@function.outer",
+      },
+    },
+    lsp_interop = {
+      enable = true,
+      peek_definition_code = { ["gf"] = "@function.outer", },
+    },
+  }
+}
+EOF
+
 " Set leader as space
 nnoremap <SPACE> <Nop>
 let mapleader=" "
@@ -265,22 +313,13 @@ function! ScrollPopup(nlines)
 endfunction
 
 " Remove newbie crutches in Command, Insert, Normal & Visual Mode
-cnoremap <Down> <Nop>
-cnoremap <Left> <Nop>
-cnoremap <Right> <Nop>
-cnoremap <Up> <Nop>
-inoremap <Down> <Nop>
-inoremap <Left> <Nop>
-inoremap <Right> <Nop>
-inoremap <Up> <Nop>
-nnoremap <Down> <Nop>
-nnoremap <Left> <Nop>
-nnoremap <Right> <Nop>
-nnoremap <Up> <Nop>
-vnoremap <Down> <Nop>
-vnoremap <Left> <Nop>
-vnoremap <Right> <Nop>
-vnoremap <Up> <Nop>
+lua << EOF
+for _, mode in ipairs({ "n", "i", "v", "x", "c" }) do
+  for _, key in ipairs({ "<Up>", "<Down>", "<Left>", "<Right>" }) do
+    vim.api.nvim_set_keymap(mode, key, "<Nop>", { noremap = true, silent = true })
+  end
+end
+EOF
 
 " Disable mouse
 set mouse=
@@ -375,8 +414,8 @@ nnoremap <silent> <A-j> :call ScrollPopup( 1)<CR>
 nnoremap <silent> <A-k> :call ScrollPopup(-1)<CR>
 
 " Scroll right left with keybinds
-nnoremap <A-l> zL
-nnoremap <A-h> zH
+nnoremap <A-l> 20zl
+nnoremap <A-h> 20zh
 
 " Shortcuts for FZF-Lua
 lua << EOF
@@ -385,7 +424,7 @@ local fzf = require("fzf-lua")
 fzf.setup({
   grep = {
     actions = {
-        ["alt-n"] = {
+        ["alt-l"] = {
           fn = function(_, opts)
             require("fzf-lua").actions.toggle_flag(_, vim.tbl_extend("force", opts, {
               toggle_flag = "--multiline --multiline-dotall --files-with-matches",
@@ -641,6 +680,10 @@ vim.api.nvim_create_user_command("Where", function()
 end, {})
 EOF
 
+" Keymaps for Leap.nvim jump plugin
+lua vim.keymap.set({'n', 'x', 'o'}, 's', '<Plug>(leap)')
+lua vim.keymap.set('n', 'S', '<Plug>(leap-from-window)')
+
 " Navigate across files using jump list
 function! JumpToNextBufferInJumplist(dir) " 1=forward, -1=backward
     let jl = getjumplist()
@@ -773,11 +816,3 @@ augroup highlight_yank
   autocmd!
   autocmd TextYankPost * silent! lua vim.highlight.on_yank { higroup="IncSearch", timeout=250 }
 augroup END
-
-" Add linter for extra 
-let g:ale_set_loclist = 0
-let g:ale_linters = { 'cpp': ['cc'] }
-let cpp_opts = '-std=c++23 -Wall -Weffc++ -Wextra -Wpedantic -L/home/kael/cpplib/lib -I/home/kael/cpplib/include'
-let g:ale_cpp_cc_options = cpp_opts
-let g:ale_floating_preview = 1
-nnoremap <leader>ad :ALEDetail<CR>
