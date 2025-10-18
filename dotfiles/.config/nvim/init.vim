@@ -126,8 +126,7 @@ cmp.setup {
   }),
   sources = {
     { name = 'nvim_lsp' },
-    { 
-        name = 'buffer',
+    {  name = 'buffer',
         option = {
             get_bufnrs = function()
                 local bufs = {}
@@ -155,7 +154,7 @@ lua << EOF
 require("nvim-treesitter.install").prefer_git = true
 require('nvim-treesitter.configs').setup {
   parser_install_dir = nil,
-  ensure_installed = { "cpp", "c", "lua", "python", "vim", "bash", "json", "markdown", "markdown_inline" },
+  ensure_installed = { "cpp", "c", "lua", "python", "vim", "bash", "markdown", "markdown_inline" },
   highlight = { enable = true, additional_vim_regex_highlighting = false },
   incremental_selection = {
     enable = true,
@@ -166,9 +165,9 @@ require('nvim-treesitter.configs').setup {
     },
   },
   textobjects = {
+    enable = true,
     select = {
-      enable = true,
-      lookahead = true,
+      enable = true, lookahead = true,
       keymaps = {
         ["af"] = "@function.outer",
         ["if"] = "@function.inner",
@@ -187,15 +186,13 @@ require('nvim-treesitter.configs').setup {
       goto_next_start = {
         ["]1"] = "@class.outer",
         ["]2"] = "@function.outer",
+        ["]3"] = "@block.inner",
       },
       goto_previous_start = {
         ["[1"] = "@class.outer",
         ["[2"] = "@function.outer",
+        ["[3"] = "@block.inner",
       },
-    },
-    lsp_interop = {
-      enable = true,
-      peek_definition_code = { ["gf"] = "@function.outer", },
     },
   }
 }
@@ -417,6 +414,12 @@ nnoremap <silent> <A-k> :call ScrollPopup(-1)<CR>
 nnoremap <A-l> 20zl
 nnoremap <A-h> 20zh
 
+" Scroll half a page with C-M and C-N
+nnoremap <C-m> <C-u>
+nnoremap <C-n> <C-d>
+vnoremap <C-m> <C-u>
+vnoremap <C-n> <C-d>
+
 " Shortcuts for FZF-Lua
 lua << EOF
 local fzf = require("fzf-lua")
@@ -424,7 +427,7 @@ local fzf = require("fzf-lua")
 fzf.setup({
   grep = {
     actions = {
-        ["alt-l"] = {
+        ["Alt-l"] = {
           fn = function(_, opts)
             require("fzf-lua").actions.toggle_flag(_, vim.tbl_extend("force", opts, {
               toggle_flag = "--multiline --multiline-dotall --files-with-matches",
@@ -485,6 +488,17 @@ fzf.setup({
         },
     },
   },
+  manpages = {
+      previewer = "man_native",
+      winopts = { 
+        fullscreen = true, 
+        preview = { 
+          hidden = false, 
+          layout = "vertical", 
+          vertical = "down:80%"
+        } 
+      }
+  },
   winopts = {
     preview = {
       layout = "vertical",
@@ -520,38 +534,6 @@ fzf.setup({
       },
   },
 })
-
--- Function to fuzzy search and preview cppman pages inline
-function CppmanLive()
-  fzf.fzf_live(
-  "cppman -f <query>",
-  {
-    prompt = "cppman> ",
-    exec_empty_query = false,
-    preview = function(selected)
-        local token = selected[1]:match("^(.-)%s*%-") or selected[1] 
-        local cmd = "echo 1 | cppman " .. vim.fn.shellescape(token)
-        local result = vim.fn.system(cmd)
-        local start_index = result:find("\nNAME")
-        if start_index then return result:sub(start_index + 1)
-        else return "No match for: " .. token end
-    end,
-    actions = {
-      ["default"] = function(selected)
-        local token = selected[1]:match("^(.-) %-") or selected[1]
-        vim.cmd("split | terminal echo 1 | cppman '" .. token .. "'")
-      end,
-    },
-    winopts = {
-      fullscreen = true,
-      preview = {
-        hidden = false,
-        layout = "vertical",
-        vertical = "down:80%",
-      },
-    },
-  })
-end
 
 -- Function to fuzzy search and kill running processes
 function FzfKill()
@@ -632,7 +614,7 @@ nnoremap <leader>fg :lua require('fzf-lua').git_bcommits()<CR>
 vnoremap <leader>fg <cmd>FzfLua git_bcommits<CR>
 nnoremap <leader>fG :lua require('fzf-lua').git_commits()<CR>
 nnoremap <leader>fz :lua require('fzf-lua').builtin()<CR>
-nnoremap <leader>fC :lua CppmanLive()<CR>
+nnoremap <leader>fM :lua require('fzf-lua').manpages()<CR>
 nnoremap <leader>fp :lua FzfKill()<CR>
 
 " Custom mappings for LSP
