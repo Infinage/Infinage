@@ -1,7 +1,3 @@
-#
-# ~/.bashrc
-#
-
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
@@ -19,21 +15,6 @@ alias grep='grep --color=auto'
 alias mcd=mkdircd
 alias nv='nvim'
 
-# Compile and run a cpp source
-cr() {
-    if [ $# -lt 1 ]; then
-        echo "Usage: cr <source.cpp> [compile flags]"
-        return 1
-    fi
-
-    src="$1"
-    exe="${src%.*}.out"
-    shift
-
-    g++ -std=c++23 "$src" -o "$exe" "$@" || return 1
-    ./$exe
-}
-
 # Compile & run a cpp source inside gdb
 cdb() {
     if [ $# -lt 1 ]; then
@@ -47,6 +28,34 @@ cdb() {
 
     g++ -std=c++23 -ggdb "$src" -o "$exe" "$@" || return 1
     gdb -q "./$exe"
+}
+
+# Notify On Done: run any command and notify on completion
+nod() {
+  if [ $# -lt 1 ]; then
+    echo "Usage: nod <command...>"; return 1
+  fi
+
+  local cmd="$*"
+  trap 'jobs -p | xargs -r kill' INT TERM EXIT
+
+  # Execute command capture its exit code
+  # wait for any bg processes to finish running
+  eval $cmd; local exit_code=$?; wait
+
+  # Trim command for notifications
+  if [ ${#cmd} -gt 20 ]; then
+    cmd="${cmd:0:20}..."
+  fi
+
+  # Notify
+  if [ $exit_code -eq 0 ]; then
+    notify-send -u normal "Command Success ✅" "Cmd: $cmd\nStatus: $exit_code"
+  else
+    notify-send -u critical "Command Failed ❌" "Cmd: $cmd\nStatus: $exit_code"
+  fi
+
+  return $exit_code
 }
 
 PS1='[\u@\h \W]\$ '
