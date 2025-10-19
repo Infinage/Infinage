@@ -14,6 +14,7 @@ alias ls='ls --color=auto'
 alias grep='grep --color=auto'
 alias mcd=mkdircd
 alias nv='nvim'
+alias lpd=list_process_descendants
 
 # Compile & run a cpp source inside gdb
 cdb() {
@@ -30,6 +31,19 @@ cdb() {
     gdb -q "./$exe"
 }
 
+# List all process descendents for input process ID
+list_process_descendants() {
+    local children
+    children=$(pgrep -P "$1")
+
+    if [ -n "$children" ]; then
+        for child in $children; do
+            list_process_descendants "$child"
+        done
+        echo "$children"
+    fi
+}
+
 # Notify On Done: run any command and notify on completion
 nod() {
   if [ $# -lt 1 ]; then
@@ -37,11 +51,11 @@ nod() {
   fi
 
   local cmd="$*"
-  trap 'jobs -p | xargs -r kill' INT TERM EXIT
+  trap 'list_process_descendants $$ | xargs -r kill 2>/dev/null' INT TERM EXIT
 
   # Execute command capture its exit code
   # wait for any bg processes to finish running
-  eval $cmd; local exit_code=$?; wait
+  eval "$cmd"; wait; local exit_code=$?;
 
   # Trim command for notifications
   if [ ${#cmd} -gt 20 ]; then

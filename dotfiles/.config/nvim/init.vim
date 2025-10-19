@@ -107,12 +107,12 @@ vim.lsp.config('clangd', {
   cmd = { 
     "clangd", "--background-index", "--clang-tidy", "-j=8", 
     "--pch-storage=memory", "--malloc-trim", "--limit-references=100",
-    "--limit-results=50",
+    "--limit-results=50", --"--experimental-modules-support"
   },
 })
 
 -- Enable all required LSP configs
-vim.lsp.enable('clangd', 'jedi_language_server', 'bashls', 'luals')
+vim.lsp.enable({'clangd', 'jedi_language_server', 'bashls', 'lua_ls', 'cmake'})
 
 -- Setup autocompletion
 cmp.setup {
@@ -154,8 +154,11 @@ lua << EOF
 require("nvim-treesitter.install").prefer_git = true
 require('nvim-treesitter.configs').setup {
   parser_install_dir = nil,
-  ensure_installed = { "cpp", "c", "lua", "python", "vim", "bash", "markdown", "markdown_inline" },
   highlight = { enable = true, additional_vim_regex_highlighting = false },
+  ensure_installed = { 
+    "cpp", "lua", "python", "vim", "vimdoc", "bash", "markdown", 
+    "markdown_inline", "cmake", "xml", "json", "dockerfile"
+  },
   incremental_selection = {
     enable = true,
     keymaps = {
