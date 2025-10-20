@@ -12,9 +12,11 @@ mkdircd () {
 # shorter alias
 alias ls='ls --color=auto'
 alias grep='grep --color=auto'
-alias mcd=mkdircd
+alias mcd='mkdircd'
 alias nv='nvim'
-alias lpd=list_process_descendants
+alias lpd='list_process_descendants'
+alias zq='zoxide query'
+alias zqi='zoxide query --interactive'
 
 # Compile & run a cpp source inside gdb
 cdb() {
@@ -64,8 +66,10 @@ nod() {
 
   # Notify
   if [ $exit_code -eq 0 ]; then
+    tmux display-message "✅ Command Success — Cmd: $cmd | Status: $exit_code"
     notify-send -u normal "Command Success ✅" "Cmd: $cmd\nStatus: $exit_code"
   else
+    tmux display-message "❌ Command Failed — Cmd: $cmd | Status: $exit_code"
     notify-send -u critical "Command Failed ❌" "Cmd: $cmd\nStatus: $exit_code"
   fi
 
@@ -73,6 +77,10 @@ nod() {
 }
 
 PS1='[\u@\h \W]\$ '
+if [[ -n "$TMUX" ]]; then
+    TMUX_SESSION=$(tmux display-message -p '#S' 2>/dev/null)
+    PS1="[TM:${TMUX_SESSION}] $PS1"
+fi
 
 #R='\[\e[38;2;255;100;100m\]'
 #G='\[\e[38;2;100;255;100m\]'
