@@ -428,6 +428,19 @@ lua << EOF
 local fzf = require("fzf-lua")
 
 fzf.setup({
+  buffers = {
+    actions = {
+      ["ctrl-d"] = {
+        fn = function(selected)
+          for _, e in ipairs(selected) do
+            local bufnr = tonumber(e:match("[(%d+)]"))
+            if bufnr then vim.cmd("bdelete! " .. bufnr) end
+          end
+        end,
+        reload = true,
+      },
+    }
+  },
   grep = {
     actions = {
         ["Alt-l"] = {
