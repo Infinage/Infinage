@@ -180,6 +180,7 @@ require('nvim-treesitter.configs').setup {
         ["ii"] = "@conditional.inner",
         ["al"] = "@loop.outer",
         ["il"] = "@loop.inner",
+        ["i/"] = "@comment.inner",
         ["a/"] = "@comment.outer",
       },
     },
@@ -189,12 +190,18 @@ require('nvim-treesitter.configs').setup {
       goto_next_start = {
         ["]1"] = "@class.outer",
         ["]2"] = "@function.outer",
-        ["]3"] = "@block.inner",
+        ["]3"] = "@block.outer",
+        ["]4"] = "@loop.outer",
+        ["]5"] = "@conditional.outer",
+        ["]6"] = "@return.inner",
       },
       goto_previous_start = {
         ["[1"] = "@class.outer",
         ["[2"] = "@function.outer",
-        ["[3"] = "@block.inner",
+        ["[3"] = "@block.outer",
+        ["[4"] = "@loop.outer",
+        ["[5"] = "@conditional.outer",
+        ["[6"] = "@return.outer",
       },
     },
   }
@@ -416,12 +423,6 @@ nnoremap <silent> <A-k> :call ScrollPopup(-1)<CR>
 " Scroll right left with keybinds
 nnoremap <A-l> 20zl
 nnoremap <A-h> 20zh
-
-" Scroll half a page with C-M and C-N
-nnoremap <C-m> <C-u>
-nnoremap <C-n> <C-d>
-vnoremap <C-m> <C-u>
-vnoremap <C-n> <C-d>
 
 " Shortcuts for FZF-Lua
 lua << EOF
