@@ -71,12 +71,12 @@ lua << EOF
 local oil = require("oil")
 oil.setup({
   columns = { "icon", "permissions", "size", "mtime" },
-  view_options = {
-    show_hidden = true,
-  },
+  view_options = { show_hidden = true, },
   keymaps = {
     ["`"] = false,
     ["!"] = "actions.open_terminal",
+    ["<C-v>"] = { "actions.select", opts = { vertical = true } },
+    ["<C-s>"] = { "actions.select", opts = { horizontal = true } },
     ["<C-Y>"] = "actions.yank_entry",
     ["<C-y>"] = { 
         callback = function()
