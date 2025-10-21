@@ -1,0 +1,3 @@
+set startup-quietly on
+set debuginfod enabled off
+set index-cache enabled on
