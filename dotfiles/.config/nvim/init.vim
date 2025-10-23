@@ -105,7 +105,7 @@ local cmp = require('cmp')
 vim.lsp.config('clangd', {
   capabilities = capabilities,
   cmd = { 
-    "clangd", "--background-index", "--clang-tidy", "-j=8", 
+    "clangd", "--query-driver=**", "--background-index", "--clang-tidy", "-j=8", 
     "--pch-storage=memory", "--malloc-trim", "--limit-references=100",
     "--limit-results=50", --"--experimental-modules-support"
   },
@@ -367,6 +367,12 @@ nnoremap <leader>zz :tab sb<CR>
 nnoremap [t :tabprevious<CR>
 nnoremap ]t :tabnext<CR>
 
+" Swap keymaps for quickfix navigation
+nnoremap ]Q :cnfile<CR>
+nnoremap [Q :cpfile<CR>
+nnoremap ]<C-q> :clast<CR>
+nnoremap [<C-q> :crewind<CR>
+
 " Disable S-Tab in insert mode - we would be using it for autocomplete
 inoremap <S-Tab> <Nop>
 
@@ -429,6 +435,22 @@ lua << EOF
 local fzf = require("fzf-lua")
 
 fzf.setup({
+  files = {
+    actions = {
+        ['ctrl-y'] = {
+            fn = function(selected)
+              local clean = {}
+              for _, entry in ipairs(selected) do
+                entry = (entry:gsub('^[^%w]*([%w].*)$', '%1'))
+                entry = vim.fn.fnamemodify(entry, ':p')
+                table.insert(clean, entry)
+              end
+              vim.fn.setreg('+', table.concat(clean, '\n'))
+              vim.notify('Copied selection to clipboard', vim.log.levels.INFO)
+            end, exec_silent = true,
+        },
+    }
+  },
   buffers = {
     actions = {
       ["ctrl-d"] = {
@@ -631,6 +653,7 @@ nnoremap <leader>fg :lua require('fzf-lua').git_bcommits()<CR>
 vnoremap <leader>fg <cmd>FzfLua git_bcommits<CR>
 nnoremap <leader>fG :lua require('fzf-lua').git_commits()<CR>
 nnoremap <leader>fz :lua require('fzf-lua').builtin()<CR>
+nnoremap <leader>fm :lua require('fzf-lua').marks({marks = "%u"})<CR>
 nnoremap <leader>fM :lua require('fzf-lua').manpages()<CR>
 nnoremap <leader>fp :lua FzfKill()<CR>
 
@@ -747,39 +770,43 @@ function! ToggleBookmark()
   endif
 endfunction
 
-" Populate all global bookmarks to a quickfix list
-function! GlobalMarksToQuickfix()
-  let l:qf = []
+" Jump to next or previous bookmark (A-Z)
+function! NavigateBookmark(direction)
+  " static variable inside function
+  if !exists("t:last_bookmark")
+      let t:last_bookmark = ''
+  endif
 
-  for m in getmarklist()
-    let mark = m['mark'][1]
-    let file = get(m, 'file', '')
-    let pos  = get(m, 'pos', [])
-
-    " Only uppercase global marks
-    if matchstr(mark, '^[A-Z]$') != ''
-      call add(l:qf, {
-            \ 'filename': file == ''? file: fnamemodify(file, ':p'),
-            \ 'lnum': get(pos, 1, 0),
-            \ 'col': get(pos, 2, 0),
-            \ 'text': 'Mark ' . mark,
-            \ })
-    endif
-  endfor
-
-  if empty(l:qf)
-    echohl WarningMsg | echom "No global marks found" | echohl None
+  " Filter and sort marks (A-Z)
+  let marks = filter(getmarklist(), {_, m -> m.mark[1] =~# '^[A-Z]$'})
+  if empty(marks)
+    echohl WarningMsg | echom "No bookmarks found" | echohl None
     return
   endif
 
-  " Populate quickfix list and open
-  call setqflist([], ' ', {'title': 'Global Marks', 'items': l:qf})
-  copen
+  "call sort(marks, {a,b -> a.mark < b.mark ? -1 : a.mark > b.mark ? 1 : 0})
+
+  " Find current mark index
+  let len = len(marks)
+  let mark_names = map(copy(marks), {_,m -> m.mark})
+  let idx = index(mark_names, t:last_bookmark)
+
+  " If last mark isn't set/found, set starting index based on direction
+  if idx == -1
+      let idx = a:direction > 0 ? -1 : 0
+  endif
+
+  " Jump to the mark and update tracker
+  let m = marks[(idx + a:direction + len) % len]
+  let t:last_bookmark = m.mark
+  execute "normal! " . m.mark | redraw
+  echohl None | echom "At bookmark: " . t:last_bookmark[1] | echohl None
 endfunction
 
-" Map to toggle bookmarking a line and to display all in a qf list
+" Map to toggle bookmarking a line and jumping across bookmarks
 nnoremap <silent> m` :call ToggleBookmark()<CR>
-nnoremap <silent> <leader>fm :call GlobalMarksToQuickfix()<CR>
+nnoremap ]` :call NavigateBookmark(1)<CR>
+nnoremap [` :call NavigateBookmark(-1)<CR>
 
 " Change to project root based on .git (or other patterns)
 function! Rooter()
