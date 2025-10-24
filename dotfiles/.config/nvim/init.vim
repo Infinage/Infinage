@@ -19,6 +19,7 @@ Plug 'nvim-lualine/lualine.nvim'
 Plug 'nvim-treesitter/nvim-treesitter'
 Plug 'nvim-treesitter/nvim-treesitter-textobjects'
 Plug 'ggandor/leap.nvim'
+Plug 'olimorris/codecompanion.nvim'
 call plug#end()
 
 " Setup lualine
@@ -126,6 +127,7 @@ cmp.setup {
   }),
   sources = {
     { name = 'nvim_lsp' },
+    { name = 'codecompanion' },
     {  name = 'buffer',
         option = {
             get_bufnrs = function()
@@ -706,6 +708,31 @@ EOF
 lua vim.keymap.set({'n', 'x', 'o'}, 's', '<Plug>(leap)')
 lua vim.keymap.set('n', 'S', '<Plug>(leap-from-window)')
 
+" Codecompanion Setup
+lua << EOF
+  require("codecompanion").setup({
+    strategies = {
+        chat = { adapter = "gemini", },
+        inline = { adapter = "gemini", },
+        cmd = { adapter = "gemini", }
+    },
+    adapters = {
+      http = {
+        gemini = function()
+          return require("codecompanion.adapters").extend("gemini", {
+            env = { api_key = os.getenv("GEMINI_API_KEY"), },
+          })
+        end,
+      },
+    },
+  })
+EOF
+ 
+" Keymaps for codecompanion
+nnoremap <silent> <leader>C :CodeCompanionChat Toggle<CR>
+vnoremap <silent> <leader>C <cmd>CodeCompanionChat Toggle<CR>
+vnoremap <silent> <leader>ll :CodeCompanionChat Add<CR>
+
 " Navigate across files using jump list
 function! JumpToNextBufferInJumplist(dir) " 1=forward, -1=backward
     let jl = getjumplist()
@@ -771,42 +798,70 @@ function! ToggleBookmark()
 endfunction
 
 " Jump to next or previous bookmark (A-Z)
-function! NavigateBookmark(direction)
-  " static variable inside function
+function! NavigateBookmark(direction, ...) abort
+  " static variable to track last bookmark (for global navigation)
   if !exists("t:last_bookmark")
       let t:last_bookmark = ''
   endif
 
-  " Filter and sort marks (A-Z)
-  let marks = filter(getmarklist(), {_, m -> m.mark[1] =~# '^[A-Z]$'})
-  if empty(marks)
+  " Get optional buffer number arg
+  let l:bufnum = get(a:, 1, 0)
+
+  " Filter only for A-Z (filter by buffer no if provided)
+  let l:marks = filter(getmarklist(), {_, m ->
+      \ (m.mark[1] =~# '^[A-Z]$') &&
+      \ (l:bufnum ==# 0 || m.pos[0] == l:bufnum)
+      \ })
+
+  if empty(l:marks)
     echohl WarningMsg | echom "No bookmarks found" | echohl None
     return
   endif
 
-  "call sort(marks, {a,b -> a.mark < b.mark ? -1 : a.mark > b.mark ? 1 : 0})
+  " --- Buffer-specific mode ---
+  if l:bufnum > 0
+    call sort(l:marks, {a,b -> a.pos[1] - b.pos[1]}) " Sort by line#
+    let l:cur_line = line('.')
+    let l:next_idx = -1
 
-  " Find current mark index
-  let len = len(marks)
-  let mark_names = map(copy(marks), {_,m -> m.mark})
-  let idx = index(mark_names, t:last_bookmark)
+    " Find next or previous mark based on direction
+    for i in range(len(l:marks))
+      if a:direction > 0 && l:marks[i].pos[1] > l:cur_line
+        let l:next_idx = i | break
+      elseif a:direction < 0 && l:marks[i].pos[1] < l:cur_line
+        let l:next_idx = i
+      endif
+    endfor
+    if l:next_idx == -1 " Handle wrap-around
+      let l:next_idx = a:direction > 0 ? 0 : len(l:marks) - 1
+    endif
+    let l:m = l:marks[l:next_idx]
+    execute l:m.pos[1]
 
-  " If last mark isn't set/found, set starting index based on direction
-  if idx == -1
-      let idx = a:direction > 0 ? -1 : 0
+  " --- Global alphabetical mode ---
+  else
+    let l:len = len(l:marks)
+    let l:mark_names = map(copy(l:marks), {_,m -> m.mark})
+    let l:idx = index(l:mark_names, t:last_bookmark)
+    if l:idx == -1 " Handle wrap around
+        let l:idx = a:direction > 0 ? -1 : 0
+    endif
+    let l:m = l:marks[(l:idx + a:direction + l:len) % l:len]
+    execute "normal! " . l:m.mark | redraw
   endif
 
-  " Jump to the mark and update tracker
-  let m = marks[(idx + a:direction + len) % len]
-  let t:last_bookmark = m.mark
-  execute "normal! " . m.mark | redraw
+  let t:last_bookmark = l:m.mark
+  normal! zz
   echohl None | echom "At bookmark: " . t:last_bookmark[1] | echohl None
+
 endfunction
 
 " Map to toggle bookmarking a line and jumping across bookmarks
 nnoremap <silent> m` :call ToggleBookmark()<CR>
 nnoremap ]` :call NavigateBookmark(1)<CR>
 nnoremap [` :call NavigateBookmark(-1)<CR>
+nnoremap } :call NavigateBookmark(1, bufnr('%'))<CR>
+nnoremap { :call NavigateBookmark(-1, bufnr('%'))<CR>
 
 " Change to project root based on .git (or other patterns)
 function! Rooter()
