@@ -649,15 +649,18 @@ EOF
 nnoremap <leader>fb :lua require('fzf-lua').buffers()<CR>
 nnoremap <leader>ff :lua require('fzf-lua').files({resume=true})<CR>
 nnoremap <leader>fs :lua require('fzf-lua').blines({resume=true})<CR>
-vnoremap <leader>fs <cmd>FzfLua blines<CR>
 nnoremap <leader>fS :lua require('fzf-lua').live_grep_native()<CR>
 nnoremap <leader>fg :lua require('fzf-lua').git_bcommits()<CR>
-vnoremap <leader>fg <cmd>FzfLua git_bcommits<CR>
 nnoremap <leader>fG :lua require('fzf-lua').git_commits()<CR>
 nnoremap <leader>fz :lua require('fzf-lua').builtin()<CR>
 nnoremap <leader>fm :lua require('fzf-lua').marks({marks = "%u"})<CR>
 nnoremap <leader>fM :lua require('fzf-lua').manpages()<CR>
 nnoremap <leader>fp :lua FzfKill()<CR>
+nnoremap <leader>fk :lua require('fzf-lua').lsp_document_symbols()<CR>
+vnoremap <leader>fs <cmd>FzfLua blines resume=true<CR>
+vnoremap <leader>fg <cmd>FzfLua git_bcommits<CR>
+vnoremap <leader>fk <cmd>FzfLua lsp_document_symbols<CR>
+
 
 " Custom mappings for LSP
 nnoremap <silent> [e        :lua vim.diagnostic.goto_prev()<CR>
@@ -714,7 +717,8 @@ lua << EOF
     strategies = {
         chat = { adapter = "gemini", },
         inline = { adapter = "gemini", },
-        cmd = { adapter = "gemini", }
+        cmd = { adapter = "gemini", },
+        agent = { adapter = "gemini", }
     },
     adapters = {
       http = {
@@ -730,7 +734,7 @@ EOF
  
 " Keymaps for codecompanion
 nnoremap <silent> <leader>C :CodeCompanionChat Toggle<CR>
-vnoremap <silent> <leader>C <cmd>CodeCompanionChat Toggle<CR>
+vnoremap <silent> <leader>C :<C-u>call feedkeys(":'<,'>CodeCompanion ")<CR>
 vnoremap <silent> <leader>ll :CodeCompanionChat Add<CR>
 
 " Navigate across files using jump list
@@ -749,7 +753,7 @@ function! JumpToNextBufferInJumplist(dir) " 1=forward, -1=backward
             let n = (i - curjump) * a:dir
             execute "silent normal! " . n . jumpcmdchr
             let found = 1
-            silent! normal! g`"
+            silent! normal! g`"zz
             break
         endif
     endfor
