@@ -1,0 +1,18 @@
+#!/usr/bin/bash
+# Cross-platform copy helper
+
+input=$(cat)
+if [ -n "$TMUX" ] && command -v print >/dev/null 2>&1; then
+    print "$input"
+elif command -v pbcopy >/dev/null 2>&1; then
+    printf "%s" "$input" | pbcopy
+elif command -v wl-copy >/dev/null 2>&1; then
+    printf "%s" "$input" | wl-copy
+elif command -v xclip >/dev/null 2>&1; then
+    printf "%s" "$input" | xclip -selection clipboard
+elif command -v xsel >/dev/null 2>&1; then
+    printf "%s" "$input" | xsel --clipboard --input
+else
+    echo "No clipboard utility found" >&2
+    exit 1
+fi

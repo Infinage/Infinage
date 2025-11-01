@@ -4,7 +4,8 @@ FROM alpine:latest
 RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories && \
     apk update && \
     apk add --no-cache bash git g++ gdb \
-    clang-extra-tools neovim stow ripgrep
+    clang-extra-tools neovim stow ripgrep \
+    fzf tmux zoxide make cmake mandoc
 
 # Clone dotfiles and apply with stow
 WORKDIR /root

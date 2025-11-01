@@ -95,16 +95,18 @@ eval "$(fzf --bash)"
 eval "$(zoxide init bash)"
 
 # Custom function to grep and kill processes
-alias kz="(date; ps -ef) |\
+alias pz="(date; ps -ef) |\
 fzf \
   --multi \
   --bind='alt-a:toggle-all' \
   --bind='ctrl-r:reload(date; ps -ef)' \
   --bind='ctrl-x:execute-silent(echo {+2} | xargs -r kill -9)+reload(date; ps -ef)' \
+  --bind='ctrl-y:execute(echo {+2} | ~/bin/copy)' \
+  --bind='alt-y:execute(echo {+3} | ~/bin/copy)' \
   --bind='enter:ignore' \
   --bind='ctrl-f:half-page-down,ctrl-b:half-page-up' \
   --bind='alt-h:backward-char,alt-l:forward-char' \
-  --header=$'CTRL-R reload | ALT-A select all | ENTER kill | CTRL-X kill\n' \
+  --header=$'C-R reload | A-A select all | C-X kill | C-Y copy PID | A-Y copy PPID\n' \
   --header-lines=2 \
   --preview='echo {}' \
   --preview-window=down,3,wrap \

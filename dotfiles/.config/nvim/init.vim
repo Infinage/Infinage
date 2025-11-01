@@ -451,14 +451,29 @@ fzf.setup({
               vim.notify('Copied selection to clipboard', vim.log.levels.INFO)
             end, exec_silent = true,
         },
+        ["ctrl-d"] = {
+          fn = function(selected)
+            if not selected or #selected == 0 then return end
+            local choice = vim.fn.confirm("Delete " .. #selected .. " file(s)?", "&Yes\n&No", 2)
+            if choice ~= 1 then return end
+            for _, entry in ipairs(selected) do
+              entry = (entry:gsub('^[^%w]*([%w].*)$', '%1'))
+              local path = vim.fn.fnamemodify(entry, ':p')
+              if vim.fn.filereadable(path) == 1 then os.remove(path) end
+            end
+          end, reload = true,
+        },
     }
   },
   buffers = {
     actions = {
       ["ctrl-d"] = {
         fn = function(selected)
+          if not selected or #selected == 0 then return end
+          local choice = vim.fn.confirm("Force delete " .. #selected .. " buffer(s)?", "&Yes\n&No", 2)
+          if choice ~= 1 then return end
           for _, e in ipairs(selected) do
-            local bufnr = tonumber(e:match("[(%d+)]"))
+            local bufnr = tonumber(e:match("%[(%d+)%]"))
             if bufnr then vim.cmd("bdelete! " .. bufnr) end
           end
         end,
@@ -646,20 +661,20 @@ end
 EOF
 
 " FZF keymaps for useful utils
-nnoremap <leader>fb :lua require('fzf-lua').buffers()<CR>
-nnoremap <leader>ff :lua require('fzf-lua').files({resume=true})<CR>
-nnoremap <leader>fs :lua require('fzf-lua').blines({resume=true})<CR>
-nnoremap <leader>fS :lua require('fzf-lua').live_grep_native()<CR>
-nnoremap <leader>fg :lua require('fzf-lua').git_bcommits()<CR>
-nnoremap <leader>fG :lua require('fzf-lua').git_commits()<CR>
-nnoremap <leader>fz :lua require('fzf-lua').builtin()<CR>
-nnoremap <leader>fm :lua require('fzf-lua').marks({marks = "%u"})<CR>
-nnoremap <leader>fM :lua require('fzf-lua').manpages()<CR>
-nnoremap <leader>fp :lua FzfKill()<CR>
-nnoremap <leader>fk :lua require('fzf-lua').lsp_document_symbols()<CR>
-vnoremap <leader>fs <cmd>FzfLua blines resume=true<CR>
-vnoremap <leader>fg <cmd>FzfLua git_bcommits<CR>
-vnoremap <leader>fk <cmd>FzfLua lsp_document_symbols<CR>
+nnoremap <silent><leader>fb :lua require('fzf-lua').buffers()<CR>
+nnoremap <silent><leader>ff :lua require('fzf-lua').files({resume=true})<CR>
+nnoremap <silent><leader>fs :lua require('fzf-lua').blines({resume=true})<CR>
+nnoremap <silent><leader>fS :lua require('fzf-lua').live_grep({resume=true})<CR>
+nnoremap <silent><leader>fg :lua require('fzf-lua').git_bcommits()<CR>
+nnoremap <silent><leader>fG :lua require('fzf-lua').git_commits()<CR>
+nnoremap <silent><leader>fz :lua require('fzf-lua').builtin()<CR>
+nnoremap <silent><leader>fm :lua require('fzf-lua').marks({marks = "%u"})<CR>
+nnoremap <silent><leader>fM :lua require('fzf-lua').manpages()<CR>
+nnoremap <silent><leader>fp :lua FzfKill()<CR>
+nnoremap <silent><leader>fk :lua require('fzf-lua').lsp_document_symbols()<CR>
+vnoremap <silent><leader>fs <cmd>FzfLua blines resume=true<CR>
+vnoremap <silent><leader>fg <cmd>FzfLua git_bcommits<CR>
+vnoremap <silent><leader>fk <cmd>FzfLua lsp_document_symbols<CR>
 
 
 " Custom mappings for LSP
@@ -713,23 +728,26 @@ lua vim.keymap.set('n', 'S', '<Plug>(leap-from-window)')
 
 " Codecompanion Setup
 lua << EOF
-  require("codecompanion").setup({
-    strategies = {
-        chat = { adapter = "gemini", },
-        inline = { adapter = "gemini", },
-        cmd = { adapter = "gemini", },
-        agent = { adapter = "gemini", }
-    },
-    adapters = {
-      http = {
-        gemini = function()
-          return require("codecompanion.adapters").extend("gemini", {
-            env = { api_key = os.getenv("GEMINI_API_KEY"), },
-          })
-        end,
-      },
-    },
+local function make_adapter(name, env_key)
+  return require("codecompanion.adapters").extend(name, {
+    env = { api_key = vim.fn.system("pass show " .. name .. "/api_key"):gsub("\n", "") }
+    --env = { api_key = os.getenv(name .. "_API_KEY"), },
   })
+end
+
+require("codecompanion").setup({
+  strategies = {
+      chat = { adapter = "gemini", },
+      inline = { adapter = "gemini", },
+      cmd = { adapter = "gemini", },
+      agent = { adapter = "gemini", }
+  },
+  adapters = {
+    http = {
+      gemini = function() return make_adapter("gemini", "GEMINI_API_KEY") end,
+    },
+  },
+})
 EOF
  
 " Keymaps for codecompanion
