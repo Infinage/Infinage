@@ -107,8 +107,8 @@ vim.lsp.config('clangd', {
   capabilities = capabilities,
   cmd = { 
     "clangd", "--query-driver=**", "--background-index", "--clang-tidy", "-j=8", 
-    "--pch-storage=memory", "--malloc-trim", "--limit-references=100",
-    "--limit-results=50", --"--experimental-modules-support"
+    "--pch-storage=memory", "--limit-references=100", "--limit-results=50", 
+    -- "--experimental-modules-support"
   },
 })
 
@@ -248,8 +248,8 @@ augroup custom_indentation
     autocmd Filetype javascript,typescript,html,json,vim setlocal tabstop=2 shiftwidth=2 softtabstop=2
 augroup END
 
-" Highlight cursor line underneath the cursor horizontally.
-set cursorline
+" Highlight cursor line underneath the cursor horizontally (disabled for perf)
+set nocursorline
 
 " Searching related stuff
 set ignorecase
@@ -664,7 +664,7 @@ EOF
 nnoremap <silent><leader>fb :lua require('fzf-lua').buffers()<CR>
 nnoremap <silent><leader>ff :lua require('fzf-lua').files({resume=true})<CR>
 nnoremap <silent><leader>fs :lua require('fzf-lua').blines({resume=true})<CR>
-nnoremap <silent><leader>fS :lua require('fzf-lua').live_grep({resume=true})<CR>
+nnoremap <silent><leader>fS :lua require('fzf-lua').live_grep_native()<CR>
 nnoremap <silent><leader>fg :lua require('fzf-lua').git_bcommits()<CR>
 nnoremap <silent><leader>fG :lua require('fzf-lua').git_commits()<CR>
 nnoremap <silent><leader>fz :lua require('fzf-lua').builtin()<CR>
@@ -723,15 +723,17 @@ end, {})
 EOF
 
 " Keymaps for Leap.nvim jump plugin
-lua vim.keymap.set({'n', 'x', 'o'}, 's', '<Plug>(leap)')
-lua vim.keymap.set('n', 'S', '<Plug>(leap-from-window)')
+lua << EOF
+require('leap').opts.safe_labels = ''
+vim.keymap.set({'n', 'x', 'o'}, 's', '<Plug>(leap)')
+vim.keymap.set('n', 'S', '<Plug>(leap-from-window)')
+EOF
 
 " Codecompanion Setup
 lua << EOF
 local function make_adapter(name, env_key)
   return require("codecompanion.adapters").extend(name, {
     env = { api_key = vim.fn.system("pass show " .. name .. "/api_key"):gsub("\n", "") }
-    --env = { api_key = os.getenv(name .. "_API_KEY"), },
   })
 end
 
@@ -855,6 +857,7 @@ function! NavigateBookmark(direction, ...) abort
       endif
     endfor
     if l:next_idx == -1 " Handle wrap-around
+      let isWrapped = 1
       let l:next_idx = a:direction > 0 ? 0 : len(l:marks) - 1
     endif
     let l:m = l:marks[l:next_idx]
@@ -874,7 +877,8 @@ function! NavigateBookmark(direction, ...) abort
 
   let t:last_bookmark = l:m.mark
   normal! zz
-  echohl None | echom "At bookmark: " . t:last_bookmark[1] | echohl None
+  let l:wrap_msg = exists('l:isWrapped') && l:isWrapped ? "(Wrapped) " : ""
+  echohl None | echom l:wrap_msg . "At bookmark: " . t:last_bookmark[1] | echohl None
 
 endfunction
 
