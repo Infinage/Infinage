@@ -203,7 +203,21 @@ require('nvim-treesitter.configs').setup {
         ["[3"] = "@block.outer",
         ["[4"] = "@loop.outer",
         ["[5"] = "@conditional.outer",
-        ["[6"] = "@return.outer",
+        ["[6"] = "@return.inner",
+      },
+      goto_next_end = {
+        ["}1"] = "@class.outer",
+        ["}2"] = "@function.outer",
+        ["}3"] = "@block.outer",
+        ["}4"] = "@loop.outer",
+        ["}5"] = "@conditional.outer",
+      },
+      goto_previous_end = {
+        ["{1"] = "@class.outer",
+        ["{2"] = "@function.outer",
+        ["{3"] = "@block.outer",
+        ["{4"] = "@loop.outer",
+        ["{5"] = "@conditional.outer",
       },
     },
   }
@@ -286,6 +300,9 @@ set splitright splitbelow
 
 " Disable search count (lualine displays it)
 set shortmess=S
+
+" Setup persistent undo
+set undofile
 
 " Auto close brackets (quotes, paranthesis, etc)
 inoremap " ""<left>
@@ -421,6 +438,10 @@ nnoremap <leader>gD :G! difftool -y<CR>
 nnoremap <leader>gl :0Gllog<CR>
 nnoremap gb :G blame<CR>
 
+" Diffput and diffget support in visual mode
+vnoremap <silent> <leader>dg :<C-U>execute "'<,'>diffget"<CR>
+vnoremap <silent> <leader>dp :<C-U>execute "'<,'>diffput"<CR>
+
 " Fold everything in Fugitive windows
 autocmd FileType git setlocal foldmethod=syntax | silent! normal! ggVGzc
 
@@ -437,6 +458,7 @@ lua << EOF
 local fzf = require("fzf-lua")
 
 fzf.setup({
+  blines = { fzf_opts = { ["--no-sort"] = true } },
   files = {
     actions = {
         ['ctrl-y'] = {
@@ -590,79 +612,12 @@ fzf.setup({
       },
   },
 })
-
--- Function to fuzzy search and kill running processes
-function FzfKill()
-  local function ps_cmd()
-    return "ps -eo pid,%cpu,%mem,user,cmd --sort=-%cpu" .. 
-    " | cut -c1-100"
-  end
-
-  local function ps_preview(selected)
-    local pid = selected[1]:match("^%s*(.-)%s*$"):match("^(%d+)")
-    local ps_cmd = string.format("ps -p %s -o pid=,ppid=,user=,%%cpu=,%%mem=,etime=,cmd=", pid)
-    local handle = io.popen(ps_cmd)
-    local result = handle:read("*a")
-    handle:close()
-
-    -- Parse output (ps returns a single line)
-    local pid_out, ppid, user, cpu, mem, etime, cmd = result:match(
-      "(%d+)%s+(%d+)%s+(%S+)%s+(%S+)%s+(%S+)%s+(%S+)%s+(.+)"
-    )
-
-    if not pid_out then return "Process not found" end
-    return string.format([[
-PID:          %s
-PPID:         %s
-Program:      %s
-User:         %s
-Uptime:       %s
-Memory usage: %s%%
-CPU Usage:    %s%%
-Command:      %s
-    ]], pid_out, ppid, cmd:match("([^%s]+)"), user, etime, mem, cpu, cmd)
-  end
-
-  fzf.fzf_exec(ps_cmd(), {
-    prompt = "Processes> ",
-    preview = ps_preview,
-    actions = {
-      ["ctrl-x"] = function(selected)
-        local killed_count = 0
-        for _, line in ipairs(selected) do
-          local pid = line:match("^%s*(.-)%s*$"):match("^(%d+)")
-          if pid then
-            vim.fn.system({ "kill", "-9", pid })
-            killed_count = killed_count + 1
-          end
-        end
-        vim.defer_fn(function() -- reliably output log message
-          vim.notify("Killed " .. killed_count .. " process(es)")
-        end, 10)
-      end,
-    },
-    keymap = {
-      fzf = {
-        ["ctrl-r"] = "reload:" .. ps_cmd(),
-        ["enter"] = "ignore",
-      },
-    },
-    fzf_opts = { ["--multi"] = true },
-    winopts = {
-      width = 0.8,
-      preview = {
-        vertical = "down:45%",
-        wrap = true,
-      },
-    },
-    header = [[CTRL-R reload | ALT-A toggle all | CTRL-X kill]],
-  })
-end
 EOF
 
 " FZF keymaps for useful utils
 nnoremap <silent><leader>fb :lua require('fzf-lua').buffers()<CR>
 nnoremap <silent><leader>ff :lua require('fzf-lua').files({resume=true})<CR>
+nnoremap <silent><leader>fl :lua require('fzf-lua').lines({resume=true})<CR>
 nnoremap <silent><leader>fs :lua require('fzf-lua').blines({resume=true})<CR>
 nnoremap <silent><leader>fS :lua require('fzf-lua').live_grep_native()<CR>
 nnoremap <silent><leader>fg :lua require('fzf-lua').git_bcommits()<CR>
@@ -670,7 +625,7 @@ nnoremap <silent><leader>fG :lua require('fzf-lua').git_commits()<CR>
 nnoremap <silent><leader>fz :lua require('fzf-lua').builtin()<CR>
 nnoremap <silent><leader>fm :lua require('fzf-lua').marks({marks = "%u"})<CR>
 nnoremap <silent><leader>fM :lua require('fzf-lua').manpages()<CR>
-nnoremap <silent><leader>fp :lua FzfKill()<CR>
+nnoremap <silent><leader>fo :lua require('fzf-lua').oldfiles()<CR>
 nnoremap <silent><leader>fk :lua require('fzf-lua').lsp_document_symbols()<CR>
 vnoremap <silent><leader>fs <cmd>FzfLua blines resume=true<CR>
 vnoremap <silent><leader>fg <cmd>FzfLua git_bcommits<CR>
@@ -734,6 +689,7 @@ lua << EOF
 local function make_adapter(name, env_key)
   return require("codecompanion.adapters").extend(name, {
     env = { api_key = vim.fn.system("pass show " .. name .. "/api_key"):gsub("\n", "") }
+    --env = { api_key = os.getenv(name .. "_API_KEY"), },
   })
 end
 

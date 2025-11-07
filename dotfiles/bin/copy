@@ -1,10 +1,11 @@
-#!/usr/bin/bash
+#!/bin/bash
 # Cross-platform copy helper
 
-input=$(cat)
-if [ -n "$TMUX" ] && command -v print >/dev/null 2>&1; then
-    print "$input"
-elif command -v pbcopy >/dev/null 2>&1; then
+# If $* is non empty use that, else use cat
+# Work with both `echo hi | copy` and `copy hi`
+input="${*:-$(cat)}"
+
+if command -v pbcopy >/dev/null 2>&1; then
     printf "%s" "$input" | pbcopy
 elif command -v wl-copy >/dev/null 2>&1; then
     printf "%s" "$input" | wl-copy
@@ -13,6 +14,5 @@ elif command -v xclip >/dev/null 2>&1; then
 elif command -v xsel >/dev/null 2>&1; then
     printf "%s" "$input" | xsel --clipboard --input
 else
-    echo "No clipboard utility found" >&2
-    exit 1
+    printf "\033]52;c;%s\033\\" "$(printf "%s" "$input" | base64 | tr -d '\n')"
 fi

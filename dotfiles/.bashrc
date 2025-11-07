@@ -1,36 +1,49 @@
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
-# --- make dir (if needed) and cd into it --------------------------
-mkdircd () {
-    # exit if no argument
-    [ -z "$1" ] && { echo "usage: mkdircd <dir>"; return 1; }
-    # create the directory if it doesn't already exist
-    mkdir -p -- "$1" && cd -- "$1"
-}
-
 # shorter alias
 alias ls='ls --color=auto'
 alias grep='grep --color=auto'
-alias mcd='mkdircd'
 alias nv='nvim'
 alias lpd='list_process_descendants'
 alias zq='zoxide query'
 alias zqi='zoxide query --interactive'
 
-# Compile & run a cpp source inside gdb
-cdb() {
-    if [ $# -lt 1 ]; then
-        echo "Usage: cdb <source.cpp> [compile flags]"
-        return 1
+# Neo + Fzf + Zoxide
+nz() {
+    local dir file matches count arg="$1"
+
+    # No args → fzf in current directory
+    if [ $# -eq 0 ]; then
+        file="$(fzf)" || return
+        [ -n "$file" ] && nvim "$file"; return
     fi
 
-    src="$1"
-    exe="${src%.*}.out"
-    shift
+    # Single argument → resolve as file or folder first
+    if [ $# -eq 1 ]; then
+        [ -f "$arg" ] && { nvim "$arg"; return; }
+        if [ -d "$arg" ]; then
+            file="$(find "$arg" -type f 2>/dev/null | fzf)"
+            [ -n "$file" ] && nvim "$file"; return
+        fi
+    fi
 
-    g++ -std=c++23 -ggdb "$src" -o "$exe" "$@" || return 1
-    gdb -q "./$exe"
+    # Multiple args or unresolved single arg → use zoxide
+    matches="$(zoxide query -l "$@")" || return
+    [ $? -ne 0 ] || [ -z "$matches" ] && echo "Could not resolve for: $*" && return
+    count="$(echo "$matches" | grep -c .)"
+
+    if [ "$count" -eq 1 ]; then
+        dir="$(echo "$matches" | head -n 1)"
+    else
+        dir="$(zoxide query --interactive "$@")" || return
+    fi
+
+    [ -z "$dir" ] && return
+
+    # Run fzf inside resolved directory
+    file="$(find "$dir" -type f 2>/dev/null | fzf)" || return
+    [ -n "$file" ] && nvim "$file"
 }
 
 # List all process descendents for input process ID
@@ -92,23 +105,33 @@ fi
 eval "$(fzf --bash)"
 
 # Setup zoxide for bash
+export _ZO_RESOLVE_SYMLINKS=1
 eval "$(zoxide init bash)"
 
 # Custom function to grep and kill processes
-alias pz="(date; ps -ef) |\
-fzf \
-  --multi \
-  --bind='alt-a:toggle-all' \
-  --bind='ctrl-r:reload(date; ps -ef)' \
-  --bind='ctrl-x:execute-silent(echo {+2} | xargs -r kill -9)+reload(date; ps -ef)' \
-  --bind='ctrl-y:execute(echo {+2} | ~/bin/copy)' \
-  --bind='alt-y:execute(echo {+3} | ~/bin/copy)' \
-  --bind='enter:ignore' \
-  --bind='ctrl-f:half-page-down,ctrl-b:half-page-up' \
-  --bind='alt-h:backward-char,alt-l:forward-char' \
-  --header=$'C-R reload | A-A select all | C-X kill | C-Y copy PID | A-Y copy PPID\n' \
-  --header-lines=2 \
-  --preview='echo {}' \
-  --preview-window=down,3,wrap \
-  --layout=reverse \
-  --height=80%"
+pz() {
+  # if argument is given, filter by user, else show all (-e)
+  local user_filter=${1:+-u $1}
+  [ -z "$user_filter" ] && user_filter="-e"
+
+  # build ps command dynamically; no -e flag so -u takes effect
+  local _pz="(date; ps $user_filter -o user,pid,ppid,stat,etime,time,comm,rss)"
+
+  eval "$_pz | \
+  fzf \
+    --multi \
+    --bind='alt-a:toggle-all' \
+    --bind='ctrl-r:reload($_pz)' \
+    --bind='ctrl-x:execute-silent(echo {+2} | xargs -r kill -9)+reload($_pz)' \
+    --bind='ctrl-y:execute(echo {+2} | ~/bin/copy)' \
+    --bind='alt-y:execute(echo {+3} | ~/bin/copy)' \
+    --bind='enter:execute(ps -p {2} -o args --no-header | ~/bin/copy)' \
+    --bind='ctrl-f:half-page-down,ctrl-b:half-page-up' \
+    --bind='alt-h:backward-char,alt-l:forward-char' \
+    --header=\$'C-R reload | A-A select all | C-X kill | C-Y copy PID | A-Y copy PPID\n' \
+    --header-lines=2 \
+    --preview='ps -p {2} -o args --no-header' \
+    --preview-window=down,3,wrap \
+    --layout=reverse \
+    --height=80%"
+}
