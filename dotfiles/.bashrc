@@ -1,6 +1,9 @@
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
+# Proper locale support
+export LANG=en_US.UTF-8
+
 # shorter alias
 alias ls='ls --color=auto'
 alias grep='grep --color=auto'
@@ -115,7 +118,7 @@ pz() {
   [ -z "$user_filter" ] && user_filter="-e"
 
   # build ps command dynamically; no -e flag so -u takes effect
-  local _pz="(date; ps $user_filter -o user,pid,ppid,stat,etime,time,comm,rss)"
+  local _pz="(date; ps $user_filter -o user,pid,ppid,stat,etime,comm,pmem,pcpu)"
 
   eval "$_pz | \
   fzf \

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 readonly LINE_NUMBER_PANE_WIDTH=3
 readonly LINE_NUMBER_UPDATE_DELAY=0.1
@@ -42,7 +42,7 @@ redraw_line_numbers(){
 
     printf "\e[38;2;$COLOR_ACTIVE_NUMBER_RGB;1m 0\e[0m"
 
-    if [ $lines -gt $(($cursor_line + 1)) ]; then
+    if [[ $lines -gt $(($cursor_line + 1)) ]]; then
         echo
         printf "\e[38;2;$COLOR_NUMBERS_RGB;2m"
         seq 1 $(($lines - $cursor_line - 2))
@@ -58,7 +58,7 @@ update_loop(){
     while is_in_copy_mode; do
         cursor_line=$(get_cursor_line)
 
-        if [ $cursor_line -ne $last_cursor_line ]; then
+        if [[ $cursor_line -ne $last_cursor_line ]]; then
             redraw_line_numbers $cursor_line
             last_cursor_line=$cursor_line
         fi
@@ -75,7 +75,7 @@ restore_pane_width(){
 main(){
     local target_pane=$1
 
-    if [ -z $target_pane ]; then
+    if [[ -z $target_pane ]]; then
         open_line_number_split
         exit 0
     else

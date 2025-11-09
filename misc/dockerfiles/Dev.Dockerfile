@@ -5,7 +5,8 @@ RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositor
     apk update && \
     apk add --no-cache bash git g++ gdb \
     clang-extra-tools neovim stow ripgrep \
-    fzf tmux zoxide make cmake mandoc
+    fzf tmux zoxide make cmake mandoc \
+    procps ncurses
 
 # Clone dotfiles and apply with stow
 WORKDIR /root

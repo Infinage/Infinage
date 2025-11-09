@@ -3,6 +3,8 @@
 	name = infinage
 [core]
 	editor = nvim
+	autocrlf = true
+	fileMode = false
 [credential]
 	helper = store
 [diff]
