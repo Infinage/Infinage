@@ -3,7 +3,7 @@
 	name = infinage
 [core]
 	editor = nvim
-	autocrlf = true
+	autocrlf = false
 	fileMode = false
 [credential]
 	helper = store

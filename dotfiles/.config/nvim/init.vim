@@ -686,13 +686,6 @@ EOF
 
 " Codecompanion Setup
 lua << EOF
-local function make_adapter(name, env_key)
-  return require("codecompanion.adapters").extend(name, {
-    env = { api_key = vim.fn.system("pass show " .. name .. "/api_key"):gsub("\n", "") }
-    --env = { api_key = os.getenv(name .. "_API_KEY"), },
-  })
-end
-
 require("codecompanion").setup({
   strategies = {
       chat = { adapter = "gemini", },
@@ -702,7 +695,11 @@ require("codecompanion").setup({
   },
   adapters = {
     http = {
-      gemini = function() return make_adapter("gemini", "GEMINI_API_KEY") end,
+      gemini = function()
+        return require("codecompanion.adapters").extend("gemini", {
+          env = { api_key = "cmd:pass show google/gemini" },
+        })
+      end,
     },
   },
 })
