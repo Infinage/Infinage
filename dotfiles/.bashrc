@@ -24,9 +24,10 @@ nz() {
 
     # Single argument → resolve as file or folder first
     if [ $# -eq 1 ]; then
-        [ -f "$arg" ] && { nvim "$arg"; return; }
-        if [ -d "$arg" ]; then
-            file="$(find "$arg" -type f 2>/dev/null | fzf)"
+        resolved="$(readlink -f "$arg" 2>/dev/null || echo "$arg")"
+        [ -f "$resolved" ] && { nvim "$resolved"; return; }
+        if [ -d "$resolved" ]; then
+            file="$(find -L "$resolved" -type f 2>/dev/null | fzf)"
             [ -n "$file" ] && nvim "$file"; return
         fi
     fi
@@ -45,7 +46,7 @@ nz() {
     [ -z "$dir" ] && return
 
     # Run fzf inside resolved directory
-    file="$(find "$dir" -type f 2>/dev/null | fzf)" || return
+    file="$(find -L "$dir" -type f 2>/dev/null | fzf)" || return
     [ -n "$file" ] && nvim "$file"
 }
 

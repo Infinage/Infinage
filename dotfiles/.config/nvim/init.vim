@@ -392,6 +392,12 @@ nnoremap [Q :cpfile<CR>
 nnoremap ]<C-q> :clast<CR>
 nnoremap [<C-q> :crewind<CR>
 
+" Swap keymaps for loclist navigation
+nnoremap ]L :lnfile<CR>
+nnoremap [L :lpfile<CR>
+nnoremap ]<C-l> :llast<CR>
+nnoremap [<C-l> :lrewind<CR>
+
 " Disable S-Tab in insert mode - we would be using it for autocomplete
 inoremap <S-Tab> <Nop>
 
@@ -435,7 +441,7 @@ nmap [g <Plug>(GitGutterPrevHunk)
 " Fugitive keybinds
 nnoremap <leader>gd :Gdiffsplit!<CR>
 nnoremap <leader>gD :G! difftool -y<CR>
-nnoremap <leader>gl :0Gllog<CR>
+nnoremap <expr> <leader>gl ':Git log -n ' . v:count1 . '<CR>'
 nnoremap gb :G blame<CR>
 
 " Diffput and diffget support in visual mode
