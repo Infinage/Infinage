@@ -156,3 +156,27 @@ pz() {
     --layout=reverse \
     --height=80%"
 }
+
+# Monitor network sockets by port number or PID
+ports() {
+    case "$1" in
+        "")  watch -n 1 --differences ss -patun ;;
+        -h|--help)
+            echo "Usage: ports [-p pid | -P port]"
+            echo "  no args   → monitor all sockets"
+            echo "  -p <port> → monitor by port"
+            echo "  -P <pid>  → monitor by process ID"
+            ;;
+        -P)
+            ps -p "$2" &>/dev/null || { echo "pid $2 not found"; return 1; }
+            watch -n 1 --differences "ss -patun | grep -E 'pid=$2[,)]'"
+            ;;
+        -p)
+            watch -n 1 --differences "ss -patun | grep -E '[:.]$2\b'"
+            ;;
+        *)
+            echo "usage: ports [-p pid | -P port]"
+            ;;
+    esac
+}
+
