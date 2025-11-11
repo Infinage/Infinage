@@ -78,16 +78,8 @@ oil.setup({
     ["!"] = "actions.open_terminal",
     ["<C-v>"] = { "actions.select", opts = { vertical = true } },
     ["<C-s>"] = { "actions.select", opts = { horizontal = true } },
-    ["<C-Y>"] = "actions.yank_entry",
-    ["<C-y>"] = { 
-        callback = function()
-            local entry = oil.get_cursor_entry()
-            local dir = oil.get_current_dir()
-            if not entry or not dir then return end
-            vim.fn.setreg("+", vim.fn.fnamemodify(dir, ":.") .. entry.name)
-        end,
-        desc = "Copy relative file path of current entry",
-    },
+    ["<C-y>"] = { "actions.yank_entry", opts = { modify = ":." } },
+    ["<A-y>"] = "actions.yank_entry",
   }
 })
 
@@ -439,9 +431,10 @@ nmap ]g <Plug>(GitGutterNextHunk)
 nmap [g <Plug>(GitGutterPrevHunk)
 
 " Fugitive keybinds
-nnoremap <leader>gd :Gdiffsplit!<CR>
+nnoremap <leader>ds :Gvdiffsplit!<CR>
+nnoremap <leader>du :Gvdiffsplit! HEAD:%<CR>
 nnoremap <leader>gD :G! difftool -y<CR>
-nnoremap <expr> <leader>gl ':Git log -n ' . v:count1 . '<CR>'
+nnoremap <silent><leader>gl :<C-u>execute 'G log' (v:count ? '-n ' . v:count : '')<CR>
 nnoremap gb :G blame<CR>
 
 " Diffput and diffget support in visual mode
@@ -451,9 +444,11 @@ vnoremap <silent> <leader>dp :<C-U>execute "'<,'>diffput"<CR>
 " Fold everything in Fugitive windows
 autocmd FileType git setlocal foldmethod=syntax | silent! normal! ggVGzc
 
-" Scroll floating popups via Alt - J / K
-nnoremap <silent> <A-j> :call ScrollPopup( 1)<CR>
-nnoremap <silent> <A-k> :call ScrollPopup(-1)<CR>
+" Scroll floating popups
+nnoremap <silent> <A-j> :call ScrollPopup(  1)<CR>
+nnoremap <silent> <A-k> :call ScrollPopup( -1)<CR>
+nnoremap <silent> <A-n> :call ScrollPopup( 10)<CR>
+nnoremap <silent> <A-m> :call ScrollPopup(-10)<CR>
 
 " Scroll right left with keybinds
 nnoremap <A-l> 20zl
@@ -532,7 +527,22 @@ fzf.setup({
   },
   git = {
     commits = {
-      preview = "git show --color --stat --format= {1}",
+      fzf_args="--multi",
+      actions = {
+        ["alt-q"] = function(selected)
+          if not selected or #selected == 0 then return end
+          local commits = {}
+          for _, entry in ipairs(selected) do
+            local hash = entry:match("^%x+")
+            if hash then table.insert(commits, hash) end
+          end
+          if #commits > 0 then
+            local cmd = string.format("silent! G show %s", table.concat(commits, " "))
+            vim.cmd(cmd)
+          end
+        end,
+      },
+      preview = "git show --color --stat {1}",
       winopts = {
         preview = {
           layout = "vertical",
@@ -543,28 +553,7 @@ fzf.setup({
       },
     },
     bcommits = {
-        fzf_args="--multi",
         actions = {
-          ["ctrl-q"] = function(selected)
-            if not selected or #selected == 0 then return end
-            local current_file = vim.api.nvim_buf_get_name(0)
-            if current_file == "" then
-              vim.notify("Not in a file buffer to see its commits", vim.log.levels.WARN)
-              return
-            end
-
-            local commits = {}
-            for _, entry in ipairs(selected) do
-              local hash = entry:match("^%x+")
-              if hash then table.insert(commits, hash) end
-            end
-
-            if #commits > 0 then
-              local cmd = string.format("silent! Gclog %s -- %s", table.concat(commits, " "), current_file)
-              vim.cmd(cmd) vim.cmd("copen")
-            end
-          end,
-
           ["ctrl-d"] = function(...)
             fzf.actions.git_buf_split(...)
             vim.cmd("windo diffthis | wincmd h")
@@ -636,7 +625,6 @@ nnoremap <silent><leader>fk :lua require('fzf-lua').lsp_document_symbols()<CR>
 vnoremap <silent><leader>fs <cmd>FzfLua blines resume=true<CR>
 vnoremap <silent><leader>fg <cmd>FzfLua git_bcommits<CR>
 vnoremap <silent><leader>fk <cmd>FzfLua lsp_document_symbols<CR>
-
 
 " Custom mappings for LSP
 nnoremap <silent> [e        :lua vim.diagnostic.goto_prev()<CR>
@@ -728,14 +716,16 @@ function! JumpToNextBufferInJumplist(dir) " 1=forward, -1=backward
 
     let found = 0
     for i in searchrange
-        if i < len(jumplist) && jumplist[i]["bufnr"] != bufnr('%')
-            let n = (i - curjump) * a:dir
-            execute "silent normal! " . n . jumpcmdchr
-            let found = 1
-            silent! normal! g`"zz
-            break
+      if i < len(jumplist)
+        let buf = jumplist[i]["bufnr"]
+        if buf != bufnr('%') && bufexists(buf) && bufloaded(buf)
+          execute "silent normal! " . ((i - curjump) * a:dir) . jumpcmdchr
+          let found = 1
+          silent! normal! g`"zz
+          break
         endif
-    endfor
+      endif
+    endfor 
 
   if !found 
     echohl WarningMsg | echom "No other jump locations available" | echohl None
