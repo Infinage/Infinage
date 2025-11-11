@@ -160,22 +160,36 @@ pz() {
 # Monitor network sockets by port number or PID
 ports() {
     case "$1" in
-        "")  watch -n 1 --differences ss -patun ;;
+        "")  ss -patun ;;
         -h|--help)
-            echo "Usage: ports [-p pid | -P port]"
-            echo "  no args   → monitor all sockets"
-            echo "  -p <port> → monitor by port"
-            echo "  -P <pid>  → monitor by process ID"
+            echo "Usage: ports [-p port1 [port2 ...]] [-P pid1 [pid2 ...]]"
+            echo "  no args         → monitor all sockets"
+            echo "  -p <ports...>   → monitor by port(s)"
+            echo "  -P <pids...>    → monitor by process ID(s)"
+            return
             ;;
         -P)
-            ps -p "$2" &>/dev/null || { echo "pid $2 not found"; return 1; }
-            watch -n 1 --differences "ss -patun | grep -E 'pid=$2[,)]'"
+            shift
+            [[ $# -eq 0 ]] && { echo "no pid specified"; return 1; }
+            local valid_pids=() regex
+            for pid in "$@"; do
+                ps -p "$pid" &>/dev/null && valid_pids+=("$pid") || echo "⚠️  PID $pid not found"
+            done
+            [[ ${#valid_pids[@]} -eq 0 ]] && { echo "no valid pids"; return 1; }
+            regex=$(printf 'pid=(%s)[,)]|' "${valid_pids[@]}")
+            regex=${regex%|}
+            watch -n 1 --differences "ss -patun | grep -E '$regex'"
             ;;
         -p)
-            watch -n 1 --differences "ss -patun | grep -E '[:.]$2\b'"
+            shift
+            [[ $# -eq 0 ]] && { echo "no port specified"; return 1; }
+            local regex
+            regex=$(printf '[:.]%s\\b|' "$@")
+            regex=${regex%|}
+            watch -n 1 --differences "ss -patun | grep -E '$regex'"
             ;;
         *)
-            echo "usage: ports [-p pid | -P port]"
+            echo "usage: ports [-p port ...] [-P pid ...]"
             ;;
     esac
 }

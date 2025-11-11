@@ -825,7 +825,7 @@ function! NavigateBookmark(direction, ...) abort
   endif
 
   let t:last_bookmark = l:m.mark
-  normal! zz
+  normal! zt
   let l:wrap_msg = exists('l:isWrapped') && l:isWrapped ? "(Wrapped) " : ""
   echohl None | echom l:wrap_msg . "At bookmark: " . t:last_bookmark[1] | echohl None
 
