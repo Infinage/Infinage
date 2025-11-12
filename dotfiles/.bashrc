@@ -7,6 +7,12 @@ export LANG=en_US.UTF-8
 # Useful utilities defined here
 export PATH="$HOME/bin:$PATH"
 
+# Termux specific
+if [ -n "$TERMUX_VERSION" ]; then
+  export XDG_RUNTIME_DIR="${TERMUX__PREFIX}/tmp"
+  mkdir -p "$XDG_RUNTIME_DIR"
+fi
+
 # shorter alias
 alias l='ls -lart --color=auto'
 alias ls='ls -a --color=auto'
@@ -32,6 +38,7 @@ nz() {
         resolved="$(readlink -f "$arg" 2>/dev/null || echo "$arg")"
         [ -f "$resolved" ] && { nvim "$resolved"; return; }
         if [ -d "$resolved" ]; then
+            zq "$resolved" >/dev/null 2>&1 || zoxide add "$resolved"
             file="$(find -L "$resolved" -type f 2>/dev/null | fzf)"
             [ -n "$file" ] && nvim "$file"; return
         fi
