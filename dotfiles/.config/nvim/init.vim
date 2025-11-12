@@ -714,6 +714,13 @@ require("codecompanion").setup({
           env = { api_key = "cmd:pass show google/gemini" },
         })
       end,
+      groq = function()
+        return require("codecompanion.adapters").extend("openai", {
+          name = "Groq", env = { api_key = "cmd:pass show groq" },
+          url = "https://api.groq.com/openai/v1/chat/completions",
+          schema = { model = { default = "llama-3.1-8b-instant", }, },
+        })
+      end,
     },
   },
 })
@@ -845,7 +852,7 @@ function! NavigateBookmark(direction, ...) abort
   endif
 
   let t:last_bookmark = l:m.mark
-  normal! zt
+  normal! zz
   let l:wrap_msg = exists('l:isWrapped') && l:isWrapped ? "(Wrapped) " : ""
   echohl None | echom l:wrap_msg . "At bookmark: " . t:last_bookmark[1] | echohl None
 

@@ -13,9 +13,8 @@ WORKDIR /root
 
 # Setup dotfiles
 RUN git clone https://github.com/infinage/infinage.git && \
-    stow --no-folding --dir=/root/infinage --target=/root dotfiles && \
-    chmod 700 /root/.gnupg && \
-    cp -r /root/infinage/.password-store /root/.password-store 
+    stow --dir=/root/infinage --target=/root dotfiles && \
+    chmod 700 /root/.gnupg 
 
 # Clangd setup for LSP
 RUN wget https://github.com/clangd/clangd/releases/download/21.1.0/clangd-linux-21.1.0.zip && \
