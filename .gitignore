@@ -4,5 +4,5 @@ dotfiles/.gnupg/*
 
 # Ignore everything under 'dotfiles/.config' except the nvim and clangd
 dotfiles/.config/*
-!dotfiles/.config/nvim/**
-!dotfiles/.config/clangd/**
+!dotfiles/.config/nvim
+!dotfiles/.config/clangd

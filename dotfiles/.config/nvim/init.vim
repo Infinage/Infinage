@@ -1,5 +1,6 @@
 " Install vim-plug if not present
 " https://raw.githubusercontent.com/junegunn/vim-plug/refs/heads/master/plug.vim
+" mkdir -p ~/.local/share/nvim/site/autoload && mv misc/plug.vim ~/.local/share/nvim/site/autoload
 " nv --headless -es +silent! +'PlugInstall --sync' +qa
 
 " Plugins
@@ -278,7 +279,7 @@ set foldlevel=99
 
 " Use System Clipboard
 set clipboard^=unnamed,unnamedplus
-"let g:clipboard = "termux"
+"let g:clipboard = "tmux"
 
 " Compat Disable screen flashing, backspace work as expected
 set belloff=all
@@ -297,16 +298,15 @@ set shortmess=S
 set undofile
 
 " Auto close brackets (quotes, paranthesis, etc)
-inoremap " ""<left>
-inoremap ' ''<left>
-inoremap ( ()<left>
-inoremap [ []<left>
-inoremap { {}<left>
-inoremap {<CR> {<CR>}<ESC>O
-inoremap {;<CR> {<CR>};<ESC>O
-inoremap <expr> ) strpart(getline('.'), col('.')-1, 1) == ")" ? "\<Right>" : ")"
-inoremap <expr> } strpart(getline('.'), col('.')-1, 1) == "}" ? "\<Right>" : "}"
-inoremap <expr> ] strpart(getline('.'), col('.')-1, 1) == "]" ? "\<Right>" : "]"
+inoremap <expr> " col('.') == col('$') ? '""<Left>' : '"'
+inoremap <expr> ' col('.') == col('$') ? "''<Left>" : "'"
+inoremap <expr> ( col('.') == col('$') ? '()<Left>' : '('
+inoremap <expr> [ col('.') == col('$') ? '[]<Left>' : '['
+inoremap <expr> { col('.') == col('$') ? '{}<Left>' : '{'
+inoremap <expr> ) getline('.')[col('.')-1] == ')' ? "\<Right>" : ")"
+inoremap <expr> } getline('.')[col('.')-1] == "}" ? "\<Right>" : "}"
+inoremap <expr> ] getline('.')[col('.')-1] == "]" ? "\<Right>" : "]"
+inoremap {<CR> {<CR>}<ESC>O 
 
 " Support python inside markdown
 let g:markdown_fenced_languages = ['cpp', 'python', 'javascript', 'js=javascript', 'typescript', 'ts=typescript']
@@ -383,6 +383,27 @@ command! -bang Q execute 'windo' (<bang>0 ? 'quit!' : 'quit')
 " Navigate prev and next tab
 nnoremap [t :tabprevious<CR>
 nnoremap ]t :tabnext<CR>
+
+" When using `dd` in the quickfix list, remove the item from the quickfix list.
+" Source: https://vi.stackexchange.com/a/21255
+function! ListDelete(bufnr) range abort
+  let l:winid = winnr()
+  let l:is_loc = getwininfo(win_getid())[0].loclist == 1
+  let l:list = l:is_loc ? getloclist(l:winid) : getqflist()
+  call remove(l:list, a:firstline - 1, a:lastline - 1)
+  if l:is_loc
+    call setloclist(l:winid, [], 'r', {'items': l:list})
+  else
+    call setqflist([], 'r', {'items': l:list})
+  endif
+  call setpos('.', [a:bufnr, min([a:firstline, len(l:list)]), 1, 0])
+endfunction
+
+augroup ListDelete
+  autocmd!
+  autocmd FileType qf nnoremap <silent><buffer> dd :<C-u>call ListDelete(bufnr())<CR>
+  autocmd FileType qf vnoremap <silent><buffer> d :<C-u>'<,'>call ListDelete(bufnr())<CR>
+augroup END
 
 " Swap keymaps for quickfix navigation
 nnoremap ]Q :cnfile<CR>
@@ -673,6 +694,8 @@ vim.api.nvim_create_user_command("RenameBuf", function(opts)
   end
 
   vim.api.nvim_buf_set_name(buf, name)
+  if buftype == "" then vim.bo[buf].buftype = "nofile" end
+
 end, { nargs = 1, desc = "Safely renames unnamed or terminal buffers.", })
 
 -- Setup an alias for above function
@@ -712,6 +735,7 @@ require("codecompanion").setup({
       gemini = function()
         return require("codecompanion.adapters").extend("gemini", {
           env = { api_key = "cmd:pass show google/gemini" },
+          schema = { model = { default = "gemini-2.5-flash", }, },
         })
       end,
       groq = function()
