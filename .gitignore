@@ -1,8 +1,8 @@
-# Ignore everything under .gnupg except the one file
-.gnupg/*
-!.gnupg/gpg-agent.conf
+# Ignore everything under 'dotfiles/.gnupg' except the one file
+dotfiles/.gnupg/*
+!dotfiles/.gnupg/gpg-agent.conf
 
-# Ignore all .config inside 'dotfiles' except clangd and nvim
+# Ignore everything under 'dotfiles/.config' except the nvim and clangd
 dotfiles/.config/*
 !dotfiles/.config/nvim/**
 !dotfiles/.config/clangd/**

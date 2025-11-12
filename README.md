@@ -42,3 +42,13 @@ I once had a thing for web development, Javascript was this crazy party going ga
 ### **DSA**
 [Repository Link](https://github.com/Infinage/DSA)  
 A DSA problem a day keeps unemployment away. Warning: I make a ton of commits here daily. Please don’t watch this repository unless you chill about getting spammed.
+
+---
+
+## **Dotfiles**
+This repository also contains my personal dotfiles, managed with GNU Stow.
+To deploy them to your home directory, navigate to the repository's root and run:
+```bash
+stow -t ~ dotfiles
+```
+Note: We are intentionally not using the `--no-folding` option, as we want `.password-store` to be tracked as a folder rather than a symlink.
