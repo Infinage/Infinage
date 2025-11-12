@@ -374,6 +374,12 @@ tnoremap <C-w> <C-\><C-N><C-w>
 " 'Zoom' a split window into a tab
 nnoremap <leader>zz :tab sb<CR>
 
+" Follow symlink to real file
+command! FollowSymlink execute 'file ' fnameescape(resolve(expand('%:p')))
+
+" Close all splits in current tab/window
+command! -bang Q execute 'windo' (<bang>0 ? 'quit!' : 'quit')
+
 " Navigate prev and next tab
 nnoremap [t :tabprevious<CR>
 nnoremap ]t :tabnext<CR>
@@ -472,9 +478,9 @@ fzf.setup({
               end
               vim.fn.setreg('+', table.concat(clean, '\n'))
               vim.notify('Copied selection to clipboard', vim.log.levels.INFO)
-            end, exec_silent = true,
+            end, exec_silent = true, desc = "Copy file path",
         },
-        ["ctrl-d"] = {
+        ["ctrl-x"] = {
           fn = function(selected)
             if not selected or #selected == 0 then return end
             local choice = vim.fn.confirm("Delete " .. #selected .. " file(s)?", "&Yes\n&No", 2)
@@ -484,13 +490,27 @@ fzf.setup({
               local path = vim.fn.fnamemodify(entry, ':p')
               if vim.fn.filereadable(path) == 1 then os.remove(path) end
             end
-          end, reload = true,
+          end, reload = true, desc = "Delete file"
+        },
+        ["ctrl-a"] = {
+          fn = function(selected, opts)
+            if opts.query == "" then return end
+            local fpath = vim.fn.fnamemodify(opts.query, ":p")
+            local fdir = vim.fn.fnamemodify(fpath, ":h")
+            if vim.fn.isdirectory(fdir) == 0 then vim.fn.mkdir(fdir, "p") end
+            if vim.fn.filereadable(fpath) == 1 then 
+              vim.notify("File already exists: " .. fpath, vim.log.levels.WARN) 
+              return
+            end
+            vim.fn.writefile({}, fpath)
+            vim.notify("Created file: " .. fpath, vim.log.levels.INFO)
+          end, reload = true, desc = "Create new file"
         },
     }
   },
   buffers = {
     actions = {
-      ["ctrl-d"] = {
+      ["alt-x"] = {
         fn = function(selected)
           if not selected or #selected == 0 then return end
           local choice = vim.fn.confirm("Force delete " .. #selected .. " buffer(s)?", "&Yes\n&No", 2)
@@ -500,7 +520,7 @@ fzf.setup({
             if bufnr then vim.cmd("bdelete! " .. bufnr) end
           end
         end,
-        reload = true,
+        reload = true, desc = "Delete buffer"
       },
     }
   },
@@ -557,7 +577,7 @@ fzf.setup({
           ["ctrl-d"] = function(...)
             fzf.actions.git_buf_split(...)
             vim.cmd("windo diffthis | wincmd h")
-          end,
+          end, desc = "Diff against commit"
         },
     },
   },
@@ -835,8 +855,8 @@ endfunction
 nnoremap <silent> m` :call ToggleBookmark()<CR>
 nnoremap ]` :call NavigateBookmark(1)<CR>
 nnoremap [` :call NavigateBookmark(-1)<CR>
-nnoremap } :call NavigateBookmark(1, bufnr('%'))<CR>
-nnoremap { :call NavigateBookmark(-1, bufnr('%'))<CR>
+nnoremap }` :call NavigateBookmark(1, bufnr('%'))<CR>
+nnoremap {` :call NavigateBookmark(-1, bufnr('%'))<CR>
 
 " Change to project root based on .git (or other patterns)
 function! Rooter()

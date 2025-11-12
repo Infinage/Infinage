@@ -159,13 +159,24 @@ pz() {
 
 # Monitor network sockets by port number or PID
 ports() {
+    local output_file=
+
+    # check if -f is specified first
+    while [[ "$1" == "-f" ]]; do
+        shift
+        [[ $# -eq 0 ]] && { echo "no file specified"; return 1; }
+        output_file="$1"
+        shift
+    done
+
     case "$1" in
         "")  ss -patun ;;
         -h|--help)
-            echo "Usage: ports [-p port1 [port2 ...]] [-P pid1 [pid2 ...]]"
+            echo "Usage: ports [-p port1 [port2 ...]] [-P pid1 [pid2 ...]] [-f file]"
             echo "  no args         → monitor all sockets"
             echo "  -p <ports...>   → monitor by port(s)"
             echo "  -P <pids...>    → monitor by process ID(s)"
+            echo "  -f <file>       → write output to file"
             return
             ;;
         -P)
@@ -178,7 +189,11 @@ ports() {
             [[ ${#valid_pids[@]} -eq 0 ]] && { echo "no valid pids"; return 1; }
             regex=$(printf 'pid=(%s)[,)]|' "${valid_pids[@]}")
             regex=${regex%|}
-            watch -n 1 --differences "ss -patun | grep -E '$regex'"
+            if [[ -n "$output_file" ]]; then
+                watch -n 1 --differences "ss -patun | grep -E '$regex' | tee -a '$output_file'"
+            else
+                watch -n 1 --differences "ss -patun | grep -E '$regex'"
+            fi
             ;;
         -p)
             shift
@@ -186,11 +201,14 @@ ports() {
             local regex
             regex=$(printf '[:.]%s\\b|' "$@")
             regex=${regex%|}
-            watch -n 1 --differences "ss -patun | grep -E '$regex'"
+            if [[ -n "$output_file" ]]; then
+                watch -n 1 --differences "ss -patun | grep -E '$regex' | tee -a '$output_file'"
+            else
+                watch -n 1 --differences "ss -patun | grep -E '$regex'"
+            fi
             ;;
         *)
-            echo "usage: ports [-p port ...] [-P pid ...]"
+            echo "usage: ports [-p port ...] [-P pid ...] [-f file]"
             ;;
     esac
 }
-
