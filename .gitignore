@@ -1,3 +1,5 @@
+__pycache__
+
 # Ignore everything under 'dotfiles/.gnupg' except the one file
 dotfiles/.gnupg/*
 !dotfiles/.gnupg/gpg-agent.conf

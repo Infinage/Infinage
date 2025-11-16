@@ -24,3 +24,5 @@ CompileFlags:
       - -pedantic-errors
       - -fmodules
       - -std=c++23
+      - -Wparentheses 
+      - -Wbool-compare
