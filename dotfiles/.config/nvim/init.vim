@@ -297,16 +297,47 @@ set shortmess=S
 " Setup persistent undo
 set undofile
 
-" Auto close brackets (quotes, paranthesis, etc)
-inoremap <expr> " col('.') == col('$') ? '""<Left>' : '"'
-inoremap <expr> ' col('.') == col('$') ? "''<Left>" : "'"
-inoremap <expr> ( col('.') == col('$') ? '()<Left>' : '('
-inoremap <expr> [ col('.') == col('$') ? '[]<Left>' : '['
-inoremap <expr> { col('.') == col('$') ? '{}<Left>' : '{'
-inoremap <expr> ) getline('.')[col('.')-1] == ')' ? "\<Right>" : ")"
-inoremap <expr> } getline('.')[col('.')-1] == "}" ? "\<Right>" : "}"
-inoremap <expr> ] getline('.')[col('.')-1] == "]" ? "\<Right>" : "]"
-inoremap {<CR> {<CR>}<ESC>O 
+" Helper function to create auto pairs
+function! AutoPair(ch)
+    let line = getline('.')
+    let coln = col('.') - 1
+
+    " find next non-space character
+    let i = coln
+    while i < len(line) && line[i] =~# '\s'
+        let i += 1
+    endwhile
+    let next = i < len(line) ? line[i] : ''
+
+    " define pairs
+    let openers = {'"':'"', "'":"'", '(' : ')', '[' : ']', '{' : '}'}
+    let closers = {')':'(', ']':'[', '}':'{'}
+
+    " opener logic
+    if has_key(openers, a:ch)
+        let close = openers[a:ch]
+        return next == close ? a:ch : a:ch . close . "\<Left>"
+    endif
+
+    " closer logic
+    if has_key(closers, a:ch)
+        return next == a:ch ? "\<Right>" : a:ch
+    endif
+
+    " fallback
+    return a:ch
+endfunction
+
+" Auto pair mapping in insert mode
+inoremap <expr> "  AutoPair('"')
+inoremap <expr> '  AutoPair("'")
+inoremap <expr> (  AutoPair('(')
+inoremap <expr> [  AutoPair('[')
+inoremap <expr> {  AutoPair('{')
+inoremap <expr> )  AutoPair(')')
+inoremap <expr> ]  AutoPair(']')
+inoremap <expr> }  AutoPair('}')
+inoremap {<CR> {<CR>}<ESC>O
 
 " Support python inside markdown
 let g:markdown_fenced_languages = ['cpp', 'python', 'javascript', 'js=javascript', 'typescript', 'ts=typescript']
@@ -513,7 +544,7 @@ fzf.setup({
             end
           end, reload = true, desc = "Delete file"
         },
-        ["ctrl-a"] = {
+        ["ctrl-n"] = {
           fn = function(selected, opts)
             if opts.query == "" then return end
             local fpath = vim.fn.fnamemodify(opts.query, ":p")
