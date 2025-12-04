@@ -13,12 +13,14 @@ if [ -n "$TERMUX_VERSION" ]; then
   mkdir -p "$XDG_RUNTIME_DIR"
 fi
 
-# Move cursor left / right with c-h, c-l
+# Move cursor and navigate history without reaching for arrow keys
 bind '"\C-h": backward-char'
 bind '"\C-l": forward-char'
+bind '"\C-k": previous-history'
+bind '"\C-j": next-history'
 
 # shorter alias
-alias l='ls -lart --color=auto'
+alias l='ls -lart --color=auto --human-readable'
 alias ls='ls -a --color=auto'
 alias grep='grep --color=auto'
 alias cat='bat'
@@ -26,6 +28,12 @@ alias nv='nvim'
 alias lpd='list_process_descendants'
 alias zq='zoxide query'
 alias zqi='zoxide query --interactive'
+alias nchat='nvim +":CodeCompanionChat" +":wincmd w" +":q"'
+
+# List all directories
+d() {
+    l "${1:-.}" | grep '^d'
+}
 
 # Neo + Fzf + Zoxide
 nz() {
