@@ -297,6 +297,10 @@ set shortmess=S
 " Setup persistent undo
 set undofile
 
+" Controls how fast swap files are created 
+" also how fast fugutive updates marks
+set updatetime=100 
+
 " Helper function to create auto pairs
 function! AutoPair(ch)
     let line = getline('.')
@@ -489,8 +493,8 @@ nmap ]g <Plug>(GitGutterNextHunk)
 nmap [g <Plug>(GitGutterPrevHunk)
 
 " Fugitive keybinds
-nnoremap <leader>ds :Gvdiffsplit!<CR>
-nnoremap <leader>du :Gvdiffsplit! HEAD:%<CR>
+nnoremap <leader>du :Gvdiffsplit!<CR>
+nnoremap <leader>ds :Gvdiffsplit! HEAD:%<CR>
 nnoremap <leader>gD :G! difftool -y<CR>
 nnoremap <silent><leader>gl :<C-u>execute 'G log' (v:count ? '-n ' . v:count : '')<CR>
 nnoremap gb :G blame<CR>
@@ -544,7 +548,7 @@ fzf.setup({
             end
           end, reload = true, desc = "Delete file"
         },
-        ["ctrl-n"] = {
+        ["alt-n"] = {
           fn = function(selected, opts)
             if opts.query == "" then return end
             local fpath = vim.fn.fnamemodify(opts.query, ":p")
@@ -750,6 +754,7 @@ lua << EOF
 require('leap').opts.safe_labels = ''
 vim.keymap.set({'n', 'x', 'o'}, 's', '<Plug>(leap)')
 vim.keymap.set('n', 'S', '<Plug>(leap-from-window)')
+vim.api.nvim_set_hl(0, 'LeapBackdrop', { link = 'Comment' })
 EOF
 
 " Codecompanion Setup
