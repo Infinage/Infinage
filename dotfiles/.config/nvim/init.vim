@@ -17,8 +17,8 @@ Plug 'hrsh7th/cmp-buffer'
 Plug 'tpope/vim-fugitive'
 Plug 'nvim-tree/nvim-web-devicons'
 Plug 'nvim-lualine/lualine.nvim'
-Plug 'nvim-treesitter/nvim-treesitter'
-Plug 'nvim-treesitter/nvim-treesitter-textobjects'
+Plug 'nvim-treesitter/nvim-treesitter', { 'branch': 'master' }
+Plug 'nvim-treesitter/nvim-treesitter-textobjects', { 'branch': 'master' }
 Plug 'ggandor/leap.nvim'
 Plug 'olimorris/codecompanion.nvim'
 call plug#end()

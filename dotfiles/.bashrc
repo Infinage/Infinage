@@ -14,6 +14,7 @@ if [ -n "$TERMUX_VERSION" ]; then
 fi
 
 # Move cursor and navigate history without reaching for arrow keys
+# Note: We can jump forward and backward words by Alt-f and Alt-b
 bind '"\C-h": backward-char'
 bind '"\C-l": forward-char'
 bind '"\C-k": previous-history'
@@ -133,6 +134,14 @@ tempd () {
     cd "$1" 
     chmod -R 0700 . 
   fi 
+}
+
+# Print new lines
+nl() {
+    local count="${1:-0}"
+    for ((i=0; i<count; i++)); do
+        echo
+    done
 }
 
 PS1='[\u@\h \w]\n$ '
