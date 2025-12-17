@@ -166,6 +166,7 @@ config.bind('<Ctrl-h>', 'rl-backward-char', mode='command')
 config.bind('<Ctrl-l>', 'rl-forward-char', mode='command')
 config.bind(';m', 'hint links spawn mpv {hint-url}')
 config.bind('pm', 'spawn mpv {clipboard}')
+config.bind('tdm', 'config-cycle colors.webpage.darkmode.enabled;; reload')
 
 # Setup color scheme
 # git clone https://github.com/catppuccin/qutebrowser.git ~/.config/qutebrowser/catppuccin
