@@ -8,3 +8,4 @@ dotfiles/.gnupg/*
 dotfiles/.config/*
 !dotfiles/.config/nvim
 !dotfiles/.config/clangd
+!dotfiles/.config/qutebrowser
