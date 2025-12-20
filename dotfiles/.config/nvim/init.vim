@@ -153,7 +153,8 @@ require('nvim-treesitter.configs').setup {
   highlight = { enable = true, additional_vim_regex_highlighting = false },
   ensure_installed = { 
     "cpp", "lua", "python", "vim", "vimdoc", "bash", "markdown", 
-    "markdown_inline", "cmake", "xml", "json", "dockerfile"
+    "markdown_inline", "cmake", "xml", "json", "dockerfile", 
+    "javascript",
   },
   incremental_selection = {
     enable = true,
