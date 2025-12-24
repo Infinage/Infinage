@@ -1,54 +1,120 @@
-# Hi there! 👋  
+## 👋 Hi, I’m Naresh Jagadeesan
 
-I’m **Naresh Jagadeesan**, and I hope you’re having a great day! Nice to e-meet you.  
+**C++ Software developer** with a strong bias toward low-level engineering: **networking, concurrency, storage, and protocol design**.
 
-## About Me  
-I’m an experienced Python developer who’s currently flirting with C++ to see if she’s **the one**. My GitHub is a mix of projects I’ve tinkered with, experiments I’ve run, and ideas I’ve tried to bring to life.
-
-If you have suggestions to improve my code or are excited about collaborating, I’d love to hear from you!
-
-### 📬 How to Reach Me  
-- [![LinkedIn](https://i.stack.imgur.com/gVE0j.png) LinkedIn](https://www.linkedin.com/in/naresh-omega/)  
-- [<img src="https://i.imgur.com/E111DD3.jpeg" width="12" height="10"> Email](mailto:naresh.naresh000@gmail.com)  
+I love building things close to the metal: servers, tools, interpreters & infrastructure in **modern C++**.
 
 ---
 
-## Projects  
+## 🔧 Core Interests
 
-### **JSON Parser**  
-[Repository Link](https://github.com/Infinage/cpp-experiments/tree/main/json-parser)  
-A lightweight, header-only JSON library in C++ (`json.hpp`) that lets you parse, create, and validate JSON documents.
-
-### **Redis Server Clone**  
-[Repository Link](https://github.com/Infinage/cpp-experiments/tree/main/redis-server)  
-A lightweight Redis server clone built in C++. Single threaded & uses raw sockets, how challenging could that be?
-
-### **Age Prediction Using TensorFlow and OpenCV**  
-[Repository Link](https://github.com/Infinage/Age-Prediction)  
-A machine learning project exploring the end-to-end lifecycle of building, training, and deploying models. The predictions aren’t perfect, but the pipeline works great!  
-
-### **FingerNet**  
-[Repository Link](https://github.com/Infinage/FingerNet)  
-Built back in the day I was all gung-ho on deep learning. Machine learning models require a ton of data to reach good performance. How well can a model learn to classify with just a single training data sample?
-
-### **Maze Generator & Solver**  
-[Repository Link](https://github.com/Infinage/maze)  
-Mazes sounded fun, how about a nice game on the CLI? Implemented 5 generator algorithms (Wilson, Kruskal, Prim, Ellers, Backtracking) & 3 (Dijkstra, A\*, Dead end filling) solver algorithms.
-
-### **Ecom Trading**  
-[Repository Link](https://github.com/Infinage/ecom-trading)  
-I once had a thing for web development, Javascript was this crazy party going gal that I couldn\'t simply resist. This is your average ecommerce website where you can both buy and sell your goods.
-
-### **DSA**
-[Repository Link](https://github.com/Infinage/DSA)  
-A DSA problem a day keeps unemployment away. Warning: I make a ton of commits here daily. Please don’t watch this repository unless you chill about getting spammed.
+* Modern C++, duh
+* Networking & distributed systems
+* Storage engines & protocol implementations
+* OS adjacent tooling
+* Re-implementing foundational tools to understand them deeply
 
 ---
 
-## **Dotfiles**
-This repository also contains my personal dotfiles, managed with GNU Stow.
-To deploy them to your home directory, navigate to the repository's root and run:
-```bash
+## ⭐ Noteworthy Projects
+
+### **Git**
+
+🔗 [https://github.com/Infinage/cpp-experiments/tree/main/cgit](https://github.com/Infinage/cpp-experiments/tree/main/cgit)
+
+> Re-implementation of core Git concepts in C++
+
+* Object storage (blobs, trees, commits)
+* Content-addressable storage
+* Index & basic plumbing commands
+* Focus on correctness, file formats, and internals
+
+➡️ *Primary learning project for VCS internals*
+
+---
+
+### **Ctorrent**
+
+🔗 [https://github.com/Infinage/cpp-experiments/tree/main/torrent](https://github.com/Infinage/cpp-experiments/tree/main/torrent)
+
+> A BitTorrent client written in C++
+
+* Torrent file parsing
+* Peer wire protocol
+* Piece selection & download management
+* Raw sockets, no training wheels
+
+➡️ *Deep dive into real world network protocols*
+
+---
+
+### **Redis Server Clone**
+
+🔗 [https://github.com/Infinage/cpp-experiments/tree/main/redis-server](https://github.com/Infinage/cpp-experiments/tree/main/redis-server)
+
+> Lightweight Redis server clone in C++
+
+* Single-threaded, event-driven design
+* Raw sockets
+* RESP protocol parsing
+* Command handling & in-memory storage
+
+➡️ *Exploring server design & protocol correctness*
+
+---
+
+## 🧪 Selected Supporting Projects
+
+### **JSON Parser**
+
+🔗 [https://github.com/Infinage/cpp-experiments/tree/main/json-parser](https://github.com/Infinage/cpp-experiments/tree/main/json-parser)
+
+Header-only JSON library (`json.hpp`)
+
+* Parsing, validation, construction
+* Zero dependencies
+* Focus on clean API & correctness
+
+---
+
+### **Maze Generator & Solver**
+
+🔗 [https://github.com/Infinage/maze](https://github.com/Infinage/maze)
+
+* 5 generation algorithms (Wilson, Kruskal, Prim, Ellers, DFS)
+* 3 solvers (Dijkstra, A*, Dead-end filling)
+* CLI-based, algorithm-focused
+
+---
+
+### **Interpreters & Tools**
+
+🔗 [https://github.com/Infinage/cpp-experiments](https://github.com/Infinage/cpp-experiments)
+
+* Brainfuck interpreter
+* ASCII art generator
+* Code judge
+* Mandelbrot explorer
+* Re-implementations of `tar`, `uniq`, `xxd`, `wc`, shell utilities
+
+➡️ *Relearning fundamentals by rebuilding them*
+
+---
+
+## Dotfiles
+
+This repository also contains my personal dotfiles, managed with GNU Stow. To deploy them to your home directory, navigate to the repository's root and run:
+
+```
 stow -t ~ dotfiles
 ```
+
 Note: We are intentionally not using the `--no-folding` option, as we want `.password-store` to be tracked as a folder rather than a symlink.
+
+---
+
+## 📬 Get in Touch
+
+* LinkedIn: [Naresh Jagadeeesan](https://www.linkedin.com/in/naresh-jagadeesan/)
+* Email: [naresh.naresh000@gmail.com](mailto:naresh.naresh000@gmail.com)
+

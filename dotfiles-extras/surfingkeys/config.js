@@ -31,6 +31,10 @@ api.map('K', 'S');
 // Tab Delete/Undo
 api.map('D', 'x');
 
+// Scroll Page Down/Up
+api.map('<Ctrl-d>', 'd')
+api.map('<Ctrl-u>', 'u')
+
 // Command mode scroll options
 api.cmap('<Ctrl-k>', '<Tab>');
 api.cmap('<Ctrl-j>', '<Shift-Tab>');

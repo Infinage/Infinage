@@ -157,6 +157,10 @@ eval "$(fzf --bash)"
 export _ZO_RESOLVE_SYMLINKS=1
 eval "$(zoxide init bash)"
 
+# Setup for VCPKG
+export VCPKG_ROOT="$HOME/.local/share/vcpkg"
+export PATH="$VCPKG_ROOT:$PATH"
+
 # Custom function to grep and kill processes
 pz() {
   # if argument is given, filter by user, else show all (-e)
@@ -239,4 +243,47 @@ ports() {
             echo "usage: ports [-p port ...] [-P pid ...] [-f file]"
             ;;
     esac
+}
+
+# List and manage env variables
+ez() {
+    eval "env | \
+    fzf \
+        --bind='ctrl-y:execute(echo {+} | cut -d\"=\" -f2 | ~/bin/copy)' \
+        --bind='alt-y:execute(echo {+} | cut -d\"=\" -f1 | ~/bin/copy)' \
+        --header=\$'C-Y copy VALUE | A-Y copy KEY\n' \
+        --header-lines=0 \
+        --preview='echo {+}' \
+        --preview-window=down,3,wrap \
+        --layout=reverse \
+        --height=80%"
+}
+
+mvz() {
+    [[ $# -lt 2 ]] && { echo "Usage: mvz <file1> ... <dest>"; return 1; }
+    local dest="${!#}" files=("${@:1:$#-1}") matches resolved
+
+    matches=$(zoxide query -l "$dest" 2>/dev/null)
+    [[ -z "$matches" ]] && { echo "Could not resolve destination: $dest"; return 1; }
+
+    # auto-pick if only one match
+    resolved=$(echo "$matches" | { read -r line && [[ -n $line ]] && echo "$line"; cat; }) 
+    resolved=$(echo "$matches" | { [ $(echo "$matches" | wc -l) -eq 1 ] && echo "$matches" \
+        || fzf --prompt="Select destination> "; }) || return
+
+    mv "${files[@]}" "$resolved"
+}
+
+cpz() {
+    [[ $# -lt 2 ]] && { echo "Usage: cpz <file1> ... <dest>"; return 1; }
+    local dest="${!#}" files=("${@:1:$#-1}") matches resolved
+
+    matches=$(zoxide query -l "$dest" 2>/dev/null)
+    [[ -z "$matches" ]] && { echo "Could not resolve destination: $dest"; return 1; }
+
+    # auto-pick if only one match
+    resolved=$(echo "$matches" | { [ $(echo "$matches" | wc -l) -eq 1 ] && echo "$matches" \
+        || fzf --prompt="Select destination> "; }) || return
+
+    cp -r "${files[@]}" "$resolved"
 }
