@@ -138,7 +138,7 @@ tempd () {
 
 # Print new lines
 nl() {
-    local count="${1:-0}"
+    local count="${1:-1}"
     for ((i=0; i<count; i++)); do
         echo
     done
