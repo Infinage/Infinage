@@ -15,6 +15,7 @@
         "tray",
         "memory",
         "cpu",
+        "custom/gpuinfo",
         "network",
         "battery",
         "backlight",
@@ -130,6 +131,14 @@
         "format": "󰍛 {usage}%",
         "format-alt": "{icon0}{icon1}{icon2}{icon3}",
         "format-icons": ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
+    },
+
+    "custom/gpuinfo": {
+        "exec": "~/.config/waybar/scripts/gpuinfo.sh",
+        "format-icons": ["󰝦","󰪞","󰪟","󰪠","󰪡","󰪢","󰪣","󰪤","󰪥"],
+        "interval": 2,
+        "on-click": "kitty nvtop",
+        "return-type": "json"
     },
 
     "network": {

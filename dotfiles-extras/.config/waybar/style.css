@@ -46,6 +46,7 @@ window#waybar {
 #pulseaudio,
 #network,
 #cpu,
+#custom-gpuinfo,
 #memory,
 #workspaces,
 #tray,
@@ -75,6 +76,11 @@ window#waybar {
 }
 
 #cpu {
+    border-radius: 0px 0px 0px 0px;
+    margin-right: 0px;
+}
+
+#custom-gpuinfo {
     border-radius: 0px 10px 10px 0px;
     margin-right: 10px;
 }
