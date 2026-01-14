@@ -30,6 +30,7 @@ alias lpd='list_process_descendants'
 alias zq='zoxide query'
 alias zqi='zoxide query --interactive'
 alias nchat='nvim +":CodeCompanionChat" +":wincmd w" +":q"'
+alias mm='micromamba'
 
 # List all directories
 d() {
@@ -161,6 +162,26 @@ eval "$(zoxide init bash)"
 export VCPKG_ROOT="$HOME/.local/share/vcpkg"
 export PATH="$VCPKG_ROOT:$PATH"
 
+# Setup for caching CPM
+export CPM_SOURCE_CACHE=$HOME/.cache/CPM
+
+# Direnv hook and setup
+_direnv_hook() {
+  local previous_exit_status=$?;
+  trap -- '' SIGINT;
+  eval "$("/usr/bin/direnv" export bash)";
+  trap - SIGINT;
+  return $previous_exit_status;
+};
+
+if [[ ";${PROMPT_COMMAND[*]:-};" != *";_direnv_hook;"* ]]; then
+  if [[ "$(declare -p PROMPT_COMMAND 2>&1)" == "declare -a"* ]]; then
+    PROMPT_COMMAND=(_direnv_hook "${PROMPT_COMMAND[@]}")
+  else
+    PROMPT_COMMAND="_direnv_hook${PROMPT_COMMAND:+;$PROMPT_COMMAND}"
+  fi
+fi
+
 # Custom function to grep and kill processes
 pz() {
   # if argument is given, filter by user, else show all (-e)
@@ -246,7 +267,7 @@ ports() {
 }
 
 # List and manage env variables
-ez() {
+envz() {
     eval "env | \
     fzf \
         --bind='ctrl-y:execute(echo {+} | cut -d\"=\" -f2 | ~/bin/copy)' \
@@ -287,3 +308,16 @@ cpz() {
 
     cp -r "${files[@]}" "$resolved"
 }
+
+# >>> mamba initialize >>>
+# !! Contents within this block are managed by 'micromamba shell init' !!
+export MAMBA_EXE="$HOME/bin/micromamba";
+export MAMBA_ROOT_PREFIX="$HOME/micromamba";
+__mamba_setup="$("$MAMBA_EXE" shell hook --shell bash --root-prefix "$MAMBA_ROOT_PREFIX" 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__mamba_setup"
+else
+    alias micromamba="$MAMBA_EXE"  # Fallback on help from micromamba activate
+fi
+unset __mamba_setup
+# <<< mamba initialize <<<
