@@ -1,0 +1,27 @@
+{
+    "$schema": "https://aka.ms/terminal-profiles-schema",
+    "actions": 
+    [
+        {
+            "id": "User.sendInput.E116B028"
+            "command": { "action": "sendInput", "input": "\u001b[32;5u" },
+        }
+    ],
+    "profiles": 
+    {
+        "defaults": {},
+        "list": 
+        [
+            {
+                "commandline": "%USERPROFILE%\\nj\\git\\bin\\bash.exe --noprofile --rcfile %USERPROFILE%\\nj\\git\\home\\.bashrc",
+                "startingDirectory": "%USERPROFILE%\\nj\\git\\home",
+                "guid": "{c44deed4-9723-4813-9bfc-3ff1d5a8d5d9}",
+                "hidden": false,
+                "icon": "\ud83d\udd25",
+                "name": "Dev",
+            }
+        ]
+    },
+    "schemes": [],
+    "themes": []
+}
