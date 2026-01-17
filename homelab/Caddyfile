@@ -1,0 +1,19 @@
+http://infinage.space, http://localhost {
+    redir https://github.com/infinage permanent
+}
+
+http://ascii-art.infinage.space, http://ascii-art.localhost {
+    reverse_proxy ascii-art:80
+}
+
+http://url-shortner.infinage.space, http://url-shortner.localhost {
+    reverse_proxy url-shortner:8080
+}
+
+http://lqueens.infinage.space, http://lqueens.localhost {
+    reverse_proxy lqueens:8080
+}
+
+http://download.infinage.space, http://download.localhost {
+    reverse_proxy download-proxy:8080
+}

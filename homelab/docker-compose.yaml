@@ -1,0 +1,24 @@
+services:
+  caddy:
+    image: docker.io/caddy:alpine
+    ports: 
+      - "80:80"
+    volumes: 
+      - ./Caddyfile:/etc/caddy/Caddyfile
+    restart: unless-stopped
+
+  url-shortner:
+    image: docker.io/infinage/url-shortner
+    restart: unless-stopped
+
+  ascii-art:
+    image: docker.io/infinage/ascii-art
+    restart: unless-stopped
+
+  lqueens:
+    image: docker.io/infinage/lqueens
+    restart: unless-stopped
+
+  download-proxy:
+    image: docker.io/infinage/download-proxy
+    restart: unless-stopped

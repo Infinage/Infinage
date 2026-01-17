@@ -158,10 +158,6 @@ eval "$(fzf --bash)"
 export _ZO_RESOLVE_SYMLINKS=1
 eval "$(zoxide init bash)"
 
-# Setup for VCPKG
-export VCPKG_ROOT="$HOME/.local/share/vcpkg"
-export PATH="$VCPKG_ROOT:$PATH"
-
 # Setup for caching CPM
 export CPM_SOURCE_CACHE=$HOME/.cache/CPM
 
