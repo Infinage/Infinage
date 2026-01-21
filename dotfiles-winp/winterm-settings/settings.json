@@ -3,6 +3,18 @@
     "actions": 
     [
         {
+            "command": "copy",
+            "id": "User.copy.644BA8F2"
+        },
+        {
+            "command": "paste",
+            "id": "User.paste"
+        },
+        {
+            "command": "find",
+            "id": "User.find"
+        },
+        {
             "id": "User.sendInput.E116B028"
             "command": { "action": "sendInput", "input": "\u001b[32;5u" },
         }
