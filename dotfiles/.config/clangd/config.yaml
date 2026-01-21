@@ -14,6 +14,7 @@
 
 CompileFlags:
     Compiler: /usr/bin/g++
+    BuiltinIncludes: QueryDriver
     Add:
       - -Wall
       - -Weffc++

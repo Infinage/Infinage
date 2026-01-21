@@ -5,6 +5,10 @@ readonly LINE_NUMBER_UPDATE_DELAY=0.1
 readonly COLOR_NUMBERS_RGB="101;112;161"
 readonly COLOR_ACTIVE_NUMBER_RGB="255;158;100"
 
+is_zoomed(){
+    [[ "$(tmux display-message -p '#{window_zoomed_flag}')" == "1" ]]
+}
+
 open_line_number_split(){
     local self_path=$(realpath $0)
     local pane_id=$(tmux display-message -pF "#{pane_id}")
@@ -76,14 +80,13 @@ main(){
     local target_pane=$1
 
     if [[ -z $target_pane ]]; then
-        open_line_number_split
+        is_zoomed && tmux copy-mode || open_line_number_split
         exit 0
-    else
-        enter_copy_mode $target_pane
     fi
 
+    enter_copy_mode "$target_pane"
     update_loop
-    restore_pane_width $target_pane
+    restore_pane_width "$target_pane"
 }
 
 main "$@"
