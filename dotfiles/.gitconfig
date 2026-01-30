@@ -9,3 +9,10 @@
 	helper = store
 [diff]
 	tool = nvimdiff
+[init]
+	defaultBranch = main
+[alias]
+    unstage = reset HEAD --
+    lo = log --oneline
+    dt = difftool
+    dts = difftool --staged

@@ -19,7 +19,7 @@ Plug 'nvim-tree/nvim-web-devicons'
 Plug 'nvim-lualine/lualine.nvim'
 Plug 'nvim-treesitter/nvim-treesitter', { 'branch': 'master' }
 Plug 'nvim-treesitter/nvim-treesitter-textobjects', { 'branch': 'master' }
-Plug 'ggandor/leap.nvim'
+Plug 'https://codeberg.org/andyg/leap.nvim.git'
 Plug 'olimorris/codecompanion.nvim'
 Plug 'windwp/nvim-autopairs'
 call plug#end()
@@ -154,7 +154,7 @@ require('nvim-treesitter.configs').setup {
   ensure_installed = { 
     "cpp", "lua", "python", "vim", "vimdoc", "bash", "markdown", 
     "markdown_inline", "cmake", "xml", "json", "dockerfile", 
-    "javascript",
+    "javascript", "query", "yaml",
   },
   incremental_selection = {
     enable = true,
@@ -611,6 +611,16 @@ fzf.setup({
         } 
       }
   },
+  undotree = { 
+    winopts = { 
+      preview = {
+        locate = false,
+        layout = "horizontal", 
+        horizontal = "right:75%",
+        hidden = false, 
+      }, 
+    } 
+  },
   winopts = {
     preview = {
       layout = "vertical",
@@ -633,6 +643,7 @@ fzf.setup({
         ["ctrl-q"] = "select-all+accept",
         ["ctrl-l"] = "forward-char",
         ["ctrl-h"] = "backward-char",
+        ["ctrl-backspace"] = "backward-kill-word",
       },
       builtin = {
         true,
@@ -643,6 +654,7 @@ fzf.setup({
         ["Alt-f"] = "focus-preview",
         ["ctrl-l"] = "forward-char",
         ["ctrl-h"] = "backward-char",
+        ["ctrl-backspace"] = "backward-kill-word",
       },
   },
 })

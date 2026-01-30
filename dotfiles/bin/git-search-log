@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -euo pipefail
+
+git log -G$@ --oneline | fzf \
+    --preview-window=bottom,80% \
+    --preview "echo {} | sed 's/ .*//g' | xargs git show --color" \
+    --bind 'enter:execute(commit=$(echo {} | sed "s/ .*//g") && git diff-tree \
+            --no-commit-id --name-only $commit -r | fzf --preview-window=bottom,80% \
+            --preview "git show --color $commit -- $(git rev-parse --show-toplevel)/\{}")'

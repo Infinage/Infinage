@@ -305,6 +305,46 @@ cpz() {
     cp -r "${files[@]}" "$resolved"
 }
 
+gfile() {
+    pushd "$(git rev-parse --show-toplevel)" > /dev/null || return 1
+
+    local commit file
+    if [ "$#" -eq 1 ]; then
+        commit="$1"
+    else
+        commit=$(
+            git log --oneline --all | \
+            fzf \
+                --layout=reverse \
+                --height=80% \
+                --header='Pick a commit to browse files' \
+            | awk '{print $1}'
+        ) || { popd > /dev/null; return 1; }
+
+        [ -z "$commit" ] && { popd > /dev/null; return 1; }
+    fi
+
+    file=$(
+        git ls-tree -r "$commit" --name-only | \
+        fzf \
+            --layout=reverse \
+            --height=80% \
+            --header="Files in $commit"
+    ) || { popd > /dev/null; return; }
+
+    [ -n "$file" ] && git show "$commit:$file"
+
+    popd > /dev/null
+}
+
+# Use nvim fzf from CLI!
+export FZF_LUA_PATH="~/.local/share/nvim/plugged/fzf-lua"
+export FZF_LUA_CLI="$FZF_LUA_PATH/scripts/cli.lua"
+alias fgrep="nvim -l $FZF_LUA_CLI live_grep_native"
+
+# Get comfortable with using git log (very powerful)
+# git log -G<regex> --grep=<commit-msg> [-p] [-- <path>]
+
 # >>> mamba initialize >>>
 # !! Contents within this block are managed by 'micromamba shell init' !!
 export MAMBA_EXE="$HOME/bin/micromamba";
