@@ -658,6 +658,24 @@ fzf.setup({
       },
   },
 })
+
+vim.api.nvim_create_user_command("DocSymbols", function()
+  local clients = vim.lsp.get_clients({ bufnr = 0 })
+  local has_document_symbols = false
+
+  for _, client in ipairs(clients) do
+    if client.server_capabilities.documentSymbolProvider then
+      has_document_symbols = true
+      break
+    end
+  end
+
+  if has_document_symbols then
+    fzf.lsp_document_symbols()
+  else
+    fzf.treesitter()
+  end
+end, { nargs = 0, desc = "Open LSP Symbols if LSP attached else open treesitter" })
 EOF
 
 " FZF keymaps for useful utils
@@ -672,10 +690,9 @@ nnoremap <silent><leader>fz :lua require('fzf-lua').builtin()<CR>
 nnoremap <silent><leader>fm :lua require('fzf-lua').marks({marks = "%u"})<CR>
 nnoremap <silent><leader>fM :lua require('fzf-lua').manpages()<CR>
 nnoremap <silent><leader>fo :lua require('fzf-lua').oldfiles()<CR>
-nnoremap <silent><leader>fk :lua require('fzf-lua').lsp_document_symbols()<CR>
+nnoremap <silent><leader>fk :DocSymbols<CR>
 vnoremap <silent><leader>fs <cmd>FzfLua blines resume=true<CR>
 vnoremap <silent><leader>fg <cmd>FzfLua git_bcommits<CR>
-vnoremap <silent><leader>fk <cmd>FzfLua lsp_document_symbols<CR>
 
 " Custom mappings for LSP
 nnoremap <silent> [e        :lua vim.diagnostic.goto_prev()<CR>

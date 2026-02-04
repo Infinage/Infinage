@@ -26,7 +26,7 @@ alias ls='ls -a --color=auto'
 alias grep='grep --color=auto'
 alias cat='bat'
 alias nv='nvim'
-alias lpd='list_process_descendants'
+alias tempd='cd "$(mktemp -d)"'
 alias zq='zoxide query'
 alias zqi='zoxide query --interactive'
 alias nchat='nvim +":CodeCompanionChat" +":wincmd w" +":q"'
@@ -38,6 +38,11 @@ d() {
 }
 
 # Neo + Fzf + Zoxide
+# Behaviour:
+# 1. no args → fzf current dir
+# 2. file → open
+# 3. dir → zoxide + fzf inside
+# 4. else → zoxide resolve
 nz() {
     local dir file matches count arg="$1"
 
@@ -76,19 +81,6 @@ nz() {
     [ -n "$file" ] && nvim "$file"
 }
 
-# List all process descendents for input process ID
-list_process_descendants() {
-    local children
-    children=$(pgrep -P "$1")
-
-    if [ -n "$children" ]; then
-        for child in $children; do
-            list_process_descendants "$child"
-        done
-        echo "$children"
-    fi
-}
-
 # TMUX Popup Show Message (closes on enter)
 tpshow() {
   local message="$*" lines cols cmd
@@ -124,17 +116,6 @@ nod() {
 
   tpshow "$msg"
   return $code
-}
-
-# Quick temp folder for experiments
-tempd () { 
-  cd "$(mktemp -d)" 
-  chmod -R 0700 . 
-  if [[ $# -eq 1 ]]; then 
-    \mkdir -p "$1" 
-    cd "$1" 
-    chmod -R 0700 . 
-  fi 
 }
 
 # Print new lines
@@ -303,6 +284,27 @@ cpz() {
         || fzf --prompt="Select destination> "; }) || return
 
     cp -r "${files[@]}" "$resolved"
+}
+
+# List all files via fd-fzf
+fz() {
+  local fd_flags=""
+  if [[ "$1" == "-i" ]]; then
+    fd_flags="--no-ignore --hidden"
+  fi
+  fd . --type f $fd_flags 2>/dev/null | fzf
+}
+
+# List all folders via FZF and cd to it
+dz() {
+  local fd_flags=""
+  if [[ "$1" == "-i" ]]; then
+    fd_flags="--no-ignore --hidden"
+  fi
+
+  local dir
+  dir="$(fd . --type d --exclude .git $fd_flags 2>/dev/null | fzf)" || return
+  [ -n "$dir" ] && cd "$dir"
 }
 
 gfile() {
