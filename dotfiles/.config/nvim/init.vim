@@ -729,16 +729,18 @@ end, { nargs = 1, desc = "Safely renames unnamed or terminal buffers.", })
 vim.cmd("command! -nargs=+ Rb RenameBuf <args>")
 
 -- Copy current file + line to clipboard
-local function copy_file_and_line_to_clipboard()
-  local text = vim.fn.expand("%:p") .. ":" .. vim.fn.line(".")
+vim.api.nvim_create_user_command("Where", function(opts)
+  local use_absolute = false
+  if opts.args == "-a" or opts.args == "--abs" then
+    use_absolute = true
+  end
+  local path = use_absolute and vim.fn.expand("%:p") or vim.fn.expand("%")
+  local text = path .. ":" .. vim.fn.line(".")
   vim.fn.setreg("+", text)
   vim.api.nvim_echo({ { "Copied: " .. text, "None" } }, false, {})
-end
-
--- Setup alias for above function
-vim.api.nvim_create_user_command("Where", function()
-  copy_file_and_line_to_clipboard()
-end, {})
+end, {
+  nargs = "?"
+})
 EOF
 
 " Keymaps for Leap.nvim jump plugin
