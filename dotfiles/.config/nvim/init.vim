@@ -582,6 +582,7 @@ fzf.setup({
         end,
       },
       preview = "git show --color --stat {1}",
+      fzf_opts = { ["no-sort"] = true },
       winopts = {
         preview = {
           layout = "vertical",
@@ -592,12 +593,13 @@ fzf.setup({
       },
     },
     bcommits = {
-        actions = {
-          ["ctrl-d"] = function(...)
-            fzf.actions.git_buf_split(...)
-            vim.cmd("windo diffthis | wincmd h")
-          end, desc = "Diff against commit"
-        },
+      fzf_opts = { ["no-sort"] = true },
+      actions = {
+        ["ctrl-d"] = function(...)
+          fzf.actions.git_buf_split(...)
+          vim.cmd("windo diffthis | wincmd h")
+        end, desc = "Diff against commit"
+      },
     },
   },
   manpages = {
@@ -690,6 +692,7 @@ nnoremap <silent><leader>fz :lua require('fzf-lua').builtin()<CR>
 nnoremap <silent><leader>fm :lua require('fzf-lua').marks({marks = "%u"})<CR>
 nnoremap <silent><leader>fM :lua require('fzf-lua').manpages()<CR>
 nnoremap <silent><leader>fo :lua require('fzf-lua').oldfiles()<CR>
+nnoremap <silent><leader>fi :lua require('fzf-lua').lsp_incoming_calls()<CR>
 nnoremap <silent><leader>fk :DocSymbols<CR>
 vnoremap <silent><leader>fs <cmd>FzfLua blines resume=true<CR>
 vnoremap <silent><leader>fg <cmd>FzfLua git_bcommits<CR>

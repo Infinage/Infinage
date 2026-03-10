@@ -22,3 +22,7 @@ services:
   download-proxy:
     image: docker.io/infinage/download-proxy
     restart: unless-stopped
+
+  calculator:
+    image: docker.io/infinage/calculator
+    restart: unless-stopped

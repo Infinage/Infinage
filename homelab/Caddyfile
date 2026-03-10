@@ -17,3 +17,7 @@ http://lqueens.infinage.space, http://lqueens.localhost {
 http://download.infinage.space, http://download.localhost {
     reverse_proxy download-proxy:8080
 }
+
+http://calculator.infinage.space, http://calculator.localhost {
+    reverse_proxy calculator:80
+}

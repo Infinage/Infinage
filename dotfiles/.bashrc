@@ -7,6 +7,15 @@ export LANG=en_US.UTF-8
 # Useful utilities defined here
 export PATH="$HOME/bin:$PATH"
 
+# Add vcpkg configs
+export VCPKG_ROOT=$HOME/vcpkg
+export PATH=$VCPKG_ROOT:$PATH
+
+# Emscripten configs
+# git clone https://github.com/emscripten-core/emsdk.git ~/emsdk
+# ~/emsdk/emsdk install latest && ~/emsdk/emsdk activate latest
+export PATH=$PATH:${HOME}/emsdk:${HOME}/emsdk/upstream/emscripten
+
 # Termux specific
 if [ -n "$TERMUX_VERSION" ]; then
   export XDG_RUNTIME_DIR="${TERMUX__PREFIX}/tmp"
