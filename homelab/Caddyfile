@@ -10,14 +10,6 @@ http://url-shortner.infinage.space, http://url-shortner.localhost {
     reverse_proxy url-shortner:8080
 }
 
-http://lqueens.infinage.space, http://lqueens.localhost {
-    reverse_proxy lqueens:8080
-}
-
-http://download.infinage.space, http://download.localhost {
-    reverse_proxy download-proxy:8080
-}
-
 http://calculator.infinage.space, http://calculator.localhost {
     reverse_proxy calculator:80
 }

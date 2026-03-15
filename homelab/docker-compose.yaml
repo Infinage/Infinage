@@ -15,14 +15,6 @@ services:
     image: docker.io/infinage/ascii-art
     restart: unless-stopped
 
-  lqueens:
-    image: docker.io/infinage/lqueens
-    restart: unless-stopped
-
-  download-proxy:
-    image: docker.io/infinage/download-proxy
-    restart: unless-stopped
-
   calculator:
     image: docker.io/infinage/calculator
     restart: unless-stopped
