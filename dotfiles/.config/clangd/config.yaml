@@ -23,7 +23,7 @@ CompileFlags:
       - -Wsign-conversion
       - -Wpedantic 
       - -pedantic-errors
-      - -fmodules
+      #- -fmodules
       - -std=c++23
       - -Wparentheses 
       - -Wbool-compare

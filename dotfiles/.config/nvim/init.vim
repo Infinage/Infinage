@@ -17,8 +17,8 @@ Plug 'hrsh7th/cmp-buffer'
 Plug 'tpope/vim-fugitive'
 Plug 'nvim-tree/nvim-web-devicons'
 Plug 'nvim-lualine/lualine.nvim'
-Plug 'nvim-treesitter/nvim-treesitter', { 'branch': 'master' }
-Plug 'nvim-treesitter/nvim-treesitter-textobjects', { 'branch': 'master' }
+Plug 'nvim-treesitter/nvim-treesitter'
+Plug 'nvim-treesitter/nvim-treesitter-textobjects'
 Plug 'https://codeberg.org/andyg/leap.nvim.git'
 Plug 'olimorris/codecompanion.nvim'
 Plug 'windwp/nvim-autopairs'
@@ -107,7 +107,8 @@ vim.lsp.config('clangd', {
 })
 
 -- Enable all required LSP configs
-vim.lsp.enable({'clangd', 'jedi_language_server', 'bashls', 'lua_ls', 'cmake'})
+vim.lsp.enable({'clangd', 'jedi_language_server', 'bashls', 
+  'lua_ls', 'cmake', 'gopls'})
 
 -- Setup autocompletion
 cmp.setup {
@@ -147,76 +148,107 @@ EOF
 
 " Setup treesitter
 lua << EOF
-require("nvim-treesitter.install").prefer_git = true
-require('nvim-treesitter.configs').setup {
-  parser_install_dir = nil,
-  highlight = { enable = true, additional_vim_regex_highlighting = false },
-  ensure_installed = { 
+local ts_supported = { 
     "cpp", "lua", "python", "vim", "vimdoc", "bash", "markdown", 
     "markdown_inline", "cmake", "xml", "json", "dockerfile", 
-    "javascript", "query", "yaml",
-  },
-  incremental_selection = {
-    enable = true,
-    keymaps = {
-      init_selection = "<CR>",
-      node_incremental = "<CR>",
-      node_decremental = "<BS>",
-    },
-  },
-  textobjects = {
-    enable = true,
-    select = {
-      enable = true, lookahead = true,
-      keymaps = {
-        ["af"] = "@function.outer",
-        ["if"] = "@function.inner",
-        ["ac"] = "@class.outer",
-        ["ic"] = "@class.inner",
-        ["ai"] = "@conditional.outer",
-        ["ii"] = "@conditional.inner",
-        ["al"] = "@loop.outer",
-        ["il"] = "@loop.inner",
-        ["i/"] = "@comment.inner",
-        ["a/"] = "@comment.outer",
-      },
-    },
-    move = {
-      enable = true,
-      set_jumps = true,
-      goto_next_start = {
-        ["]1"] = "@class.outer",
-        ["]2"] = "@function.outer",
-        ["]3"] = "@block.outer",
-        ["]4"] = "@loop.outer",
-        ["]5"] = "@conditional.outer",
-        ["]6"] = "@return.inner",
-      },
-      goto_previous_start = {
-        ["[1"] = "@class.outer",
-        ["[2"] = "@function.outer",
-        ["[3"] = "@block.outer",
-        ["[4"] = "@loop.outer",
-        ["[5"] = "@conditional.outer",
-        ["[6"] = "@return.inner",
-      },
-      goto_next_end = {
-        ["}1"] = "@class.outer",
-        ["}2"] = "@function.outer",
-        ["}3"] = "@block.outer",
-        ["}4"] = "@loop.outer",
-        ["}5"] = "@conditional.outer",
-      },
-      goto_previous_end = {
-        ["{1"] = "@class.outer",
-        ["{2"] = "@function.outer",
-        ["{3"] = "@block.outer",
-        ["{4"] = "@loop.outer",
-        ["{5"] = "@conditional.outer",
-      },
-    },
-  }
+    "javascript", "query", "yaml", "go"
 }
+
+require("nvim-treesitter.install").prefer_git = true
+require('nvim-treesitter').install(ts_supported)
+
+-- Enable neovim native highlighting with treesitter
+vim.api.nvim_create_autocmd('FileType', {
+  group = vim.api.nvim_create_augroup("tree-sitter-enable", { clear = true }),
+  pattern = ts_supported,
+  callback = function(args)
+    local lang = vim.treesitter.language.get_lang(args.match)
+    if not lang then return end
+
+    if vim.treesitter.query.get(lang, "highlights") 
+      then vim.treesitter.start(args.buf)
+    end
+
+    if vim.treesitter.query.get(lang, "indents") then
+      vim.opt_local.indentexpr = 'v:lua.require("nvim-treesitter").indentexpr()'
+    end
+
+    if vim.treesitter.query.get(lang, "folds") then
+      vim.opt_local.foldmethod = "expr"
+      vim.opt_local.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+    end
+  end,
+})
+
+vim.keymap.set('n', '<CR>', ':normal van<cr>', opts)
+vim.keymap.set('n', '<BS>', ':normal vin<cr>', opts)
+vim.keymap.set('v', '<CR>', function() vim.api.nvim_feedkeys('an', 'v', false) end)
+vim.keymap.set('v', '<BS>', function() vim.api.nvim_feedkeys('in', 'v', false) end)
+
+require("nvim-treesitter-textobjects").setup({
+  select = { lookahead = true, },
+  move = { set_jumps = true, },
+})
+
+local select = require("nvim-treesitter-textobjects.select")
+local move = require("nvim-treesitter-textobjects.move")
+local ts_repeat_move = require "nvim-treesitter-textobjects.repeatable_move"
+
+local select_maps = {
+  ["af"] = "@function.outer",
+  ["if"] = "@function.inner",
+  ["ac"] = "@class.outer",
+  ["ic"] = "@class.inner",
+  ["ai"] = "@conditional.outer",
+  ["ii"] = "@conditional.inner",
+  ["al"] = "@loop.outer",
+  ["il"] = "@loop.inner",
+  ["i/"] = "@comment.inner",
+  ["a/"] = "@comment.outer",
+}
+
+for lhs, query in pairs(select_maps) do
+  vim.keymap.set({ "x", "o" }, lhs, function()
+    select.select_textobject(query, "textobjects")
+  end)
+end
+
+-- Define the mapping of your numbers to treesitter captures
+local move_targets = {
+  ["1"] = "@class.outer",
+  ["2"] = "@function.outer",
+  ["3"] = "@block.outer",
+  ["4"] = "@loop.outer",
+  ["5"] = "@conditional.outer",
+  ["6"] = "@return.inner",
+}
+
+for key, target in pairs(move_targets) do
+  -- Modes for movement are typically Normal, Visual and operator pending
+  local modes = { "n", "x", "o" }
+
+  -- goto_next_start: ]1, ]2, etc.
+  vim.keymap.set(modes, "]" .. key, function() move.goto_next_start(target, "textobjects") end)
+
+  -- goto_previous_start: [1, [2, etc.
+  vim.keymap.set(modes, "[" .. key, function() move.goto_previous_start(target, "textobjects") end)
+
+  -- goto_next_end: }1, }2, etc.
+  vim.keymap.set(modes, "}" .. key, function() move.goto_next_end(target, "textobjects") end)
+
+  -- goto_previous_end: {1, {2, etc.
+  vim.keymap.set(modes, "{" .. key, function() move.goto_previous_end(target, "textobjects") end)
+end
+
+-- Repeat movement with ; and ,
+vim.keymap.set({ "n", "x", "o" }, ";", ts_repeat_move.repeat_last_move_next)
+vim.keymap.set({ "n", "x", "o" }, ",", ts_repeat_move.repeat_last_move_previous)
+
+-- Make builtin f, F, t, T also repeatable with ; and ,
+vim.keymap.set({ "n", "x", "o" }, "f", ts_repeat_move.builtin_f_expr, { expr = true })
+vim.keymap.set({ "n", "x", "o" }, "F", ts_repeat_move.builtin_F_expr, { expr = true })
+vim.keymap.set({ "n", "x", "o" }, "t", ts_repeat_move.builtin_t_expr, { expr = true })
+vim.keymap.set({ "n", "x", "o" }, "T", ts_repeat_move.builtin_T_expr, { expr = true })
 EOF
 
 " Set leader as space

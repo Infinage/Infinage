@@ -16,6 +16,10 @@ export PATH=$VCPKG_ROOT:$PATH
 # ~/emsdk/emsdk install latest && ~/emsdk/emsdk activate latest
 export PATH=$PATH:${HOME}/emsdk:${HOME}/emsdk/upstream/emscripten
 
+# Go stuff
+export GOPATH="$HOME/go"
+export PATH="$PATH:$GOPATH/bin"
+
 # Termux specific
 if [ -n "$TERMUX_VERSION" ]; then
   export XDG_RUNTIME_DIR="${TERMUX__PREFIX}/tmp"
@@ -147,6 +151,9 @@ eval "$(fzf --bash)"
 # Setup zoxide for bash
 export _ZO_RESOLVE_SYMLINKS=1
 eval "$(zoxide init bash)"
+
+# Setup nix
+source /home/kael/.nix-profile/etc/profile.d/nix.sh
 
 # Setup for caching CPM
 export CPM_SOURCE_CACHE=$HOME/.cache/CPM
