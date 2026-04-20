@@ -1,15 +1,19 @@
-http://infinage.space, http://localhost {
+infinage.space, localhost {
     redir https://github.com/infinage permanent
 }
 
-http://ascii-art.infinage.space, http://ascii-art.localhost {
+ascii-art.infinage.space, ascii-art.localhost {
     reverse_proxy ascii-art:80
 }
 
-http://url-shortner.infinage.space, http://url-shortner.localhost {
+url-shortner.infinage.space, url-shortner.localhost {
     reverse_proxy url-shortner:8080
 }
 
-http://calculator.infinage.space, http://calculator.localhost {
+calculator.infinage.space, calculator.localhost {
     reverse_proxy calculator:80
+}
+
+goduku.infinage.space, goduku.localhost {
+    reverse_proxy goduku:80
 }

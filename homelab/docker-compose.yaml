@@ -3,6 +3,7 @@ services:
     image: docker.io/caddy:alpine
     ports: 
       - "80:80"
+      - "443:443"
     volumes: 
       - ./Caddyfile:/etc/caddy/Caddyfile
     restart: unless-stopped
@@ -17,4 +18,8 @@ services:
 
   calculator:
     image: docker.io/infinage/calculator
+    restart: unless-stopped
+
+  goduku:
+    image: docker.io/infinage/goduku
     restart: unless-stopped
