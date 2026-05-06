@@ -730,10 +730,10 @@ vnoremap <silent><leader>fs <cmd>FzfLua blines resume=true<CR>
 vnoremap <silent><leader>fg <cmd>FzfLua git_bcommits<CR>
 
 " Custom mappings for LSP
-nnoremap <silent> [e        :lua vim.diagnostic.goto_prev()<CR>
-nnoremap <silent> ]e        :lua vim.diagnostic.goto_next()<CR>
-nnoremap <silent> [E        :lua vim.diagnostic.goto_prev({ severity = vim.diagnostic.severity.ERROR })<CR>
-nnoremap <silent> ]E        :lua vim.diagnostic.goto_next({ severity = vim.diagnostic.severity.ERROR })<CR>
+nnoremap <silent> [e        :lua vim.diagnostic.jump({ count = -1, float = true })<CR>
+nnoremap <silent> ]e        :lua vim.diagnostic.jump({ count = 1, float = true })<CR>
+nnoremap <silent> [E        :lua vim.diagnostic.jump({ count = -1, float = true, severity = vim.diagnostic.severity.ERROR })<CR>
+nnoremap <silent> ]E        :lua vim.diagnostic.jump({ count = 1, float = true, severity = vim.diagnostic.severity.ERROR })<CR>
 nnoremap <silent> <leader>e :lua vim.diagnostic.open_float()<CR>
 
 lua << EOF
@@ -800,14 +800,8 @@ require("codecompanion").setup({
       gemini = function()
         return require("codecompanion.adapters").extend("gemini", {
           env = { api_key = "cmd:pass show google/gemini" },
-          schema = { model = { default = "gemini-2.5-flash", }, },
-        })
-      end,
-      groq = function()
-        return require("codecompanion.adapters").extend("openai", {
-          name = "Groq", env = { api_key = "cmd:pass show groq" },
-          url = "https://api.groq.com/openai/v1/chat/completions",
-          schema = { model = { default = "llama-3.1-8b-instant", }, },
+          schema = { model = { default = "gemini-3-flash-preview", }, },
+
         })
       end,
     },

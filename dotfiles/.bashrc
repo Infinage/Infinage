@@ -18,7 +18,8 @@ export PATH=$PATH:${HOME}/emsdk:${HOME}/emsdk/upstream/emscripten
 
 # Go stuff
 export GOPATH="$HOME/go"
-export PATH="$PATH:$GOPATH/bin"
+export TINYGOPATH="/opt/tinygo"
+export PATH="$PATH:$GOPATH/bin:$TINYGOPATH/bin"
 
 # Termux specific
 if [ -n "$TERMUX_VERSION" ]; then
@@ -34,7 +35,7 @@ bind '"\C-k": previous-history'
 bind '"\C-j": next-history'
 
 # shorter alias
-alias l='ls -lart --color=auto --human-readable'
+alias l='ls -larth --color=auto --human-readable'
 alias ls='ls -a --color=auto'
 alias grep='grep --color=auto'
 alias cat='bat'
