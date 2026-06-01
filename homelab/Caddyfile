@@ -17,3 +17,7 @@ calculator.infinage.space, calculator.localhost {
 goduku.infinage.space, goduku.localhost {
     reverse_proxy goduku:80
 }
+
+pastebin.infinage.space, pastebin.localhost {
+    reverse_proxy pastebin:8080
+}

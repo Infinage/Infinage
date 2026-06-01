@@ -23,3 +23,16 @@ services:
   goduku:
     image: docker.io/infinage/goduku
     restart: unless-stopped
+
+  pastebin:
+    image: docker.io/infinage/pastebin
+    restart: unless-stopped
+    environment:
+      - port=8080
+      - savepath=/app/data/pastebin.gob
+    volumes:
+      - pastebin-data:/app/data
+
+# podman-compose to manage this volume internally
+volumes:
+  pastebin_data:
