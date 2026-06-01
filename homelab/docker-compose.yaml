@@ -6,6 +6,8 @@ services:
       - "443:443"
     volumes: 
       - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
     restart: unless-stopped
 
   url-shortner:
@@ -35,4 +37,6 @@ services:
 
 # podman-compose to manage this volume internally
 volumes:
-  pastebin_data:
+  pastebin-data:
+  caddy_data:
+  caddy_config:
