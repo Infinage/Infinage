@@ -35,6 +35,10 @@ services:
     volumes:
       - pastebin-data:/app/data
 
+  game-of-life:
+    image: docker.io/infinage/game-of-life
+    restart: unless-stopped
+
 # podman-compose to manage this volume internally
 volumes:
   pastebin-data:

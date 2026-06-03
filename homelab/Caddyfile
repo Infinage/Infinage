@@ -21,3 +21,7 @@ goduku.infinage.space, goduku.localhost {
 pastebin.infinage.space, pastebin.localhost {
     reverse_proxy pastebin:8080
 }
+
+game-of-life.infinage.space, game-of-life.localhost {
+    reverse_proxy game-of-life:80
+}
