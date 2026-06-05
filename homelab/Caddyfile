@@ -25,3 +25,7 @@ pastebin.infinage.space, pastebin.localhost {
 game-of-life.infinage.space, game-of-life.localhost {
     reverse_proxy game-of-life:80
 }
+
+ghloc.infinage.space, ghloc.localhost {
+    reverse_proxy ghloc:8080
+}
