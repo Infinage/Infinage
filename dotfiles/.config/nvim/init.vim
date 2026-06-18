@@ -22,6 +22,7 @@ Plug 'nvim-treesitter/nvim-treesitter-textobjects'
 Plug 'https://codeberg.org/andyg/leap.nvim.git'
 Plug 'olimorris/codecompanion.nvim'
 Plug 'windwp/nvim-autopairs'
+Plug 'andymass/vim-matchup'
 call plug#end()
 
 " Setup lualine
