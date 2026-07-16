@@ -108,7 +108,8 @@ vim.lsp.config('clangd', {
 })
 
 -- Enable all required LSP configs
-vim.lsp.enable({'clangd', 'jedi_language_server', 'bashls', 'lua_ls', 'cmake', 'gopls', 'templ'})
+vim.lsp.enable({'clangd', 'jedi_language_server', 'bashls', 'lua_ls', 'cmake', 
+  'gopls', 'cssls', 'eslint', 'html'})
 
 -- Setup autocompletion
 cmp.setup {
@@ -151,7 +152,7 @@ lua << EOF
 local ts_supported = { 
     "cpp", "lua", "python", "vim", "vimdoc", "bash", "markdown", 
     "markdown_inline", "cmake", "xml", "json", "dockerfile", 
-    "javascript", "query", "yaml", "go", "templ"
+    "javascript", "query", "yaml", "go", "html", "css"
 }
 
 require("nvim-treesitter.install").prefer_git = true
