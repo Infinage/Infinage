@@ -103,13 +103,21 @@ vim.lsp.config('clangd', {
   cmd = { 
     "clangd", "--query-driver=**", "--background-index", "--clang-tidy", "-j=8", 
     "--pch-storage=memory", "--limit-references=100", "--limit-results=50", 
-    -- "--experimental-modules-support"
   },
+})
+
+-- Make tailwind LSP complete works without a workspace
+vim.lsp.config('tailwindcss', {
+  capabilities = capabilities,
+  root_dir = function(bufnr, on_dir)
+    local fname = vim.api.nvim_buf_get_name(bufnr)
+    on_dir(vim.fs.dirname(fname))
+  end,
 })
 
 -- Enable all required LSP configs
 vim.lsp.enable({'clangd', 'jedi_language_server', 'bashls', 'lua_ls', 'cmake', 
-  'gopls', 'cssls', 'eslint', 'html'})
+  'gopls', 'eslint', 'html', 'tailwindcss'})
 
 -- Setup autocompletion
 cmp.setup {

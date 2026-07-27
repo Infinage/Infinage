@@ -7,6 +7,9 @@ export LANG=en_US.UTF-8
 # Useful utilities defined here
 export PATH="$HOME/bin:$PATH"
 
+# Add NPM packages to path
+export PATH="$HOME/.local/share/pnpm/bin:$PATH"
+
 # Add vcpkg configs
 export VCPKG_ROOT=$HOME/vcpkg
 export PATH=$VCPKG_ROOT:$PATH
@@ -20,27 +23,6 @@ export PATH=$PATH:${HOME}/emsdk:${HOME}/emsdk/upstream/emscripten
 export GOPATH="$HOME/go"
 export TINYGOPATH="/opt/tinygo"
 export PATH="$PATH:$GOPATH/bin:$TINYGOPATH/bin"
-
-# Tailwind offline docs
-export TWDPATH="$HOME/.tailwinddocs"
-twdsetup() {
-    # If the folder exists, wipe it out for a clean slate
-    if [ -d "$TWDPATH" ]; then
-        echo "Removing old docs at $TWDPATH..."
-        rm -rf "$TWDPATH"
-    fi
-
-    # Clone fresh
-    git clone --branch main --single-branch --depth 1 https://github.com/tailwindlabs/tailwindcss.com.git "$TWDPATH"
-    pushd "$TWDPATH" > /dev/null || return
-    pnpm install && pnpm build
-    popd > /dev/null || return
-}
-twdocs() {
-    # Takes an optional port: twdocs [port], defaults to 5001 
-    local port="${1:-5001}"
-    "$TWDPATH/node_modules/.bin/next" start "$TWDPATH" -p "$port" &
-}
 
 # Termux specific
 if [ -n "$TERMUX_VERSION" ]; then

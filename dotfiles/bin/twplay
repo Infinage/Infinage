@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+set -e
+set -u
+set -o pipefail
+
+NIX_PKGS="nixpkgs#tailwindcss nixpkgs#live-server nixpkgs#gnumake"
+
+# Generate a random port between 8000 and 8999
+PORT=$((8000 + RANDOM % 1000))
+
+# Store the temp path and cd into it natively
+TEMP_DIR=$(mktemp -d)
+cd "$TEMP_DIR" || exit 1
+
+# Cleanup function: Checks if folder exists to guarantee it only runs once
+cleanup() {
+    if [ -d "$TEMP_DIR" ]; then
+        echo -e "\n🧹 Cleaning up $TEMP_DIR..."
+        rm -rf "$TEMP_DIR"
+    fi
+}
+
+# Ctrl+C kills the server, causes the script to end, triggering EXIT
+trap cleanup EXIT
+
+# Scaffold Makefile (Ensure you copy the exact tabs here!)
+cat << 'EOF' > Makefile
+# Define variables with default values. 
+PORT ?= 8080
+
+.PHONY: dev serve watch-css
+
+dev:
+	@echo "Spinning up Tailwind playground on port $(PORT)"
+	@$(MAKE) -j2 watch-css serve
+
+serve:
+	live-server --port=$(PORT)
+
+watch-css:
+	tailwindcss -i input.css -o index.css --watch
+EOF
+
+# Scaffold index.html
+cat << 'EOF' > index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="index.css">
+  <script src="alpine.js" defer></script>
+</head>
+<body>
+
+</body>
+</html>
+EOF
+
+# Scaffold a minimal tailwind config file
+cat << 'EOF' > tailwind.config.js
+module.exports = { content: ["./*.html"] }
+EOF
+
+# Scaffold input.css
+cat << 'EOF' > input.css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+EOF
+
+# Download Alpine.js quietly (-s), but show errors if it fails (-S)
+echo "Downloading Alpine.js..."
+curl -fsSL https://cdn.jsdelivr.net/npm/alpinejs@3.15.12/dist/cdn.min.js -o alpine.js
+
+echo ""
+echo "================================================="
+echo "✨ Tailwind playground is LIVE!"
+echo "📁 Edit files at: $TEMP_DIR"
+echo "🌐 View page at:  http://localhost:$PORT"
+echo "🛑 Press Ctrl+C here to stop the server and auto-delete the folder."
+echo "================================================="
+echo "Building Nix environment and starting server..."
+
+# Run the server
+nix shell $NIX_PKGS --command make dev PORT="$PORT"
