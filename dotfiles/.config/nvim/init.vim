@@ -23,6 +23,7 @@ Plug 'https://codeberg.org/andyg/leap.nvim.git'
 Plug 'olimorris/codecompanion.nvim'
 Plug 'windwp/nvim-autopairs'
 Plug 'andymass/vim-matchup'
+Plug 'WillEhrendreich/datastar.nvim'
 call plug#end()
 
 " Setup lualine
@@ -117,7 +118,7 @@ vim.lsp.config('tailwindcss', {
 
 -- Enable all required LSP configs
 vim.lsp.enable({'clangd', 'jedi_language_server', 'bashls', 'lua_ls', 'cmake', 
-  'gopls', 'eslint', 'html', 'tailwindcss'})
+  'gopls', 'eslint', 'html', 'tailwindcss', 'ts_ls'})
 
 -- Setup autocompletion
 cmp.setup {
@@ -131,6 +132,7 @@ cmp.setup {
   }),
   sources = {
     { name = 'nvim_lsp' },
+    { name = 'datastar' },
     { name = 'codecompanion' },
     {  name = 'buffer',
         option = {
@@ -176,10 +178,6 @@ vim.api.nvim_create_autocmd('FileType', {
 
     if vim.treesitter.query.get(lang, "highlights") 
       then vim.treesitter.start(args.buf)
-    end
-
-    if vim.treesitter.query.get(lang, "indents") then
-      vim.opt_local.indentexpr = 'v:lua.require("nvim-treesitter").indentexpr()'
     end
 
     if vim.treesitter.query.get(lang, "folds") then
@@ -346,6 +344,9 @@ set updatetime=100
 
 " Setup auto pairs in nvim
 lua require("nvim-autopairs").setup()
+
+" Setup support for datastar
+lua require("datastar").setup()
 
 " Support python inside markdown
 let g:markdown_fenced_languages = ['cpp', 'python', 'javascript', 'js=javascript', 'typescript', 'ts=typescript']
