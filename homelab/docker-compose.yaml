@@ -43,6 +43,10 @@ services:
     image: docker.io/infinage/ghloc
     restart: unless-stopped
 
+  game-2048:
+    image: docker.io/infinage/2048
+    restart: unless-stopped
+
 # podman-compose to manage this volume internally
 volumes:
   pastebin-data:

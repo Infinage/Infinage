@@ -29,3 +29,7 @@ game-of-life.infinage.space, game-of-life.localhost {
 ghloc.infinage.space, ghloc.localhost {
     reverse_proxy ghloc:8080
 }
+
+game-2048.infinage.space, game-2048.localhost {
+    reverse_proxy game-2048:8080
+}
