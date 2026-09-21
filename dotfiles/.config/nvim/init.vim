@@ -24,6 +24,7 @@ Plug 'olimorris/codecompanion.nvim'
 Plug 'windwp/nvim-autopairs'
 Plug 'andymass/vim-matchup'
 Plug 'WillEhrendreich/datastar.nvim'
+Plug 'windwp/nvim-ts-autotag'
 call plug#end()
 
 " Setup lualine
@@ -348,6 +349,9 @@ lua require("nvim-autopairs").setup()
 " Setup support for datastar
 lua require("datastar").setup()
 
+" Setup support for nvim-ts-autotag
+lua require('nvim-ts-autotag').setup()
+
 " Support python inside markdown
 let g:markdown_fenced_languages = ['cpp', 'python', 'javascript', 'js=javascript', 'typescript', 'ts=typescript']
 autocmd FileType markdown set conceallevel=0
@@ -377,6 +381,12 @@ for _, mode in ipairs({ "n", "i", "v", "x", "c" }) do
     vim.api.nvim_set_keymap(mode, key, "<Nop>", { noremap = true, silent = true })
   end
 end
+EOF
+
+" Comment with ctrl + /
+lua << EOF
+vim.keymap.set("n", "<C-_>", "gcc", { remap = true })
+vim.keymap.set("v", "<C-_>", "gc", { remap = true })
 EOF
 
 " Disable mouse
