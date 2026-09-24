@@ -1,4 +1,5 @@
 __pycache__
+.env
 
 # Ignore everything under 'dotfiles/.gnupg' except the one file
 dotfiles/.gnupg/*

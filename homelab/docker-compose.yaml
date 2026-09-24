@@ -53,8 +53,20 @@ services:
     environment:
       - POPULATE_SEED_DATA=1
 
+  osync:
+    image: docker.io/library/couchdb
+    restart: unless-stopped
+    environment:
+      - COUCHDB_USER=${COUCHDB_USER}
+      - COUCHDB_PASSWORD=${COUCHDB_PASSWORD}
+    volumes:
+      - couchdb-data:/opt/couchdb/data
+      - couchdb-config:/opt/couchdb/etc/local.d
+
 # podman-compose to manage this volume internally
 volumes:
   pastebin-data:
   caddy_data:
   caddy_config:
+  couchdb-data:
+  couchdb-config:

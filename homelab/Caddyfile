@@ -37,3 +37,7 @@ game-2048.infinage.space, game-2048.localhost {
 ecom-trading.infinage.space, ecom-trading.localhost {
     reverse_proxy ecom-trading:8080
 }
+
+osync.infinage.space, osync.localhost {
+    reverse_proxy osync:5984
+}
