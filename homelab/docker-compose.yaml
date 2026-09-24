@@ -47,6 +47,12 @@ services:
     image: docker.io/infinage/2048
     restart: unless-stopped
 
+  ecom-trading:
+    image: docker.io/infinage/ecom-trading
+    restart: unless-stopped
+    environment:
+      - POPULATE_SEED_DATA=1
+
 # podman-compose to manage this volume internally
 volumes:
   pastebin-data:

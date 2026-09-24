@@ -48,6 +48,7 @@ alias zq='zoxide query'
 alias zqi='zoxide query --interactive'
 alias nchat='nvim +":CodeCompanionChat" +":wincmd w" +":q"'
 alias mm='micromamba'
+alias obs='Obsidian.AppImage'
 
 # List all directories
 d() {
