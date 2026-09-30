@@ -41,3 +41,7 @@ ecom-trading.infinage.space, ecom-trading.localhost {
 osync.infinage.space, osync.localhost {
     reverse_proxy osync:5984
 }
+
+tneb-scraper.infinage.space, tneb-scraper.localhost {
+    reverse_proxy tneb-scraper:8080
+}

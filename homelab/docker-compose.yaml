@@ -63,6 +63,20 @@ services:
       - couchdb-data:/opt/couchdb/data
       - couchdb-config:/opt/couchdb/etc/local.d
 
+  rod:
+    image: ghcr.io/go-rod/rod:v0.116.2
+    init: true
+    restart: unless-stopped
+
+  tneb-scraper:
+    image: docker.io/infinage/tneb-scraper
+    restart: unless-stopped
+    depends_on:
+      - rod
+    volumes:
+      - .consumer-mapping.json:/app/.consumer-mapping.json:ro
+      - .env:/app/.env:ro
+
 # podman-compose to manage this volume internally
 volumes:
   pastebin-data:
