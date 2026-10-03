@@ -3,7 +3,7 @@ infinage.space, localhost {
 }
 
 ascii-art.infinage.space, ascii-art.localhost {
-    reverse_proxy ascii-art:80
+    reverse_proxy ascii-art:8080
 }
 
 url-shortner.infinage.space, url-shortner.localhost {
