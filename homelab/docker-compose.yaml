@@ -77,6 +77,10 @@ services:
       - .consumer-mapping.json:/app/.consumer-mapping.json:ro
       - .env:/app/.env:ro
 
+  lqueens:
+    image: docker.io/infinage/lqueens
+    restart: unless-stopped
+
 # podman-compose to manage this volume internally
 volumes:
   pastebin-data:

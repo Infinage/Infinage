@@ -45,3 +45,7 @@ osync.infinage.space, osync.localhost {
 tneb-scraper.infinage.space, tneb-scraper.localhost {
     reverse_proxy tneb-scraper:8080
 }
+
+lqueens.infinage.space, lqueens.localhost {
+    reverse_proxy lqueens:8080
+}
