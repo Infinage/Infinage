@@ -49,3 +49,7 @@ tneb-scraper.infinage.space, tneb-scraper.localhost {
 lqueens.infinage.space, lqueens.localhost {
     reverse_proxy lqueens:8080
 }
+
+tailwind-battle.infinage.space tailwind-battle.localhost {
+    reverse_proxy tailwind-battle:8080
+}
