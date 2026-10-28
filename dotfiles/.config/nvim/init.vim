@@ -23,7 +23,6 @@ Plug 'https://codeberg.org/andyg/leap.nvim.git'
 Plug 'olimorris/codecompanion.nvim'
 Plug 'windwp/nvim-autopairs'
 Plug 'andymass/vim-matchup'
-Plug 'WillEhrendreich/datastar.nvim'
 Plug 'windwp/nvim-ts-autotag'
 call plug#end()
 
@@ -119,7 +118,7 @@ vim.lsp.config('tailwindcss', {
 
 -- Enable all required LSP configs
 vim.lsp.enable({'clangd', 'jedi_language_server', 'bashls', 'lua_ls', 'cmake', 
-  'gopls', 'eslint', 'html', 'tailwindcss', 'ts_ls'})
+  'gopls', 'eslint', 'html', 'tailwindcss', 'ts_ls', 'cssls'})
 
 -- Setup autocompletion
 cmp.setup {
@@ -133,7 +132,6 @@ cmp.setup {
   }),
   sources = {
     { name = 'nvim_lsp' },
-    { name = 'datastar' },
     { name = 'codecompanion' },
     {  name = 'buffer',
         option = {
@@ -345,9 +343,6 @@ set updatetime=100
 
 " Setup auto pairs in nvim
 lua require("nvim-autopairs").setup()
-
-" Setup support for datastar
-lua require("datastar").setup()
 
 " Setup support for nvim-ts-autotag
 lua require('nvim-ts-autotag').setup()

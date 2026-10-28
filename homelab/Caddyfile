@@ -53,3 +53,7 @@ lqueens.infinage.space, lqueens.localhost {
 tailwind-battle.infinage.space tailwind-battle.localhost {
     reverse_proxy tailwind-battle:8080
 }
+
+images2pdf.infinage.space images2.localhost {
+    reverse_proxy images2pdf:8080
+}
