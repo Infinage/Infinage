@@ -24,6 +24,17 @@ export GOPATH="$HOME/go"
 export TINYGOPATH="/opt/tinygo"
 export PATH="$PATH:$GOPATH/bin:$TINYGOPATH/bin"
 
+# Tinygo stuff (picked from tinygo info arduino)
+tinygo-setup() {
+    export GOPATH="$HOME/tinygo"
+    export GOROOT="/home/kael/.cache/tinygo/goroot-3b8671b5fdffd568bf0bc4329170b7a4a30a5ed64fe6391d8db4bf4c92a9fff2"
+
+    export GOOS=linux
+    export GOARCH=arm
+
+    export GOFLAGS="-tags=avr,baremetal,linux,arm,atmega328p,atmega,avr5,arduino_uno,tinygo,purego,osusergo,math_big_pure_go,gc.conservative,scheduler.none,tinygo.unwind.setjmp,serial.uart,tinygo.unicore"
+}
+
 # Termux specific
 if [ -n "$TERMUX_VERSION" ]; then
   export XDG_RUNTIME_DIR="${TERMUX__PREFIX}/tmp"
@@ -48,6 +59,10 @@ alias zq='zoxide query'
 alias zqi='zoxide query --interactive'
 alias nchat='nvim +":CodeCompanionChat" +":wincmd w" +":q"'
 alias mm='micromamba'
+
+# Default editor for programs such as PI
+export VISUAL="nvim"
+export EDITOR="nvim"
 
 # List all directories
 d() {

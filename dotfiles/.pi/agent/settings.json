@@ -1,0 +1,16 @@
+{
+  "lastChangelogVersion": "1.4.0",
+  "packages": [
+    "npm:pi-gemini-acp",
+    "npm:pi-permission-system",
+    "npm:pi-undo-redo",
+    "npm:pi-ask-user",
+    "npm:pi-web-search"
+  ],
+  "defaultProvider": "google",
+  "defaultModel": "gemini-flash-lite-latest",
+  "hideThinkingBlock": false,
+  "modelThinkingLevels": {
+    "google/gemini-flash-lite-latest": "minimal"
+  }
+}

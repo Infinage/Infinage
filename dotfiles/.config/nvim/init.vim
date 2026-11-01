@@ -23,6 +23,7 @@ Plug 'https://codeberg.org/andyg/leap.nvim.git'
 Plug 'olimorris/codecompanion.nvim'
 Plug 'windwp/nvim-autopairs'
 Plug 'andymass/vim-matchup'
+Plug 'WillEhrendreich/datastar.nvim'
 Plug 'windwp/nvim-ts-autotag'
 call plug#end()
 
@@ -132,6 +133,7 @@ cmp.setup {
   }),
   sources = {
     { name = 'nvim_lsp' },
+    { name = 'datastar' },
     { name = 'codecompanion' },
     {  name = 'buffer',
         option = {
@@ -343,6 +345,9 @@ set updatetime=100
 
 " Setup auto pairs in nvim
 lua require("nvim-autopairs").setup()
+
+" Setup support for datastar
+lua require("datastar").setup()
 
 " Setup support for nvim-ts-autotag
 lua require('nvim-ts-autotag').setup()
@@ -804,6 +809,7 @@ EOF
 " Codecompanion Setup
 lua << EOF
 require("codecompanion").setup({
+  display = { chat = { window = { layout = "horizontal", height = 0.4, } } },
   strategies = {
       chat = { adapter = "gemini", },
       inline = { adapter = "gemini", },
@@ -815,7 +821,7 @@ require("codecompanion").setup({
       gemini = function()
         return require("codecompanion.adapters").extend("gemini", {
           env = { api_key = "cmd:pass show google/gemini" },
-          schema = { model = { default = "gemini-3-flash-preview", }, },
+          schema = { model = { default = "gemini-3.5-flash", }, },
 
         })
       end,
