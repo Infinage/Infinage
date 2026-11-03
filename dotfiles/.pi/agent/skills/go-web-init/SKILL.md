@@ -1,26 +1,34 @@
 ---
 name: go-web-init
-description: "Initialise a Go web application using the user's preferred lightweight stack: Go, Datastar, Tailwind CSS, local browser assets, html/template, Make, and Air. Use when starting or scaffolding a new Go web project."
+description: "Initialise, build and maintain Go web applications using the user's preferred lightweight stack: Go, Datastar, Tailwind CSS, local browser assets, html/template, Make and Air. Use whenever the user wants to scaffold, start, extend or fix a Go web app or web UI, mentions Datastar with Go, Tailwind with html/template, or asks for a small server-rendered Go project, even if they don't name this skill."
 ---
 
-# Initialise a Go web project
+# Go Web Projects
 
-Create a small, conventional Go web application using the user's preferred setup. First inspect the target directory and ask about any important missing project details. Do not overwrite existing files without approval.
+Create and maintain small, conventional Go web applications using the user's preferred setup. Inspect the target directory first. Do not overwrite existing files without approval.
 
-## Before creating files
+## Conventions (read before implementing)
 
-Clarify only what is needed to initialise the project:
+- Go code: `references/go-conventions.md`
+- HTML templates and Tailwind: `references/html-tailwind-conventions.md`
+- Datastar: invoke the `datastar` skill first, when available, then read `references/datastar-conventions.md`. Project rules here override the skill's generic guidance (for example, the skill's CDN script tag).
+
+General engineering rules (dependencies, testing, planning) come from the project's AGENTS.md and are not repeated here.
+
+## Before Creating Files
+
+Clarify only what is needed:
 
 - Project name and module path.
-- Whether this is a web application or a service with a web UI.
-- The required Go version and whether a database is needed.
-- Whether the project needs authentication or other infrastructure now.
+- Web application or service with a web UI.
+- Required Go version and database needs.
+- Whether authentication or other infrastructure is required now.
 
-Do not add a database, authentication, frontend framework, or other feature speculatively.
+Do not add infrastructure or features speculatively.
 
-## Preferred layout
+## Preferred Layout
 
-Use this as a starting point, not a mandatory architecture:
+Use this as a starting point, not mandatory architecture:
 
 ```text
 project/
@@ -28,30 +36,31 @@ project/
 │   ├── css/
 │   │   ├── input.css
 │   │   └── index.css
+│   ├── html/
+│   │   └── index.html
 │   └── js/
 │       └── datastar.js
-├── templates/
-│   └── ...
 ├── go.mod
 ├── main.go
 ├── Makefile
 └── .air.toml
 ```
 
-Add directories and packages only when responsibilities justify them. Keep HTML templates in separate files under `templates/`. Use Go's `html/template` for HTML rendering.
-
-## Browser-side dependencies
-
-- Download browser-side JavaScript dependencies and keep local copies under `assets/js/`.
-- Do not rely on a CDN at runtime.
-- For Datastar, obtain the appropriate `datastar.js` distribution from the official Datastar release/CDN source and save it as `assets/js/datastar.js`.
-- Record the version and source used. Do not silently use an old cached copy or invent a version.
-- Do not add other JavaScript libraries unless the user approves them.
+- Keep browser-facing assets, including HTML templates, under `assets/`.
+- Keep templates in separate files under `assets/html/`.
+- Use Go's html/template for HTML rendering.
+- Add directories and packages only when responsibilities justify them.
 - Ensure the application serves the local assets correctly.
 
-## Tailwind CSS setup
+## Browser-Side Dependencies
 
-Use the Tailwind CSS CLI workflow already preferred by the user.
+- Obtain the bundle from Datastar's official distribution and save it as `assets/js/datastar.js`.
+- Serve it locally. No CDN at runtime.
+- Record the bundle version and source. Do not invent versions or reuse stale copies.
+
+## Tailwind CSS Setup
+
+Use the Tailwind CSS CLI workflow.
 
 Create `assets/css/input.css`:
 
@@ -59,7 +68,7 @@ Create `assets/css/input.css`:
 @import "tailwindcss";
 ```
 
-Create a `Makefile` with the following development targets, adjusting only when the project needs it:
+Create `Makefile`:
 
 ```makefile
 dev:
@@ -91,42 +100,25 @@ tmp_dir = "tmp"
   time = false
 ```
 
-The `tailwindcss` CLI and `air` are development tools that must be installed separately. Do not add an npm-based frontend toolchain unless explicitly approved. Check the installed Tailwind CLI version and ensure the chosen configuration is compatible.
+Create `tailwind.config.js` (needed for user's neovim autocompletion):
 
-The generated `assets/css/index.css` is a build output. Decide whether it belongs in version control based on the project's deployment and build workflow; ask if uncertain.
+```javaScript
+module.exports = {
+  content: ["./assets/html/**/*.html"],
+};
+```
 
-## HTML and templates
+- `tailwindcss` and `air` are development tools installed separately. Check the installed Tailwind CLI version and confirm it is v4.
+- `assets/css/index.css` is a build output. Whether to commit it depends on the deployment workflow; ask if uncertain.
 
-- Prefer semantic HTML elements over generic containers when an appropriate element exists.
-- Use native browser behaviour and built-in form validation before writing custom JavaScript.
-- Build pages from small, reusable template fragments where that improves clarity.
-- Keep templates readable; avoid deeply nested conditionals and duplicated markup.
-- Follow `references/html-tailwind-conventions.md`.
-
-## Datastar
-
-- Prefer Datastar's server-driven interaction model.
-- Keep application and business logic on the backend where practical.
-- Use client-side JavaScript only when browser APIs or interaction requirements genuinely need it.
-- Follow `references/datastar-conventions.md`.
-- Verify APIs against current official Datastar documentation when uncertain. Installed skills or examples may be stale.
-
-## Go
-
-- Follow `references/go-conventions.md`.
-- Use the standard library and existing dependencies by default.
-- Do not add dependencies without approval.
-- Keep handlers focused on HTTP concerns and avoid placing the entire application in one large handler file.
-
-## Completion checklist
-
-After scaffolding:
+## Completion Checklist
 
 1. Verify the Go module and entry point.
 2. Verify local Datastar assets are present and served.
-3. Verify Tailwind CLI can generate the CSS.
-4. Verify `air` can build and run the application.
-5. Run `gofmt` and `go test ./...`.
-6. Explain required local tools, generated files, and how to start development.
+3. Verify the Tailwind CLI generates CSS.
+4. Verify `air` builds and runs the application.
+5. Run `djlint` on modified templates (see the HTML reference).
+6. Run `go fmt` and `go test ./...`.
+7. Explain required tools, generated files and startup steps.
 
-Do not claim the setup works unless the relevant checks have been run.
+Do not claim setup works unless the relevant checks ran.

@@ -394,3 +394,6 @@ else
 fi
 unset __mamba_setup
 # <<< mamba initialize <<<
+
+# Created by `pipx`
+export PATH="$PATH:/home/kael/.local/bin"

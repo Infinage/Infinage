@@ -25,6 +25,7 @@ Plug 'windwp/nvim-autopairs'
 Plug 'andymass/vim-matchup'
 Plug 'WillEhrendreich/datastar.nvim'
 Plug 'windwp/nvim-ts-autotag'
+Plug 'meanderingprogrammer/render-markdown.nvim'
 call plug#end()
 
 " Setup lualine
@@ -157,6 +158,9 @@ vim.diagnostic.config({
   float = { border = "rounded" }
 })
 EOF
+
+" Setup markdown renderer
+lua require('render-markdown').setup({})
 
 " Setup treesitter
 lua << EOF

@@ -1,16 +1,19 @@
 {
-  "lastChangelogVersion": "1.4.0",
+  "lastChangelogVersion": "1.5.0",
   "packages": [
-    "npm:pi-gemini-acp",
     "npm:pi-permission-system",
     "npm:pi-undo-redo",
     "npm:pi-ask-user",
-    "npm:pi-web-search"
+    "npm:pi-web-search",
+    "npm:@sentiolabs/pi-frontend-design"
   ],
-  "defaultProvider": "google",
-  "defaultModel": "gemini-flash-lite-latest",
-  "hideThinkingBlock": false,
+  "defaultProvider": "openrouter",
+  "defaultModel": "z-ai/glm-5.3-flash",
+  "hideThinkingBlock": true,
   "modelThinkingLevels": {
-    "google/gemini-flash-lite-latest": "minimal"
+    "openrouter/google/gemini-3.5-flash-lite": "minimal"
+  },
+  "extensionChangelogVersions": {
+    "{\"source\":\"npm:pi-permission-system\",\"scope\":\"user\"}": "0.8.0"
   }
 }

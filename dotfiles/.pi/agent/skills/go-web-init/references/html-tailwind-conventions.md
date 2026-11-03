@@ -2,45 +2,80 @@
 
 ## HTML
 
-- Use Go's `html/template` and keep templates in separate files under `templates/`.
-- Build pages from small template fragments where that improves reuse and readability.
-- Prefer native semantic HTML elements over generic `div` and `span` elements when an appropriate element exists.
-- Use elements according to their actual semantics. Do not use an element merely because its name sounds convenient.
-- Prefer native browser capabilities: form submission, input types, `required`, `min`, `max`, `pattern`, labels, buttons, and built-in validation.
-- Use JavaScript only when native HTML and Datastar cannot reasonably provide the required behaviour.
-- Keep markup accessible: labels for controls, sensible heading order, keyboard-operable interactions, and meaningful button text.
+- Use Go's `html/template`; keep templates under `assets/html/`.
+- Prefer semantic HTML and native browser capabilities. Use built-in form validation before custom JavaScript.
+- Keep markup accessible. Use JavaScript only when native HTML and Datastar cannot provide the behaviour.
+- Build pages from small, reusable template fragments where that improves clarity. Avoid deeply nested conditionals and duplicated markup.
+- Use two spaces for indentation.
+- Keep source lines within 80 characters.
+- Put every HTML attribute on its own line, indented two spaces beyond the opening tag.
+- Align closing tags with their opening tags.
+- Put the closing `>` on its own line.
+- Break long attribute values across lines, indenting continuation lines to match Go-style formatting.
+- Format Go template control structures on separate lines.
 
-## Formatting
+## Preferred Formatting
 
-The preferred HTML indentation is **two spaces**.
-
-For elements with multiple attributes:
-- Keep short elements on one line when readable.
-- Put the opening tag's attributes on separate lines when the tag becomes long.
-- Indent continuation lines by two additional spaces relative to the element.
-- Put the closing `>` on its own line when using the multiline style.
-- Keep the closing tag aligned with the opening tag.
-
-Preferred example:
+One attribute per line, even for short attributes. Keep simple values on one line. Break long class lists and other long values across lines.
 
 ```html
-  <div data-show="$_contact.showpopup"
-    class="flex flex-col fixed bottom-6 left-6 right-6 border rounded-md overflow-hidden
-      border-gray-400/50 shadow-gray-400 sm:left-auto sm:w-[25rem]"
+<section
+  id="main"
+  class="space-y-4"
+>
+  <tr
+    class="bg-gray-100 dark:bg-gray-900/50 border-y border-gray-200
+      dark:border-gray-800"
   >
     ...
-  </div>
+  </tr>
+</section>
 ```
 
-This is a project formatting preference, not a claim that the style has a universally accepted formal name. Apply it consistently within a project.
+The same formatting applies to SVG elements and their attributes:
 
-## Tailwind CSS
+```html
+<svg
+  class="w-6 h-6 shrink-0 group-hover:text-blue-600
+    dark:group-hover:text-blue-400 transition"
+  data-class="view === 'dictionary' ? 'text-blue-500' : ''"
+  fill="none"
+  stroke="currentColor"
+  viewBox="0 0 24 24"
+>
+  <path
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="2"
+    d="M12 6.253v13m0-13C10.832 5.477 9.246 5
+      7.5 5S4.168 5.477 3 6.253v13C4.168 18.477
+      5.754 18 7.5 18s3.332.477 4.5 1.253"
+  >
+  </path>
+</svg>
+```
 
-- Use Tailwind utility classes for styling.
-- Keep `assets/css/input.css` as the Tailwind entry point, using `@import "tailwindcss";` for the preferred Tailwind v4 setup.
+## Tailwind CSS (v4)
+
+- Use Tailwind utility classes for styling. Prefer utilities over custom CSS.
+- Entry point is `assets/css/input.css`:
+
+  ```css
+  @import "tailwindcss";
+  ```
+
 - Generate `assets/css/index.css` with the Tailwind CLI.
-- Do not add a JavaScript package manager or frontend build framework unless approved.
-- Avoid unnecessary custom CSS when utilities are sufficient.
-- Use responsive utilities deliberately; check layouts at mobile and desktop widths.
-- Keep class lists readable. Break long class attributes across lines using the formatting convention above.
-- Do not invent a component system or abstraction for markup that is only used once.
+- Prefer utilities over unnecessary custom CSS.
+- Use responsive utilities and check mobile and desktop layouts.
+- Keep class lists readable; break long values across lines.
+- Do not create abstractions for markup used only once.
+
+## Formatting Check
+
+After modifying templates, run:
+
+```bash
+djlint assets/html/app.html --reformat --configuration ~/.djlintrc
+```
+
+Replace the filename with the actual modified template paths. Review the output and ensure Go template syntax and preferred formatting are preserved.

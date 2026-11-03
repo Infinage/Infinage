@@ -1,0 +1,17 @@
+{
+  "profile": "golang",
+  "max_line_length": 80,
+  "max_attribute_length": 80,
+  "indent": 2,
+  "max_blank_lines": 1,
+  "single_attribute_per_line": true,
+  "format_attribute_js_json": true,
+  "preserve_blank_lines": true,
+  "preserve_class_newlines": true,
+  "format_js": true,
+  "js": { "indent_size": 2 },
+  "format_css": true,
+  "css": { "indent_size": 5 },
+  "sort_attributes": true,
+  "quiet": true
+}

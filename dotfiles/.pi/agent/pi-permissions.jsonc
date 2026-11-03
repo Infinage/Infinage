@@ -12,7 +12,8 @@
     "find": "allow",
     "ls": "allow",
     "write": "ask",
-    "edit": "ask"
+    "edit": "ask",
+    "ask_user": "allow"
   },
   "bash": {
     "*": "ask",
@@ -20,6 +21,8 @@
     "ls": "allow",
     "ls *": "allow",
     "pwd": "allow",
+    "wc": "allow",
+    "cat": "allow",
 
     // Git read only commands
     "git status": "allow",
@@ -32,6 +35,7 @@
     "go test *": "allow",
     "go fmt *": "allow",
     "go vet *": "allow",
+    "go doc *": "allow",
     "go version": "allow"
   }
 }
