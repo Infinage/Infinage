@@ -23,6 +23,8 @@
     "pwd": "allow",
     "wc": "allow",
     "cat": "allow",
+    "head": "allow",
+    "tail": "allow",
 
     // Git read only commands
     "git status": "allow",

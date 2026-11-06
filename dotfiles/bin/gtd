@@ -1,44 +1,70 @@
 #!/usr/bin/env bash
-set -e
-set -u
-set -o pipefail
+set -euo pipefail
 
-NIX_PKGS="nixpkgs#go nixpkgs#tailwindcss nixpkgs#air nixpkgs#gnumake"
+# -----------------------
 
-# Generate a random port between 8000 and 8999
-PORT=$((8000 + RANDOM % 1000))
+step() { echo -e "\n > $1"; }
+ok()   { echo "   [OK]   $1"; }
+skip() { echo "   [SKIP] $1"; }
+err()  { echo "   [FAIL] $1" >&2; }
 
-TEMP_DIR=$(mktemp -d)
-cd "$TEMP_DIR" || exit 1
+# -----------------------
 
-cleanup() {
-    if [ -d "$TEMP_DIR" ]; then
-        echo -e "\n🧹 Cleaning up $TEMP_DIR..."
-        rm -rf "$TEMP_DIR"
+step "Checking dependencies..."
+
+deps=("curl" "go" "tailwindcss" "air" "make")
+missing=()
+for dep in "${deps[@]}"; do
+    if ! command -v "$dep" >/dev/null 2>&1; then
+        missing+=("$dep")
     fi
+done
+
+if [ ${#missing[@]} -ne 0 ]; then
+    err "Missing dependencies: ${missing[*]}"
+    echo "          Please install them and try again." >&2
+    echo ""
+    exit 1
+fi
+
+ok "All required dependencies are installed."
+
+# ------------------
+
+step "Creating directories..."
+mkdir -p assets/{html,js,css} tmp
+ok "Created assets/html, assets/js, assets/css, and tmp/"
+
+# -----------------------
+
+step "Scaffolding configuration files..."
+
+# Helper to write if file missing
+scaffold_file() {
+    local filepath="$1"
+    if [ -f "$filepath" ]; then
+        skip "$filepath (already exists)"
+        return 0
+    fi
+    
+    cat > "$filepath"
+    ok "Created $filepath"
 }
 
-# Ctrl+C kills the server, causes the script to end, triggering EXIT
-trap cleanup EXIT
-
-# Scaffold Makefile
-cat << 'EOF' > Makefile
-PORT ?= 8080
+scaffold_file "Makefile" << 'EOF'
 .PHONY: dev watch-css watch-go
 
 dev:
-	@echo "Spinning up Go + Tailwind + Datastar playground on port $(PORT)"
 	@$(MAKE) -j2 watch-css watch-go
 
 watch-css:
-	tailwindcss -i input.css -o index.css --watch
+	tailwindcss -i assets/css/input.css -o assets/css/index.css --watch
 
 watch-go:
-	PORT=$(PORT) air
+	air
 EOF
 
-# Scaffold .air.toml
-cat << 'EOF' > .air.toml
+scaffold_file ".air.toml" << 'EOF'
 root = "."
 tmp_dir = "tmp"
 
@@ -53,15 +79,22 @@ tmp_dir = "tmp"
   time = false
 EOF
 
-# Scaffold index.html
-cat << 'EOF' > index.html
+scaffold_file "tailwind.config.js" << 'EOF'
+module.exports = { content: ["./assets/html/*.html"] }
+EOF
+
+# -----------------------
+
+step "Scaffolding frontend assets..."
+
+scaffold_file "assets/html/index.html" << 'EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="index.css">
-  <script src="datastar.js" type="module" defer></script>
+  <link rel="stylesheet" href="/assets/css/index.css">
+  <script src="/assets/js/datastar.js" type="module" defer></script>
 </head>
 <body>
 
@@ -69,65 +102,24 @@ cat << 'EOF' > index.html
 </html>
 EOF
 
-# Scaffold minimal tailwind config
-cat << 'EOF' > tailwind.config.js
-module.exports = { content: ["./*.html"] }
+scaffold_file "assets/css/input.css" << 'EOF'
+@import "tailwindcss";
 EOF
 
-# Scaffold input.css
-cat << 'EOF' > input.css
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-EOF
+DATASTAR_JS="assets/js/datastar.js"
+step "Checking for datastar.js..."
+if [ ! -f "$DATASTAR_JS" ]; then
+    curl -fsSL https://cdn.jsdelivr.net/gh/starfederation/datastar/bundles/datastar.js -o "$DATASTAR_JS"
+    ok "Downloaded datastar.js to assets/js/"
+else
+    skip "datastar.js (already exists)"
+fi
 
-# Scaffold main.go
-cat << 'EOF' > main.go
-package main
+# -----------------------
 
-import (
-	"log"
-	"net/http"
-	"os"
-)
+step "Installing datastar-go SDK..."
+go get -u github.com/starfederation/datastar-go >/dev/null 2>&1
+ok "Go SDK installed."
 
-func main() {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-
-	mux := http.NewServeMux()
-
-	// API routes go under /api/
-	mux.HandleFunc("/api/", func(w http.ResponseWriter, r *http.Request) {
-		http.NotFound(w, r)
-	})
-
-	// Everything else is static files served from disk
-	mux.Handle("/", http.FileServer(http.Dir(".")))
-
-	println("🚀 Server running at http://localhost:" + port)
-	if err := http.ListenAndServe(":"+port, mux); err != nil {
-		log.Fatal(err)
-	}
-}
-EOF
-
-# Download datastar.js quietly (-s), but show errors if it fails (-S)
-echo "Downloading Datastar..."
-curl -fsSL https://cdn.jsdelivr.net/gh/starfederation/datastar@v1.0.3/bundles/datastar.js -o datastar.js
-
+step "🚀 Good to Go!"
 echo ""
-echo "================================================="
-echo "✨ Go + Tailwind + Datastar playground is LIVE!"
-echo "📁 Edit files at: $TEMP_DIR"
-echo "🌐 View page at:  http://localhost:$PORT"
-echo "🛑 Press Ctrl+C here to stop the server and auto-delete the folder."
-echo "================================================="
-echo "Building Nix environment and starting server..."
-
-nix shell $NIX_PKGS --command bash -c "
-  go mod init playground > /dev/null 2>&1 || true
-  make dev PORT=$PORT
-"

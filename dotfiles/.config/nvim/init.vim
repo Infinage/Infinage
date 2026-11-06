@@ -20,12 +20,10 @@ Plug 'nvim-lualine/lualine.nvim'
 Plug 'nvim-treesitter/nvim-treesitter'
 Plug 'nvim-treesitter/nvim-treesitter-textobjects'
 Plug 'https://codeberg.org/andyg/leap.nvim.git'
-Plug 'olimorris/codecompanion.nvim'
 Plug 'windwp/nvim-autopairs'
 Plug 'andymass/vim-matchup'
 Plug 'WillEhrendreich/datastar.nvim'
 Plug 'windwp/nvim-ts-autotag'
-Plug 'meanderingprogrammer/render-markdown.nvim'
 call plug#end()
 
 " Setup lualine
@@ -135,7 +133,6 @@ cmp.setup {
   sources = {
     { name = 'nvim_lsp' },
     { name = 'datastar' },
-    { name = 'codecompanion' },
     {  name = 'buffer',
         option = {
             get_bufnrs = function()
@@ -158,9 +155,6 @@ vim.diagnostic.config({
   float = { border = "rounded" }
 })
 EOF
-
-" Setup markdown renderer
-lua require('render-markdown').setup({})
 
 " Setup treesitter
 lua << EOF
@@ -809,35 +803,6 @@ vim.keymap.set({'n', 'x', 'o'}, 's', '<Plug>(leap)')
 vim.keymap.set('n', 'S', '<Plug>(leap-from-window)')
 vim.api.nvim_set_hl(0, 'LeapBackdrop', { link = 'Comment' })
 EOF
-
-" Codecompanion Setup
-lua << EOF
-require("codecompanion").setup({
-  display = { chat = { window = { layout = "horizontal", height = 0.4, } } },
-  strategies = {
-      chat = { adapter = "gemini", },
-      inline = { adapter = "gemini", },
-      cmd = { adapter = "gemini", },
-      agent = { adapter = "gemini", }
-  },
-  adapters = {
-    http = {
-      gemini = function()
-        return require("codecompanion.adapters").extend("gemini", {
-          env = { api_key = "cmd:pass show google/gemini" },
-          schema = { model = { default = "gemini-3.5-flash", }, },
-
-        })
-      end,
-    },
-  },
-})
-EOF
- 
-" Keymaps for codecompanion
-nnoremap <silent> <leader>C :CodeCompanionChat Toggle<CR>
-vnoremap <silent> <leader>C :<C-u>call feedkeys(":'<,'>CodeCompanion ")<CR>
-vnoremap <silent> <leader>ll :CodeCompanionChat Add<CR>
 
 " Navigate across files using jump list
 function! JumpToNextBufferInJumplist(dir) " 1=forward, -1=backward
