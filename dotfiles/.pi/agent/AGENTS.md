@@ -64,17 +64,18 @@ These guidelines apply to all projects unless project-specific instructions expl
 - Summarise changes, tests performed, and outstanding concerns.
 - For Go web applications using Go, Datastar and Tailwind CSS, new or existing, invoke the `go-web-init` skill and read its relevant convention references before implementation. It will direct you to the `datastar` skill for Datastar work.
 
-### When Stuck
+## When Stuck
 
-If two approaches fail without producing new evidence:
-
-1. Stop and explain the problem.
-2. Summarise what was attempted and why it failed.
-3. Separate known facts from assumptions.
-4. Propose a minimal experiment or alternative.
-5. Wait for direction before continuing.
-
-Do not repeatedly retry variations of an unsuccessful approach.
+- Any failed or unproductive action on the same problem counts as an attempt (code change, fixture rebuild, changed verification, retried tool call).
+- After **three attempts on the same problem**, stop. Do not try another approach autonomously.
+- Report in 6 lines or fewer:
+  1. What is working.
+  2. What was attempted and why it failed.
+  3. The specific decision or information needed from the user, with 2-3 options.
+- Do not silently change approaches. State the new approach before trying it.
+- If external verification fails twice, stop and give a short manual-verification checklist instead.
+- Attempt counting resets only with new information from the user or verification, or when the underlying problem materially changes; changing the implementation approach does not reset the count.
+- Summarise tool output in 5 lines or fewer. For large output, write it to a file and reference the path instead of pasting.
 
 ## Documentation
 

@@ -19,7 +19,6 @@
     "*": "ask",
 
     "ls": "allow",
-    "ls *": "allow",
     "pwd": "allow",
     "wc": "allow",
     "cat": "allow",

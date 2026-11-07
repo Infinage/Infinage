@@ -5,5 +5,6 @@
   "tui.altScreen.pageUp": ["pageUp", "alt+h"],
   "tui.altScreen.pageDown": ["pageDown", "alt+l"],
   "tui.select.up": ["up", "ctrl+k"],
-  "tui.select.down": ["down", "ctrl+j"]
+  "tui.select.down": ["down", "ctrl+j"],
+  "tui.editor.yankPop": []
 }

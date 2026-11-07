@@ -321,24 +321,21 @@ cpz() {
     cp -r "${files[@]}" "$resolved"
 }
 
-# List all files via fd-fzf
+# List files via fd-fzf: files + symlinks-to-files only (no folder entries),
+# Note: --follow descends symlinked dirs, so files reachable via a link can appear too
 fz() {
-  local fd_flags=""
-  if [[ "$1" == "-i" ]]; then
-    fd_flags="--no-ignore --hidden"
-  fi
-  fd . --type f $fd_flags 2>/dev/null | fzf
+  local fd_flags="--hidden --type f --follow --exclude .git"
+  [[ "$1" == "-i" ]] && fd_flags+=" --no-ignore"
+  fd . $fd_flags 2>/dev/null | fzf
 }
 
-# List all folders via FZF and cd to it
+# List folders via FZF and cd
 dz() {
-  local fd_flags=""
-  if [[ "$1" == "-i" ]]; then
-    fd_flags="--no-ignore --hidden"
-  fi
+  local fd_flags="--hidden --type d --follow --exclude .git"
+  [[ "$1" == "-i" ]] && fd_flags+=" --no-ignore"
 
   local dir
-  dir="$(fd . --type d --exclude .git $fd_flags 2>/dev/null | fzf)" || return
+  dir="$(fd . $fd_flags 2>/dev/null | fzf)" || return
   [ -n "$dir" ] && cd "$dir"
 }
 

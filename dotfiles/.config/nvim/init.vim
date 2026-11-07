@@ -509,6 +509,7 @@ nmap [g <Plug>(GitGutterPrevHunk)
 nnoremap <leader>du :Gvdiffsplit!<CR>
 nnoremap <leader>ds :Gvdiffsplit! HEAD:%<CR>
 nnoremap <leader>gD :G! difftool -y<CR>
+nnoremap <leader>gS :G! difftool -y --cached<CR>
 nnoremap <silent><leader>gl :<C-u>execute 'G log' (v:count ? '-n ' . v:count : '')<CR>
 nnoremap gb :G blame<CR>
 
