@@ -3,9 +3,7 @@
   "packages": [
     "npm:pi-permission-system",
     "npm:pi-web-search",
-    "npm:@sentiolabs/pi-frontend-design",
     "npm:@juicesharp/rpiv-ask-user-question",
-    "npm:@plannotator/pi-extension",
     "npm:pi-agent-browser-native",
     "npm:billion-context-pi"
   ],

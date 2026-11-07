@@ -13,7 +13,11 @@
     "ls": "allow",
     "write": "ask",
     "edit": "ask",
-    "ask_user": "allow"
+    "ask_user_question": "allow",
+    "compress": "allow"
+  },
+  "skills": {
+    "*": "allow"
   },
   "bash": {
     "*": "ask",

@@ -66,16 +66,16 @@ These guidelines apply to all projects unless project-specific instructions expl
 
 ## When Stuck
 
-- Any failed or unproductive action on the same problem counts as an attempt (code change, fixture rebuild, changed verification, retried tool call).
-- After **three attempts on the same problem**, stop. Do not try another approach autonomously.
-- Report in 6 lines or fewer:
-  1. What is working.
-  2. What was attempted and why it failed.
-  3. The specific decision or information needed from the user, with 2-3 options.
+- Count every failed or unproductive action on the same problem as an attempt.
+- Treat failures with the same underlying cause as the same problem, regardless of tool, error, parameters, or approach.
+- Output that does not achieve the goal is a failure, even if it looks like progress.
+- After **three attempts**, stop and report. Do not keep trying autonomously.
+- Wait/poll loops must have a fixed retry or time limit set before starting. Each repeated failure counts as an attempt; do not use a loop to bypass the attempt limit.
+- Report in **6 lines or fewer**: what works, what failed, and what decision/input you need from the user (with 2-3 options).
+- Challenge pages, CAPTCHAs, and paywalls get **one genuine attempt**, then stop and report with a workaround. Rate limits and auth errors get one retry.
 - Do not silently change approaches. State the new approach before trying it.
-- If external verification fails twice, stop and give a short manual-verification checklist instead.
-- Attempt counting resets only with new information from the user or verification, or when the underlying problem materially changes; changing the implementation approach does not reset the count.
-- Summarise tool output in 5 lines or fewer. For large output, write it to a file and reference the path instead of pasting.
+- Reset the count only when the user provides new information or the underlying cause materially changes.
+- Summarise tool output in **5 lines or fewer**. For large output, write it to a file instead.
 
 ## Documentation
 
