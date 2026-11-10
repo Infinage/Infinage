@@ -15,6 +15,8 @@ These guidelines apply to all projects unless project-specific instructions expl
 
 - Ask when ambiguity could materially affect implementation.
 - Do not make significant product, architectural, security, data-model or dependency decisions without approval.
+- During investigation, inspect, reproduce and diagnose autonomously.
+- Before implementing, report the root cause with 2-3 fix options and wait for approval if the fix changes architecture, system boundaries, or behaviour beyond restoring the intended behaviour.
 - Use sensible defaults for minor details and state important assumptions.
 - Explain meaningful trade-offs and alternatives.
 - Avoid unnecessary interruptions over trivial decisions.
@@ -59,7 +61,8 @@ These guidelines apply to all projects unless project-specific instructions expl
 - Implement one coherent increment at a time. Keep the application working and testable.
 - Verify each increment and review the diff before proceeding.
 - Follow the approved plan without repeatedly asking permission for routine steps.
-- Seek approval for significant scope changes or new architectural decisions.
+- Seek approval before significant scope changes or new architectural decisions.
+- Investigation does not imply approval to implement the resulting solution.
 - For small, straightforward changes, work directly without unnecessary planning.
 - Summarise changes, tests performed, and outstanding concerns.
 - For Go web applications using Go, Datastar and Tailwind CSS, new or existing, invoke the `go-web-init` skill and read its relevant convention references before implementation. It will direct you to the `datastar` skill for Datastar work.

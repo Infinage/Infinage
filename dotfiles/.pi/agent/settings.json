@@ -1,11 +1,11 @@
 {
-  "lastChangelogVersion": "1.5.0",
+  "lastChangelogVersion": "1.5.1",
   "packages": [
-    "npm:pi-permission-system",
     "npm:pi-web-search",
     "npm:@juicesharp/rpiv-ask-user-question",
     "npm:pi-agent-browser-native",
-    "npm:billion-context-pi"
+    "npm:billion-context-pi",
+    "npm:@gotgenes/pi-permission-system"
   ],
   "defaultProvider": "opencode-go",
   "defaultModel": "glm-5.3-flash",
@@ -15,7 +15,8 @@
   },
   "extensionChangelogVersions": {
     "{\"source\":\"npm:pi-permission-system\",\"scope\":\"user\"}": "0.8.0",
-    "{\"source\":\"npm:pi-agent-browser-native\",\"scope\":\"user\"}": "0.9.16"
+    "{\"source\":\"npm:pi-agent-browser-native\",\"scope\":\"user\"}": "0.9.18",
+    "{\"source\":\"npm:@gotgenes/pi-permission-system\",\"scope\":\"user\"}": "42.0.0"
   },
   "tuiMode": "regular"
 }
