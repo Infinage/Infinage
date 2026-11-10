@@ -21,6 +21,12 @@ These guidelines apply to all projects unless project-specific instructions expl
 - Explain meaningful trade-offs and alternatives.
 - Avoid unnecessary interruptions over trivial decisions.
 
+## Debugging
+
+- Before proposing or attempting fixes for any bug, test failure or unexpected behaviour, invoke and follow the `systematic-debugging` skill.
+- Before fixing, identify related behaviour that currently works; re-verify it after the fix and report any regressions.
+- Revert failed fixes before testing another hypothesis, preserving useful diagnostic instrumentation.
+
 ## Code Quality
 
 - Follow modern, idiomatic language conventions.
@@ -48,6 +54,8 @@ These guidelines apply to all projects unless project-specific instructions expl
 - Keep tests deterministic.
 - Run relevant tests, formatters, linters, and build checks after changes.
 - Never claim checks passed unless they were actually run.
+- Verify build artifacts contain the latest changes, are installed, and the running process is the new one before testing deployed behaviour. Recheck this after any fix that appears not to work.
+- For UI changes, verify the actual user-visible outcome in the environment where the issue occurs, not a proxy environment.
 - Report anything that could not be verified.
 
 ## Workflow

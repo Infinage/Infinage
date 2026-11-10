@@ -13,6 +13,10 @@
       "~/.gnupg/*": "deny"
     },
     "external_directory": "ask",
+    "external_directory_read": {
+      "*": "ask",
+      "~/.pi/agent/*": "allow"
+    },
     "bash": {
       "*": "ask",
       "ls": "allow",
@@ -23,11 +27,12 @@
       "head *": "allow",
       "tail *": "allow",
       "wc *": "allow",
+      "tr *": "allow",
+      "cut *": "allow",
       "echo *": "allow",
       "grep *": "allow",
       "rg *": "allow",
       "which *": "allow",
-      "sed -n *": "allow",
       "git status": "allow",
       "git status *": "allow",
       "git diff": "allow",
@@ -35,11 +40,15 @@
       "git log": "allow",
       "git log *": "allow",
       "git show *": "allow",
+      "git grep *": "allow",
+      "git ls-tree *": "allow",
+      "git ls-files *": "allow",
       "go version": "allow",
       "go test *": "allow",
       "go fmt *": "allow",
       "go vet *": "allow",
-      "go doc *": "allow"
+      "go doc *": "allow",
+      "go build *": "allow"
     },
     "skill": {
       "*": "allow"
@@ -53,6 +62,7 @@
     "ask_user_question": "allow",
     "compress": "allow",
     "decompress": "allow",
-    "acp_status": "allow"
+    "acp_status": "allow",
+    "search_context": "allow"
   }
 }
