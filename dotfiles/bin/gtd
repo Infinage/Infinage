@@ -117,6 +117,20 @@ fi
 
 # -----------------------
 
+step "Initializing Go module (if needed)..."
+if [ ! -f "go.mod" ]; then
+    module_name=$(basename "$PWD" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9._-]/-/g; s/^[.-]*//')
+    if [ -z "$module_name" ]; then
+        err "Could not derive a module name from the current directory."
+        echo "          Run 'go mod init <name>' manually and try again." >&2
+        exit 1
+    fi
+    go mod init "$module_name"
+    ok "Initialized go.mod with module name '$module_name'."
+else
+    skip "go.mod (already exists)"
+fi
+
 step "Installing datastar-go SDK..."
 go get -u github.com/starfederation/datastar-go >/dev/null 2>&1
 ok "Go SDK installed."

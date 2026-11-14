@@ -113,15 +113,6 @@ nz() {
     [ -n "$file" ] && nvim "$file"
 }
 
-# TMUX Popup Show Message (closes on enter)
-tpshow() {
-  local message="$*" lines cols cmd
-  lines=$(echo -e "$message" | wc -l)
-  cols=$(echo -e "$message" | awk '{print length}' | sort -nr | head -1)
-  cmd="bash -c 'tput civis; printf \"%b\" \"\$1\"; stty -echo; read -r _' _ \"$message\""
-  tmux display-popup -E -h $((lines+2)) -w $((cols+2)) -xC -yC "$cmd"
-}
-
 # Notify On Done: run any command and notify on completion
 nod() {
   [ $# -lt 1 ] && echo "Usage: nod <command...>" && return 1
@@ -146,7 +137,7 @@ nod() {
   msg=$(printf "%b%s%b\n\nTime Taken: %ss\nExit Code: %d\nCommand: %s\n\nPress enter to close." \
     "$color" "$title" "\033[0m" "$elapsed" "$code" "$cmd")
 
-  tpshow "$msg"
+  tpshow-note "$msg"
   return $code
 }
 
