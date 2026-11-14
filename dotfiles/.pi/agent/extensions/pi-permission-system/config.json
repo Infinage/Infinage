@@ -31,7 +31,16 @@
       "cut *": "allow",
       "echo *": "allow",
       "grep *": "allow",
+      "file *": "allow",
+      "diff *": "allow",
       "rg *": "allow",
+      "date *": "allow",
+      "du *": "allow",
+      "man *": "allow",
+      "cut *": "allow",
+      "fold *": "allow",
+      "free *": "allow",
+      "readlink *": "allow",
       "which *": "allow",
       "git status": "allow",
       "git status *": "allow",
@@ -43,6 +52,7 @@
       "git grep *": "allow",
       "git ls-tree *": "allow",
       "git ls-files *": "allow",
+      "git rev-parse *": "allow",
       "go version": "allow",
       "go test *": "allow",
       "go fmt *": "allow",
@@ -63,6 +73,10 @@
     "compress": "allow",
     "decompress": "allow",
     "acp_status": "allow",
-    "search_context": "allow"
+    "acp_cache": "allow",
+    "acp_delegate": "allow",
+    "acp_delegate_wait": "allow",
+    "search_context": "allow",
+    "fetch_content": "allow"
   }
 }

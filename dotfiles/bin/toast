@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# toast: desktop notification + chime. Truly non-blocking: nothing is
+# drawn in the terminal, so no pane/tab can ever have its input disturbed.
+#
+# Usage: toast [message]     (first line = title, rest = body)
+# Env:   TOAST_EXPIRE   notification timeout in ms (default: 8000; 0 = sticky)
+#        TOAST_SOUND    sound file for paplay
+#                        (default: complete.oga — clear rising chime)
+
+set -euo pipefail
+
+message="${*:-}"
+[ -z "$message" ] && exit 0
+expire="${TOAST_EXPIRE:-8000}"
+sound="${TOAST_SOUND:-/usr/share/sounds/freedesktop/stereo/complete.oga}"
+
+expanded=$(printf '%b' "$message")
+title=$(printf '%s' "$expanded" | head -1)
+body=$(printf '%s' "$expanded" | tail -n +2)
+
+# Chime: detached via setsid so it survives this short-lived script; fall
+# back to running it through the tmux server, then plain background.
+if command -v setsid >/dev/null 2>&1; then
+	setsid paplay "$sound" >/dev/null 2>&1 &
+elif [[ -n "${TMUX_PANE:-}" ]]; then
+	tmux run-shell -b "paplay '$sound' 2>/dev/null" >/dev/null 2>&1 &
+else
+	paplay "$sound" >/dev/null 2>&1 &
+fi
+
+if command -v notify-send >/dev/null 2>&1; then
+	notify-send -a Pi -i dialog-information -t "$expire" "$title" "$body"
+else
+	# No desktop notifications: OSC 777 (Ghostty, iTerm2, WezTerm, ...)
+	printf '\033]777;notify;%s;%s\007' "$title" "$body"
+fi

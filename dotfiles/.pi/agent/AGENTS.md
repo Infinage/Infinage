@@ -77,9 +77,10 @@ These guidelines apply to all projects unless project-specific instructions expl
 
 ## When Stuck
 
-- Count every failed or unproductive action on the same problem as an attempt.
-- Treat failures with the same underlying cause as the same problem, regardless of tool, error, parameters, or approach.
+- Count failed or unproductive actions against the current goal, not individual tool calls.
+- Treat failures with the same underlying cause as the same problem, regardless of tool, error, parameters, or approach. Splitting one problem into smaller sub-problems does not reset the count.
 - Output that does not achieve the goal is a failure, even if it looks like progress.
+- Read-only diagnostics (logs, snapshots, reading code) don't count as attempts. Any action that changes state or tries to achieve the goal does.
 - After **three attempts**, stop and report. Do not keep trying autonomously.
 - Wait/poll loops must have a fixed retry or time limit set before starting. Each repeated failure counts as an attempt; do not use a loop to bypass the attempt limit.
 - Report in **6 lines or fewer**: what works, what failed, and what decision/input you need from the user (with 2-3 options).

@@ -6,6 +6,8 @@ settings.focusAfterClosed = 'last';
 settings.modeAfterYank = 'Normal';
 settings.showTabIndices = true;
 
+settings.blacklistPattern = /.*monkeytype\.com\.*/i;
+
 // Hints mode to open in new tab
 api.map('F', 'C');
 

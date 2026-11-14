@@ -4,6 +4,9 @@
   "tui.altScreen.lineDown": "alt+j",
   "tui.altScreen.pageUp": ["pageUp", "alt+h"],
   "tui.altScreen.pageDown": ["pageDown", "alt+l"],
+  "tui.editor.cursorLeft": ["left", "ctrl+b", "ctrl+h"],
+  "tui.editor.cursorRight": ["right", "ctrl+f", "ctrl+l"],
+  "app.model.select": "alt+m",
   "tui.select.up": ["up", "ctrl+k"],
   "tui.select.down": ["down", "ctrl+j"],
   "tui.editor.yankPop": []
